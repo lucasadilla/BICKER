@@ -56,7 +56,6 @@ export default function InstigatePage() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                overflow: 'hidden', // Prevent scrolling within the container
             }}
         >
             <NavBar />
@@ -79,22 +78,23 @@ export default function InstigatePage() {
                     maxLength={200}
                     style={{
                         width: '100%',
-                        height: '150px',
+                        height: '450px',
                         marginBottom: '10px',
                         padding: '10px',
-                        fontSize: '16px',
+                        fontSize: '36px',
                         borderRadius: '4px',
                         border: '1px solid #ccc',
+                        resize: 'none', // Disable resizing
                     }}
                 />
                 <button
                     onClick={submitInstigate}
                     style={{
-                        width: '100%',
+                        width: '50%',
                         padding: '10px',
                         backgroundColor: '#007BFF',
                         color: 'white',
-                        fontSize: '16px',
+                        fontSize: '26px',
                         borderRadius: '4px',
                         border: 'none',
                         cursor: 'pointer',

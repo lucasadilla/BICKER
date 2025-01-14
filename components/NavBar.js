@@ -4,79 +4,52 @@ export default function NavBar() {
     return (
         <nav
             style={{
-                position: 'absolute', // Overlay on top of the page
-                top: 0,
-                left: 0,
-                width: '100%',
-                backgroundColor: 'rgba(0,0,0,0)', // Slight transparency
-                zIndex: 10, // Ensure it stays above other content
-                padding: '10px',
                 display: 'flex',
                 justifyContent: 'center',
-                gap: '300px',
+                gap: '20px',
+                padding: '10px 0', // Consistent padding
+                backgroundColor: 'transparent', // Transparent background
+                position: 'fixed',
+                top: 0,
+                width: '100%',
+                zIndex: 1000,
+                boxShadow: 'none', // Remove shadows
+                border: 'none', // Ensure no borders
             }}
         >
-            <Link href="/" passHref>
-                <button
-                    style={{
-                        backgroundColor: '#ebc7fa',
-                        color: 'black',
-                        border: 'none',
-                        padding: '10px 20px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                    }}
-                >
-                    Home
-                </button>
-            </Link>
-            <Link href="/instigate" passHref>
-                <button
-                    style={{
-                        backgroundColor: '#ebc7fa',
-                        color: 'black',
-                        border: 'none',
-                        padding: '10px 20px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                    }}
-                >
-                    Instigate
-                </button>
-            </Link>
-            <Link href="/debate" passHref>
-                <button
-                    style={{
-                        backgroundColor: '#ebc7fa',
-                        color: 'black',
-                        border: 'none',
-                        padding: '10px 20px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                    }}
-                >
-                    Debate
-                </button>
-            </Link>
-            <Link href="/deliberate" passHref>
-                <button
-                    style={{
-                        backgroundColor: '#ebc7fa',
-                        color: 'black',
-                        border: 'none',
-                        padding: '10px 20px',
-                        borderRadius: '4px',
-                        borderColor: 'white',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                    }}
-                >
-                    Deliberate
-                </button>
-            </Link>
+            {[
+                { label: 'Home', path: '/' },
+                { label: 'Instigate', path: '/instigate' },
+                { label: 'Debate', path: '/debate' },
+                { label: 'Deliberate', path: '/deliberate' },
+            ].map(({ label, path }) => (
+                <Link key={label} href={path} passHref>
+                    <button
+                        style={{
+                            padding: '10px 20px',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            border: 'none',
+                            borderRadius: '5px',
+                            backgroundColor: '#007BFF',
+                            color: 'white',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.boxShadow = '0 6px 10px rgba(0, 0, 0, 0.2)';
+                            e.target.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                            e.target.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        {label}
+                    </button>
+                </Link>
+            ))}
         </nav>
     );
 }

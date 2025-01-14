@@ -3,17 +3,11 @@ import NavBar from '../components/NavBar';
 
 export default function DebatePage() {
     const [instigates, setInstigates] = useState([]);
-    const [selectedInstigate, setSelectedInstigate] = useState('');
+    const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0); // Track the current instigate
     const [debateText, setDebateText] = useState('');
+    const [hovering, setHovering] = useState(false); // Track hover state
 
-    // Disable scrolling for the page
-    useEffect(() => {
-        document.body.style.overflow = 'hidden'; // Disable scrolling on the body
-        return () => {
-            document.body.style.overflow = 'auto'; // Re-enable scrolling when unmounting
-        };
-    }, []);
-
+    // Fetch instigates when the component loads
     useEffect(() => {
         fetchInstigates();
     }, []);
@@ -29,9 +23,16 @@ export default function DebatePage() {
         }
     };
 
+    const handleNextInstigate = () => {
+        setCurrentInstigateIndex((prevIndex) =>
+            prevIndex === instigates.length - 1 ? 0 : prevIndex + 1
+        );
+    };
+
     const submitDebate = async () => {
+        const selectedInstigate = instigates[currentInstigateIndex];
         if (!selectedInstigate) {
-            alert('Please select a debate topic.');
+            alert('No instigate selected.');
             return;
         }
 
@@ -39,15 +40,31 @@ export default function DebatePage() {
             await fetch('/api/debate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ instigateId: selectedInstigate, debateText }),
+                body: JSON.stringify({ instigateId: selectedInstigate._id, debateText }),
             });
-            setDebateText('');
             alert('Debate submitted successfully!');
+
+            // Remove debated instigate from the list
+            const updatedInstigates = instigates.filter(
+                (_, index) => index !== currentInstigateIndex
+            );
+
+            setInstigates(updatedInstigates);
+
+            // Reset the index to ensure valid navigation
+            setCurrentInstigateIndex((prevIndex) =>
+                prevIndex >= updatedInstigates.length ? 0 : prevIndex
+            );
+
+            // Clear the debate text
+            setDebateText('');
         } catch (error) {
             console.error('Error submitting debate:', error);
             alert('Failed to submit debate. Please try again.');
         }
     };
+
+    const currentInstigate = instigates[currentInstigateIndex];
 
     return (
         <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
@@ -55,35 +72,32 @@ export default function DebatePage() {
 
             {/* Left Side - Red */}
             <div
+                onClick={handleNextInstigate}
+                onMouseEnter={() => setHovering(true)} // Set hovering state
+                onMouseLeave={() => setHovering(false)} // Remove hovering state
                 style={{
                     flex: 1,
-                    backgroundColor: '#FF4D4D',
+                    backgroundColor: hovering ? '#FF6A6A' : '#FF4D4D', // Lighten red on hover
                     padding: '20px',
                     color: 'white',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s ease', // Smooth transition
                 }}
             >
-                <h2 style={{ textAlign: 'center' }}>Select a Topic</h2>
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                    {instigates.map((instigate) => (
-                        <li key={instigate._id} style={{ marginBottom: '10px' }}>
-                            <button
-                                onClick={() => setSelectedInstigate(instigate._id)}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    backgroundColor: selectedInstigate === instigate._id ? '#FF6A6A' : '#FF4D4D',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    textAlign: 'left',
-                                }}
-                            >
-                                {instigate.text}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                <p
+                    style={{
+                        textAlign: 'center',
+                        fontSize: '40px',
+                        margin: '0 10px',
+                        maxWidth: '400px',
+                    }}
+                >
+                    {currentInstigate ? currentInstigate.text : 'No topics available'}
+                </p>
             </div>
 
             {/* Right Side - Blue */}
@@ -99,31 +113,31 @@ export default function DebatePage() {
                     alignItems: 'center',
                 }}
             >
-                <h2 style={{ textAlign: 'center' }}>Write Your Debate</h2>
                 <textarea
                     value={debateText}
                     onChange={(e) => setDebateText(e.target.value)}
                     placeholder="Write your debate response here (max 200 characters)"
                     maxLength={200}
                     style={{
-                        width: '80%',
-                        height: '100px',
+                        width: '60%',
+                        height: '500px',
                         marginBottom: '10px',
                         padding: '10px',
-                        fontSize: '16px',
+                        fontSize: '30px',
                         borderRadius: '4px',
                         border: '1px solid #ccc',
                         color: 'black',
+                        resize: 'none',
                     }}
                 />
                 <button
                     onClick={submitDebate}
                     style={{
-                        width: '80%',
+                        width: '30%',
                         padding: '10px',
                         backgroundColor: '#007BFF',
                         color: 'white',
-                        fontSize: '16px',
+                        fontSize: '30px',
                         borderRadius: '4px',
                         border: 'none',
                         cursor: 'pointer',

@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
 
-export default function DeliberatePage() {
-    const [debates, setDebates] = useState([]);
+export default function DeliberatePage({ initialDebates }) {
+    const [debates, setDebates] = useState(initialDebates || []);
     const [currentDebateIndex, setCurrentDebateIndex] = useState(0);
     const [showVotes, setShowVotes] = useState(false);
+    const [hoveringSide, setHoveringSide] = useState(''); // Track which side is hovered
 
     useEffect(() => {
-        fetchDebates();
+        if (!initialDebates || initialDebates.length === 0) {
+            fetchDebates();
+        }
     }, []);
 
     useEffect(() => {
@@ -40,7 +43,6 @@ export default function DeliberatePage() {
                 body: JSON.stringify({ debateId, ...votes }),
             });
 
-            await fetchDebates();
             setShowVotes(true);
         } catch (error) {
             console.error('Error submitting vote:', error);
@@ -56,13 +58,8 @@ export default function DeliberatePage() {
     const currentDebate = debates[currentDebateIndex];
 
     if (!currentDebate) {
-        return (
-            <div style={{ fontFamily: 'Arial, sans-serif', textAlign: 'center', padding: '20px' }}>
-                <NavBar />
-                <h1>Deliberate on Debates</h1>
-                <p>No debates available. Add some debates first!</p>
-            </div>
-        );
+        // If there are no debates, return an empty fragment
+        return null;
     }
 
     return (
@@ -84,9 +81,11 @@ export default function DeliberatePage() {
                 {/* Left Side - Red */}
                 <div
                     onClick={() => !showVotes && vote(currentDebate._id, 'red')}
+                    onMouseEnter={() => setHoveringSide('red')}
+                    onMouseLeave={() => setHoveringSide('')}
                     style={{
                         flex: 1,
-                        backgroundColor: '#FF4D4D',
+                        backgroundColor: hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D',
                         color: 'white',
                         display: 'flex',
                         flexDirection: 'column',
@@ -94,6 +93,7 @@ export default function DeliberatePage() {
                         alignItems: 'center',
                         cursor: showVotes ? 'default' : 'pointer',
                         height: '100%',
+                        transition: 'background-color 0.3s ease',
                     }}
                 >
                     <p style={{ fontWeight: 'bold', fontSize: '24px', textAlign: 'center', margin: 0 }}>
@@ -105,9 +105,11 @@ export default function DeliberatePage() {
                 {/* Right Side - Blue */}
                 <div
                     onClick={() => !showVotes && vote(currentDebate._id, 'blue')}
+                    onMouseEnter={() => setHoveringSide('blue')}
+                    onMouseLeave={() => setHoveringSide('')}
                     style={{
                         flex: 1,
-                        backgroundColor: '#4D94FF',
+                        backgroundColor: hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF',
                         color: 'white',
                         display: 'flex',
                         flexDirection: 'column',
@@ -115,6 +117,7 @@ export default function DeliberatePage() {
                         alignItems: 'center',
                         cursor: showVotes ? 'default' : 'pointer',
                         height: '100%',
+                        transition: 'background-color 0.3s ease',
                     }}
                 >
                     <p style={{ fontWeight: 'bold', fontSize: '24px', textAlign: 'center', margin: 0 }}>
@@ -125,4 +128,16 @@ export default function DeliberatePage() {
             </div>
         </div>
     );
+}
+
+// Prefetch debates at build time
+export async function getStaticProps() {
+    try {
+        const response = await fetch('http://localhost:3000/api/deliberate'); // Replace with your API URL
+        const initialDebates = await response.json();
+        return { props: { initialDebates } };
+    } catch (error) {
+        console.error('Error prefetching debates:', error);
+        return { props: { initialDebates: [] } };
+    }
 }
