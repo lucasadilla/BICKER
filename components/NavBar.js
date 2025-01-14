@@ -7,14 +7,12 @@ export default function NavBar() {
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '20px',
-                padding: '10px 0', // Consistent padding
-                backgroundColor: 'transparent', // Transparent background
+                padding: '10px 0',
+                backgroundColor: 'transparent',
                 position: 'fixed',
                 top: 0,
                 width: '100%',
                 zIndex: 1000,
-                boxShadow: 'none', // Remove shadows
-                border: 'none', // Ensure no borders
             }}
         >
             {[
@@ -34,15 +32,15 @@ export default function NavBar() {
                             backgroundColor: '#007BFF',
                             color: 'white',
                             cursor: 'pointer',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                            boxShadow: '10px 12px rgba(25,25,25,0.58)', // Default shadow
+                            transition: 'transform 0.2s ease, box-shadow 0.4s ease', // Smooth animation
                         }}
                         onMouseEnter={(e) => {
-                            e.target.style.boxShadow = '0 6px 10px rgba(0, 0, 0, 0.2)';
-                            e.target.style.transform = 'translateY(-2px)';
+                            e.target.style.boxShadow = 'none'; // Remove shadow on hover
+                            e.target.style.transform = 'translateY(2px)'; // Simulate "pressing" the button
                         }}
                         onMouseLeave={(e) => {
-                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                            e.target.style.boxShadow = '10px 12px rgba(25,25,25,0.58)'; // Restore shadow
                             e.target.style.transform = 'translateY(0)';
                         }}
                     >
