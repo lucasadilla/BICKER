@@ -98,7 +98,16 @@ export default function InstigatePage() {
                         borderRadius: '4px',
                         border: 'none',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                        boxShadow: '10px 12px black', // Drop shadow
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease', // Smooth animation
+                    }}
+                    onMouseEnter={(e) => {
+                        e.target.style.boxShadow = 'none'; // Remove shadow on hover
+                        e.target.style.transform = 'translateY(2px)'; // Simulate button press
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.boxShadow = '10px 12px black'; // Restore shadow
+                        e.target.style.transform = 'translateY(0)';
                     }}
                 >
                     Submit
