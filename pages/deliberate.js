@@ -1,18 +1,22 @@
+// pages/deliberate/index.js
+
 import { useState, useEffect } from 'react';
-import NavBar from '../components/NavBar';
+import NavBar from '../components/NavBar'; // If you have a NavBar; otherwise remove
 
 export default function DeliberatePage({ initialDebates }) {
     const [debates, setDebates] = useState(initialDebates || []);
     const [currentDebateIndex, setCurrentDebateIndex] = useState(0);
     const [showVotes, setShowVotes] = useState(false);
-    const [hoveringSide, setHoveringSide] = useState(''); // Track which side is hovered
+    const [hoveringSide, setHoveringSide] = useState('');
 
+    // If there were no initialDebates, fetch them on client side
     useEffect(() => {
         if (!initialDebates || initialDebates.length === 0) {
             fetchDebates();
         }
-    }, []);
+    }, [initialDebates]);
 
+    // After voting, show results for 4 seconds before moving on
     useEffect(() => {
         if (showVotes) {
             const timer = setTimeout(() => {
@@ -22,10 +26,11 @@ export default function DeliberatePage({ initialDebates }) {
         }
     }, [showVotes]);
 
+    // Client-side fetch if needed
     const fetchDebates = async () => {
         try {
             const response = await fetch('/api/deliberate');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) throw new Error('HTTP error! ' + response.status);
             const data = await response.json();
             setDebates(data);
         } catch (error) {
@@ -33,58 +38,98 @@ export default function DeliberatePage({ initialDebates }) {
         }
     };
 
+    // When user clicks left or right side
     const vote = async (debateId, side) => {
         try {
-            const votes = side === 'red' ? { votesRed: 1 } : { votesBlue: 1 };
+            const body =
+                side === 'red'
+                    ? { debateId, votesRed: 1 }
+                    : { debateId, votesBlue: 1 };
 
-            await fetch('/api/deliberate', {
+            // POST the vote
+            const response = await fetch('/api/deliberate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ debateId, ...votes }),
+                body: JSON.stringify(body),
             });
+            if (!response.ok) {
+                throw new Error('Failed to update votes');
+            }
 
+            // We get the updated doc back
+            const updatedDoc = await response.json();
+
+            // Update local state to reflect new vote counts
+            setDebates((prev) =>
+                prev.map((deb) =>
+                    deb._id === debateId
+                        ? {
+                            ...deb,
+                            votesRed: updatedDoc.votesRed,
+                            votesBlue: updatedDoc.votesBlue,
+                        }
+                        : deb
+                )
+            );
+
+            // Show the vote results
             setShowVotes(true);
         } catch (error) {
             console.error('Error submitting vote:', error);
-            alert('Failed to submit vote. Please try again.');
+            alert('Failed to submit vote.');
         }
     };
 
+    // Move to the next debate in the array
     const nextDebate = () => {
         setShowVotes(false);
         setCurrentDebateIndex((prevIndex) => (prevIndex + 1) % debates.length);
     };
 
+    // The currently displayed debate
     const currentDebate = debates[currentDebateIndex];
 
+    // If no debates available, show a fallback
     if (!currentDebate) {
-        // If there are no debates, return an empty fragment
-        return null;
+        return (
+            <div style={{ textAlign: 'center', marginTop: '50px' }}>
+                <h2>No debates available</h2>
+            </div>
+        );
     }
+
+    // Calculate percentages for dynamic width
+    const totalVotes = (currentDebate.votesRed || 0) + (currentDebate.votesBlue || 0);
+    let redPercent = 50;
+    let bluePercent = 50;
+
+    if (totalVotes > 0) {
+        redPercent = ((currentDebate.votesRed || 0) / totalVotes) * 100;
+        bluePercent = 100 - redPercent;
+    }
+    const redWidth = showVotes ? `${redPercent}%` : '50%';
+    const blueWidth = showVotes ? `${bluePercent}%` : '50%';
 
     return (
         <div
             style={{
-                fontFamily: 'Arial, sans-serif',
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100vh',
-                position: 'relative',
                 overflow: 'hidden',
             }}
         >
-            {/* NavBar */}
-            <NavBar />
+            <NavBar /> {/* remove if you don’t have a NavBar */}
 
             {/* Fullscreen Debate Section */}
             <div style={{ display: 'flex', height: '100%', width: '100%' }}>
-                {/* Left Side - Red */}
+                {/* Left side: Red */}
                 <div
                     onClick={() => !showVotes && vote(currentDebate._id, 'red')}
                     onMouseEnter={() => setHoveringSide('red')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
-                        flex: 1,
+                        width: redWidth,
                         backgroundColor: hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D',
                         color: 'white',
                         display: 'flex',
@@ -92,23 +137,38 @@ export default function DeliberatePage({ initialDebates }) {
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: showVotes ? 'default' : 'pointer',
-                        height: '100%',
-                        transition: 'background-color 0.3s ease',
+                        transition: 'width 1s ease, background-color 0.3s ease',
                     }}
                 >
-                    <p style={{ fontWeight: 'bold', fontSize: '24px', textAlign: 'center', margin: 0 }}>
-                        {currentDebate.instigateId?.text || 'Unknown Instigate'}
+                    <p
+                        style={{
+                            fontWeight: 'bold',
+                            fontSize: '24px',
+                            textAlign: 'center',
+                            margin: 0,
+                            whiteSpace: 'normal',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                            maxWidth: '40%',
+                            padding: '0 10px',
+                        }}
+                    >
+                        {currentDebate.instigateText || 'Unknown Instigate'}
                     </p>
-                    {showVotes && <p style={{ fontSize: '18px', marginTop: '20px' }}>Votes: {currentDebate.votesRed || 0}</p>}
+                    {showVotes && (
+                        <p style={{ fontSize: '18px', marginTop: '20px' }}>
+                            Votes: {currentDebate.votesRed || 0}
+                        </p>
+                    )}
                 </div>
 
-                {/* Right Side - Blue */}
+                {/* Right side: Blue */}
                 <div
                     onClick={() => !showVotes && vote(currentDebate._id, 'blue')}
                     onMouseEnter={() => setHoveringSide('blue')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
-                        flex: 1,
+                        width: blueWidth,
                         backgroundColor: hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF',
                         color: 'white',
                         display: 'flex',
@@ -116,28 +176,46 @@ export default function DeliberatePage({ initialDebates }) {
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: showVotes ? 'default' : 'pointer',
-                        height: '100%',
-                        transition: 'background-color 0.3s ease',
+                        transition: 'width 1s ease, background-color 0.3s ease',
                     }}
                 >
-                    <p style={{ fontWeight: 'bold', fontSize: '24px', textAlign: 'center', margin: 0 }}>
+                    <p
+                        style={{
+                            fontWeight: 'bold',
+                            fontSize: '24px',
+                            textAlign: 'center',
+                            margin: 0,
+                            whiteSpace: 'normal',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                            maxWidth: '40%',
+                            padding: '0 10px',
+                        }}
+                    >
                         {currentDebate.debateText || 'Unknown Debate'}
                     </p>
-                    {showVotes && <p style={{ fontSize: '18px', marginTop: '20px' }}>Votes: {currentDebate.votesBlue || 0}</p>}
+                    {showVotes && (
+                        <p style={{ fontSize: '18px', marginTop: '20px' }}>
+                            Votes: {currentDebate.votesBlue || 0}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
     );
 }
 
-// Prefetch debates at build time
-export async function getStaticProps() {
+// Option 1: getServerSideProps
+export async function getServerSideProps() {
+    const res = await fetch('http://localhost:3000/api/deliberate');
+    let initialDebates = [];
     try {
-        const response = await fetch('http://localhost:3000/api/deliberate'); // Replace with your API URL
-        const initialDebates = await response.json();
-        return { props: { initialDebates } };
+        initialDebates = await res.json();
     } catch (error) {
-        console.error('Error prefetching debates:', error);
-        return { props: { initialDebates: [] } };
+        console.error('Error parsing JSON:', error);
     }
+
+    return {
+        props: { initialDebates },
+    };
 }

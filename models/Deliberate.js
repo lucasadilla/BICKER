@@ -1,10 +1,28 @@
+// models/Deliberate.js
 import mongoose from 'mongoose';
 
-const DeliberateSchema = new mongoose.Schema({
-    debateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Debate', required: true },
-    votesRed: { type: Number, default: 0 },
-    votesBlue: { type: Number, default: 0 },
-    createdAt: { type: Date, default: Date.now },
-});
+const DeliberateSchema = new mongoose.Schema(
+    {
+        instigateText: {
+            type: String,
+            required: true,
+            maxlength: 200,
+        },
+        debateText: {
+            type: String,
+            required: true,
+            maxlength: 200,
+        },
+        votesRed: {
+            type: Number,
+            default: 0,
+        },
+        votesBlue: {
+            type: Number,
+            default: 0,
+        },
+    },
+    { timestamps: true }
+);
 
 export default mongoose.models.Deliberate || mongoose.model('Deliberate', DeliberateSchema);

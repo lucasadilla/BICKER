@@ -1,13 +1,13 @@
+// pages/debate/index.js
 import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
 
 export default function DebatePage() {
     const [instigates, setInstigates] = useState([]);
-    const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0); // Track the current instigate
+    const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0);
     const [debateText, setDebateText] = useState('');
-    const [hovering, setHovering] = useState(false); // Track hover state
+    const [hovering, setHovering] = useState(false);
 
-    // Fetch instigates when the component loads
     useEffect(() => {
         fetchInstigates();
     }, []);
@@ -37,26 +37,30 @@ export default function DebatePage() {
         }
 
         try {
-            await fetch('/api/debate', {
+            const response = await fetch('/api/debate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ instigateId: selectedInstigate._id, debateText }),
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to create debate');
+            }
+
             alert('Debate submitted successfully!');
 
-            // Remove debated instigate from the list
+            // Remove from local state
             const updatedInstigates = instigates.filter(
                 (_, index) => index !== currentInstigateIndex
             );
-
             setInstigates(updatedInstigates);
 
-            // Reset the index to ensure valid navigation
+            // Update index
             setCurrentInstigateIndex((prevIndex) =>
                 prevIndex >= updatedInstigates.length ? 0 : prevIndex
             );
 
-            // Clear the debate text
+            // Clear text
             setDebateText('');
         } catch (error) {
             console.error('Error submitting debate:', error);
@@ -73,11 +77,11 @@ export default function DebatePage() {
             {/* Left Side - Red */}
             <div
                 onClick={handleNextInstigate}
-                onMouseEnter={() => setHovering(true)} // Set hovering state
-                onMouseLeave={() => setHovering(false)} // Remove hovering state
+                onMouseEnter={() => setHovering(true)}
+                onMouseLeave={() => setHovering(false)}
                 style={{
                     flex: 1,
-                    backgroundColor: hovering ? '#FF6A6A' : '#FF4D4D', // Lighten red on hover
+                    backgroundColor: hovering ? '#FF6A6A' : '#FF4D4D',
                     padding: '20px',
                     color: 'white',
                     display: 'flex',
@@ -85,7 +89,7 @@ export default function DebatePage() {
                     justifyContent: 'center',
                     alignItems: 'center',
                     cursor: 'pointer',
-                    transition: 'background-color 0.3s ease', // Smooth transition
+                    transition: 'background-color 0.3s ease',
                 }}
             >
                 <p
@@ -94,6 +98,9 @@ export default function DebatePage() {
                         fontSize: '40px',
                         margin: '0 10px',
                         maxWidth: '400px',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
                     }}
                 >
                     {currentInstigate ? currentInstigate.text : 'No topics available'}
@@ -113,23 +120,23 @@ export default function DebatePage() {
                     alignItems: 'center',
                 }}
             >
-                <textarea
-                    value={debateText}
-                    onChange={(e) => setDebateText(e.target.value)}
-                    placeholder="Write your debate response here (max 200 characters)"
-                    maxLength={200}
-                    style={{
-                        width: '60%',
-                        height: '500px',
-                        marginBottom: '10px',
-                        padding: '10px',
-                        fontSize: '30px',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        color: 'black',
-                        resize: 'none',
-                    }}
-                />
+        <textarea
+            value={debateText}
+            onChange={(e) => setDebateText(e.target.value)}
+            placeholder="Write your debate response here (max 200 characters)"
+            maxLength={200}
+            style={{
+                width: '60%',
+                height: '500px',
+                marginBottom: '10px',
+                padding: '10px',
+                fontSize: '30px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                color: 'black',
+                resize: 'none',
+            }}
+        />
                 <button
                     onClick={submitDebate}
                     style={{
@@ -141,15 +148,15 @@ export default function DebatePage() {
                         borderRadius: '4px',
                         border: 'none',
                         cursor: 'pointer',
-                        boxShadow: '10px 12px black', // Drop shadow
+                        boxShadow: '10px 12px black',
                         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     }}
                     onMouseEnter={(e) => {
-                        e.target.style.boxShadow = 'none'; // Remove shadow on hover
-                        e.target.style.transform = 'translateY(2px)'; // Simulate button press
+                        e.target.style.boxShadow = 'none';
+                        e.target.style.transform = 'translateY(2px)';
                     }}
                     onMouseLeave={(e) => {
-                        e.target.style.boxShadow = '10px 12px black'; // Restore shadow
+                        e.target.style.boxShadow = '10px 12px black';
                         e.target.style.transform = 'translateY(0)';
                     }}
                 >
