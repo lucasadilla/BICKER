@@ -1,6 +1,6 @@
 // pages/deliberate/index.js
-
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react'; // <-- IMPORTANT
 import NavBar from '../components/NavBar'; // If you have a NavBar; otherwise remove
 
 export default function DeliberatePage({ initialDebates }) {
@@ -9,7 +9,10 @@ export default function DeliberatePage({ initialDebates }) {
     const [showVotes, setShowVotes] = useState(false);
     const [hoveringSide, setHoveringSide] = useState('');
 
-    // If there were no initialDebates, fetch them on client side
+    // Check if user is signed in or not
+    const { data: session, status } = useSession();
+
+    // If there were no initialDebates, fetch them client-side
     useEffect(() => {
         if (!initialDebates || initialDebates.length === 0) {
             fetchDebates();
@@ -26,7 +29,6 @@ export default function DeliberatePage({ initialDebates }) {
         }
     }, [showVotes]);
 
-    // Client-side fetch if needed
     const fetchDebates = async () => {
         try {
             const response = await fetch('/api/deliberate');
@@ -38,8 +40,14 @@ export default function DeliberatePage({ initialDebates }) {
         }
     };
 
-    // When user clicks left or right side
+    // The vote function checks if user is signed in.
     const vote = async (debateId, side) => {
+        // If not signed in, show alert or do nothing
+        if (!session) {
+            alert('You must be signed in to vote.');
+            return;
+        }
+
         try {
             const body =
                 side === 'red'
@@ -56,10 +64,10 @@ export default function DeliberatePage({ initialDebates }) {
                 throw new Error('Failed to update votes');
             }
 
-            // We get the updated doc back
+            // Updated doc from the API
             const updatedDoc = await response.json();
 
-            // Update local state to reflect new vote counts
+            // Update local state
             setDebates((prev) =>
                 prev.map((deb) =>
                     deb._id === debateId
@@ -80,16 +88,14 @@ export default function DeliberatePage({ initialDebates }) {
         }
     };
 
-    // Move to the next debate in the array
     const nextDebate = () => {
         setShowVotes(false);
         setCurrentDebateIndex((prevIndex) => (prevIndex + 1) % debates.length);
     };
 
-    // The currently displayed debate
     const currentDebate = debates[currentDebateIndex];
 
-    // If no debates available, show a fallback
+    // If no debates available, show fallback
     if (!currentDebate) {
         return (
             <div style={{ textAlign: 'center', marginTop: '50px' }}>
@@ -125,7 +131,8 @@ export default function DeliberatePage({ initialDebates }) {
             <div style={{ display: 'flex', height: '100%', width: '100%' }}>
                 {/* Left side: Red */}
                 <div
-                    onClick={() => !showVotes && vote(currentDebate._id, 'red')}
+                    // If showVotes or no session, we won't let them click to vote
+                    onClick={() => (!showVotes ? vote(currentDebate._id, 'red') : null)}
                     onMouseEnter={() => setHoveringSide('red')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
@@ -139,6 +146,7 @@ export default function DeliberatePage({ initialDebates }) {
                         cursor: showVotes ? 'default' : 'pointer',
                         transition: 'width 1s ease, background-color 0.3s ease',
                     }}
+                    title={!session ? 'Sign in to vote on this side' : ''}
                 >
                     <p
                         style={{
@@ -164,7 +172,7 @@ export default function DeliberatePage({ initialDebates }) {
 
                 {/* Right side: Blue */}
                 <div
-                    onClick={() => !showVotes && vote(currentDebate._id, 'blue')}
+                    onClick={() => (!showVotes ? vote(currentDebate._id, 'blue') : null)}
                     onMouseEnter={() => setHoveringSide('blue')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
@@ -178,6 +186,7 @@ export default function DeliberatePage({ initialDebates }) {
                         cursor: showVotes ? 'default' : 'pointer',
                         transition: 'width 1s ease, background-color 0.3s ease',
                     }}
+                    title={!session ? 'Sign in to vote on this side' : ''}
                 >
                     <p
                         style={{

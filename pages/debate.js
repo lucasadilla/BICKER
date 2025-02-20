@@ -1,12 +1,16 @@
-// pages/debate/index.js
+// pages/debate.js
 import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
+import { useSession } from 'next-auth/react'; // for client-side session check
 
 export default function DebatePage() {
     const [instigates, setInstigates] = useState([]);
     const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0);
     const [debateText, setDebateText] = useState('');
     const [hovering, setHovering] = useState(false);
+
+    // NextAuth session info
+    const { data: session, status } = useSession();
 
     useEffect(() => {
         fetchInstigates();
@@ -30,6 +34,12 @@ export default function DebatePage() {
     };
 
     const submitDebate = async () => {
+        // If not logged in, do nothing (or show alert)
+        if (!session) {
+            alert('You must be signed in to submit a debate.');
+            return;
+        }
+
         const selectedInstigate = instigates[currentInstigateIndex];
         if (!selectedInstigate) {
             alert('No instigate selected.');
@@ -139,26 +149,30 @@ export default function DebatePage() {
         />
                 <button
                     onClick={submitDebate}
+                    disabled={!session} // disabled if not signed in
                     style={{
                         width: '30%',
                         padding: '10px',
-                        backgroundColor: '#007BFF',
+                        backgroundColor: !session ? 'gray' : '#007BFF',
                         color: 'white',
                         fontSize: '30px',
                         borderRadius: '4px',
                         border: 'none',
-                        cursor: 'pointer',
+                        cursor: !session ? 'not-allowed' : 'pointer',
                         boxShadow: '10px 12px black',
                         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     }}
                     onMouseEnter={(e) => {
+                        if (!session) return;
                         e.target.style.boxShadow = 'none';
                         e.target.style.transform = 'translateY(2px)';
                     }}
                     onMouseLeave={(e) => {
+                        if (!session) return;
                         e.target.style.boxShadow = '10px 12px black';
                         e.target.style.transform = 'translateY(0)';
                     }}
+                    title={!session ? 'Sign in to submit a debate' : ''}
                 >
                     Submit Debate
                 </button>

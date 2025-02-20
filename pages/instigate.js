@@ -1,17 +1,22 @@
+// pages/instigate/index.js
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react'; // For checking if user is signed in
 import NavBar from '../components/NavBar';
 
 export default function InstigatePage() {
     const [instigates, setInstigates] = useState([]);
     const [newInstigate, setNewInstigate] = useState('');
 
-    // Disable scrolling for the page
+    // Disable scrolling on mount
     useEffect(() => {
-        document.body.style.overflow = 'hidden'; // Disable scrolling on the body
+        document.body.style.overflow = 'hidden';
         return () => {
-            document.body.style.overflow = 'auto'; // Re-enable scrolling when unmounting
+            document.body.style.overflow = 'auto';
         };
     }, []);
+
+    // Fetch session info (to see if user is signed in)
+    const { data: session } = useSession();
 
     useEffect(() => {
         fetchInstigates();
@@ -32,6 +37,12 @@ export default function InstigatePage() {
     };
 
     const submitInstigate = async () => {
+        // If not signed in, block submission
+        if (!session) {
+            alert('You must be signed in to submit a new topic.');
+            return;
+        }
+
         try {
             await fetch('/api/instigate', {
                 method: 'POST',
@@ -71,44 +82,50 @@ export default function InstigatePage() {
                     textAlign: 'center',
                 }}
             >
-                <textarea
-                    value={newInstigate}
-                    onChange={(e) => setNewInstigate(e.target.value)}
-                    placeholder="Write your opinion here (max 200 characters)"
-                    maxLength={200}
-                    style={{
-                        width: '100%',
-                        height: '450px',
-                        marginBottom: '10px',
-                        padding: '10px',
-                        fontSize: '36px',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        resize: 'none', // Disable resizing
-                    }}
-                />
+        <textarea
+            value={newInstigate}
+            onChange={(e) => setNewInstigate(e.target.value)}
+            placeholder="Write your opinion here (max 200 characters)"
+            maxLength={200}
+            style={{
+                width: '100%',
+                height: '450px',
+                marginBottom: '10px',
+                padding: '10px',
+                fontSize: '36px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                resize: 'none',
+            }}
+        />
                 <button
                     onClick={submitInstigate}
+                    disabled={!session} // Disabled if not signed in
                     style={{
                         width: '50%',
                         padding: '10px',
-                        backgroundColor: '#007BFF',
+                        backgroundColor: !session ? 'gray' : '#007BFF',
                         color: 'white',
                         fontSize: '26px',
                         borderRadius: '4px',
                         border: 'none',
-                        cursor: 'pointer',
-                        boxShadow: '10px 12px black', // Drop shadow
-                        transition: 'transform 0.2s ease, box-shadow 0.2s ease', // Smooth animation
+                        cursor: !session ? 'not-allowed' : 'pointer',
+                        boxShadow: '10px 12px black',
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     }}
                     onMouseEnter={(e) => {
-                        e.target.style.boxShadow = 'none'; // Remove shadow on hover
-                        e.target.style.transform = 'translateY(2px)'; // Simulate button press
+                        if (session) {
+                            e.target.style.boxShadow = 'none';
+                            e.target.style.transform = 'translateY(2px)';
+                        }
                     }}
                     onMouseLeave={(e) => {
-                        e.target.style.boxShadow = '10px 12px black'; // Restore shadow
-                        e.target.style.transform = 'translateY(0)';
+                        if (session) {
+                            e.target.style.boxShadow = '10px 12px black';
+                            e.target.style.transform = 'translateY(0)';
+                        }
                     }}
+                    title={!session ? 'Sign in to submit an instigate' : ''}
                 >
                     Submit
                 </button>
