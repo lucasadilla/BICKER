@@ -13,7 +13,7 @@ export default function LeaderboardIndex() {
             <div style={{ flex: 1, display: 'flex' }}>
                 {/* Left side: Global Stats */}
                 <div
-                    onClick={() => router.push('../leaderboard/global')}
+                    onClick={() => router.push('../Leaderboard/global')}
                     style={{
                         flex: 1,
                         backgroundColor: '#FF4D4D',
@@ -30,7 +30,7 @@ export default function LeaderboardIndex() {
 
                 {/* Right side: Personal Stats */}
                 <div
-                    onClick={() => router.push('/leaderboard/personal')}
+                    onClick={() => router.push('/Leaderboard/personal')}
                     style={{
                         flex: 1,
                         backgroundColor: '#4D94FF',
