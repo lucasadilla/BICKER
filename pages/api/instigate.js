@@ -18,18 +18,32 @@ export default async function handler(req, res) {
             console.error('Error creating instigate:', error);
             return res.status(500).json({ error: 'Failed to create instigate.' });
         }
+
     } else if (req.method === 'GET') {
         try {
-            const instigates = await Instigate.find({});
+            const { search } = req.query;
+            let filter = {};
+
+            // If there's a search query, filter by partial match (case-insensitive)
+            if (search) {
+                filter = { text: { $regex: search, $options: 'i' } };
+            }
+
+            // Fetch either all instigates or those matching the search
+            const instigates = await Instigate.find(filter);
             return res.status(200).json(instigates);
+
         } catch (error) {
             console.error('Error fetching instigates:', error);
             return res.status(500).json({ error: 'Failed to fetch instigates.' });
         }
+
     } else if (req.method === 'DELETE') {
         const { id } = req.query;
         if (!id) {
-            return res.status(400).json({ error: 'Instigate ID is required (use ?id=... ).' });
+            return res
+                .status(400)
+                .json({ error: 'Instigate ID is required (use ?id=... ).' });
         }
         try {
             await Instigate.findByIdAndDelete(id);
@@ -38,6 +52,7 @@ export default async function handler(req, res) {
             console.error('Error deleting instigate:', error);
             return res.status(500).json({ error: 'Failed to delete instigate.' });
         }
+
     } else {
         res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
         return res.status(405).end(`Method ${req.method} Not Allowed`);

@@ -1,40 +1,79 @@
 // pages/debate.js
 import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
-import { useSession } from 'next-auth/react'; // for client-side session check
+import { useSession } from 'next-auth/react';
 
-export default function DebatePage() {
-    const [instigates, setInstigates] = useState([]);
+export default function DebatePage({ initialDebates }) {
+    const [instigates, setInstigates] = useState(initialDebates || []);
     const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0);
     const [debateText, setDebateText] = useState('');
     const [hovering, setHovering] = useState(false);
 
+    // Search-related state
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [showSearchPopup, setShowSearchPopup] = useState(false);
+
     // NextAuth session info
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
 
+    // On mount, fetch all instigates (random order)
     useEffect(() => {
-        fetchInstigates();
-    }, []);
+        if (!initialDebates || initialDebates.length === 0) {
+            fetchInstigates();
+        }
+    }, [initialDebates]);
 
-    const fetchInstigates = async () => {
+    // Fetch instigates (optionally filtered by search)
+    const fetchInstigates = async (search = '') => {
         try {
-            const response = await fetch('/api/instigate');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const url = search
+                ? `/api/instigate?search=${encodeURIComponent(search)}`
+                : `/api/instigate`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
-            setInstigates(data);
+            // Shuffle for randomness
+            const shuffled = data.sort(() => Math.random() - 0.5);
+            setInstigates(shuffled);
+            setCurrentInstigateIndex(0);
         } catch (error) {
             console.error('Error fetching instigates:', error);
         }
     };
 
+    // When user clicks the left side (outside the search controls), cycle to next topic
     const handleNextInstigate = () => {
         setCurrentInstigateIndex((prevIndex) =>
             prevIndex === instigates.length - 1 ? 0 : prevIndex + 1
         );
     };
 
+    // Handle search: fetch topics matching searchTerm and show popup
+    const handleSearch = async () => {
+        try {
+            const response = await fetch(`/api/instigate?search=${encodeURIComponent(searchTerm)}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const results = await response.json();
+            setSearchResults(results);
+            setShowSearchPopup(true);
+        } catch (error) {
+            console.error('Error searching instigates:', error);
+        }
+    };
+
+    // When a user clicks on a search result, set that topic as the current topic
+    const selectSearchResult = (instigate) => {
+        // Option: prepend the selected topic to the list and set it as current index 0
+        setInstigates([instigate, ...instigates]);
+        setCurrentInstigateIndex(0);
+        setShowSearchPopup(false);
+    };
+
+    // Submit debate (only if signed in)
     const submitDebate = async () => {
-        // If not logged in, do nothing (or show alert)
         if (!session) {
             alert('You must be signed in to submit a debate.');
             return;
@@ -59,18 +98,14 @@ export default function DebatePage() {
 
             alert('Debate submitted successfully!');
 
-            // Remove from local state
+            // Remove the selected topic from local state
             const updatedInstigates = instigates.filter(
                 (_, index) => index !== currentInstigateIndex
             );
             setInstigates(updatedInstigates);
-
-            // Update index
-            setCurrentInstigateIndex((prevIndex) =>
-                prevIndex >= updatedInstigates.length ? 0 : prevIndex
+            setCurrentInstigateIndex(
+                updatedInstigates.length > 0 ? 0 : currentInstigateIndex
             );
-
-            // Clear text
             setDebateText('');
         } catch (error) {
             console.error('Error submitting debate:', error);
@@ -84,7 +119,7 @@ export default function DebatePage() {
         <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
             <NavBar />
 
-            {/* Left Side - Red */}
+            {/* Left Side (Red) */}
             <div
                 onClick={handleNextInstigate}
                 onMouseEnter={() => setHovering(true)}
@@ -96,28 +131,74 @@ export default function DebatePage() {
                     color: 'white',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     cursor: 'pointer',
                     transition: 'background-color 0.3s ease',
                 }}
             >
-                <p
+                {/* Topic Display (top part) */}
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <p
+                        style={{
+                            textAlign: 'center',
+                            fontSize: '40px',
+                            margin: '0 10px',
+                            maxWidth: '400px',
+                            whiteSpace: 'normal',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                        }}
+                    >
+                        {currentInstigate ? currentInstigate.text : 'No topics available'}
+                    </p>
+                </div>
+
+                {/* Search Bar (bottom part) */}
+                <div
+                    onClick={(e) => e.stopPropagation()} // prevent parent's onClick
                     style={{
-                        textAlign: 'center',
-                        fontSize: '40px',
-                        margin: '0 10px',
-                        maxWidth: '400px',
-                        whiteSpace: 'normal',
-                        wordBreak: 'break-word',
-                        overflowWrap: 'break-word',
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        marginTop: '20px',
                     }}
                 >
-                    {currentInstigate ? currentInstigate.text : 'No topics available'}
-                </p>
+                    <input
+                        type="text"
+                        placeholder="Search a topic..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{
+                            fontSize: '16px',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc',
+                            width: '60%',
+                        }}
+                    />
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleSearch();
+                        }}
+                        style={{
+                            marginLeft: '10px',
+                            padding: '8px 16px',
+                            fontSize: '16px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            backgroundColor: '#007BFF',
+                            color: 'white',
+                        }}
+                    >
+                        Search
+                    </button>
+                </div>
             </div>
 
-            {/* Right Side - Blue */}
+            {/* Right Side (Blue) */}
             <div
                 style={{
                     flex: 1,
@@ -149,7 +230,7 @@ export default function DebatePage() {
         />
                 <button
                     onClick={submitDebate}
-                    disabled={!session} // disabled if not signed in
+                    disabled={!session}
                     style={{
                         width: '30%',
                         padding: '10px',
@@ -177,6 +258,84 @@ export default function DebatePage() {
                     Submit Debate
                 </button>
             </div>
+
+            {/* Search Popup Modal */}
+            {showSearchPopup && (
+                <div
+                    onClick={() => setShowSearchPopup(false)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10000,
+                    }}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside popup
+                        style={{
+                            backgroundColor: 'white',
+                            padding: '20px',
+                            borderRadius: '8px',
+                            maxHeight: '80vh',
+                            overflowY: 'auto',
+                            width: '80%',
+                            maxWidth: '600px',
+                        }}
+                    >
+                        <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>Search Results</h2>
+                        {searchResults.length === 0 ? (
+                            <p>No topics found.</p>
+                        ) : (
+                            searchResults.map((result) => (
+                                <div
+                                    key={result._id}
+                                    onClick={() => selectSearchResult(result)}
+                                    style={{
+                                        padding: '10px',
+                                        borderBottom: '1px solid #ccc',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    {result.text}
+                                </div>
+                            ))
+                        )}
+                        <button
+                            onClick={() => setShowSearchPopup(false)}
+                            style={{
+                                marginTop: '20px',
+                                padding: '10px 20px',
+                                backgroundColor: '#007BFF',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
+}
+
+// Use getServerSideProps to fetch initial instigates
+export async function getServerSideProps() {
+    try {
+        const res = await fetch('http://localhost:3000/api/instigate');
+        const initialInstigates = await res.json();
+        const shuffled = initialInstigates.sort(() => Math.random() - 0.5);
+        return { props: { initialDebates: shuffled } };
+    } catch (error) {
+        console.error('Error prefetching instigates:', error);
+        return { props: { initialDebates: [] } };
+    }
 }
