@@ -6,7 +6,8 @@ import NavBar from '../../components/NavBar';
 export default function GlobalStats() {
     const [debates, setDebates] = useState([]);
     const [sortOption, setSortOption] = useState('newest');
-    const [totalVotes, setTotalVotes] = useState(0); // live vote counter
+    const [totalVotes, setTotalVotes] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchDebates();
@@ -14,15 +15,16 @@ export default function GlobalStats() {
 
     async function fetchDebates() {
         try {
-            // If your stats route is /api/debates/stats, use that:
-            const response = await fetch(`/api/stats?sort=${sortOption}`);
+            setIsLoading(true);
+            const response = await fetch(`/api/debates/stats?sort=${sortOption}`);
             if (!response.ok) throw new Error('Failed to fetch');
             const data = await response.json();
-
             setDebates(data.debates);
             setTotalVotes(data.totalVotes);
         } catch (error) {
             console.error('Error fetching global stats:', error);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -37,83 +39,231 @@ export default function GlobalStats() {
                 minHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
-                backgroundColor: '#4D94FF', // or another color if you prefer
+                backgroundColor: '#FF4D4D',
             }}
         >
             <NavBar />
 
             <div
                 style={{
-                    padding: '70px',
+                    padding: '40px',
                     marginTop: '70px',
-                    color: 'white',
                     flex: 1,
                     overflow: 'auto',
                 }}
             >
-                <h1 style={{ fontSize: '48px', textAlign: 'center', marginBottom: '30px' }}>
-                    Global Stats
-                </h1>
+                <div style={{ 
+                    maxWidth: '1200px', 
+                    margin: '0 auto',
+                    backgroundColor: 'white',
+                    borderRadius: '20px',
+                    padding: '40px',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                }}>
+                    <h1 style={{ 
+                        fontSize: '48px', 
+                        textAlign: 'center', 
+                        marginBottom: '30px',
+                        color: '#333',
+                        textShadow: '2px 2px 4px rgba(0, 0, 0, 0.1)'
+                    }}>
+                        Global Stats
+                    </h1>
 
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <label
-                        htmlFor="sort"
-                        style={{
-                            marginRight: '10px',
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        Sort By:
-                    </label>
-                    <select
-                        id="sort"
-                        onChange={handleSortChange}
-                        value={sortOption}
-                        style={{
-                            fontSize: '18px',
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                        }}
-                    >
-                        <option value="newest">Newest</option>
-                        <option value="oldest">Oldest</option>
-                        <option value="mostPopular">Most Popular</option>
-                        <option value="mostDivisive">Most Divisive</option>
-                        <option value="mostDecisive">Most Decisive</option>
-                    </select>
-                </div>
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        gap: '20px',
+                        marginBottom: '30px',
+                        flexWrap: 'wrap'
+                    }}>
+                        <div style={{
+                            backgroundColor: '#4D94FF',
+                            padding: '20px 40px',
+                            borderRadius: '15px',
+                            color: 'white',
+                            textAlign: 'center',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            transition: 'transform 0.2s ease',
+                            cursor: 'pointer',
+                            ':hover': {
+                                transform: 'translateY(-5px)'
+                            }
+                        }}>
+                            <h3 style={{ margin: '0', fontSize: '24px' }}>Total Votes</h3>
+                            <p style={{ margin: '10px 0 0', fontSize: '36px', fontWeight: 'bold' }}>{totalVotes}</p>
+                        </div>
 
-                {/* Live counter of all votes */}
-                <p style={{ fontSize: '20px', textAlign: 'center', marginBottom: '20px' }}>
-                    Total Votes (Site-wide): <strong>{totalVotes}</strong>
-                </p>
+                        <div style={{
+                            backgroundColor: '#FF4D4D',
+                            padding: '20px 40px',
+                            borderRadius: '15px',
+                            color: 'white',
+                            textAlign: 'center',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            transition: 'transform 0.2s ease',
+                            cursor: 'pointer',
+                            ':hover': {
+                                transform: 'translateY(-5px)'
+                            }
+                        }}>
+                            <h3 style={{ margin: '0', fontSize: '24px' }}>Total Debates</h3>
+                            <p style={{ margin: '10px 0 0', fontSize: '36px', fontWeight: 'bold' }}>{debates.length}</p>
+                        </div>
+                    </div>
 
-                <hr style={{ marginBottom: '20px', border: '1px solid white' }} />
-
-                {/* Debate List */}
-                {debates.map((debate) => {
-                    const total = (debate.votesRed || 0) + (debate.votesBlue || 0);
-                    return (
-                        <div
-                            key={debate._id}
+                    <div style={{ 
+                        textAlign: 'center', 
+                        marginBottom: '30px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '10px'
+                    }}>
+                        <label
+                            htmlFor="sort"
                             style={{
-                                marginBottom: '20px',
-                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                borderRadius: '8px',
-                                padding: '20px',
+                                fontSize: '20px',
+                                fontWeight: 'bold',
+                                color: '#333'
                             }}
                         >
-                            <h3 style={{ fontSize: '28px', margin: '0 0 10px' }}>{debate.debateText}</h3>
-                            <p style={{ fontSize: '18px', margin: 0 }}>
-                                <strong>Votes Red:</strong> {debate.votesRed || 0} &nbsp;|&nbsp;
-                                <strong>Votes Blue:</strong> {debate.votesBlue || 0} &nbsp;|&nbsp;
-                                <strong>Total:</strong> {total}
-                            </p>
+                            Sort By:
+                        </label>
+                        <select
+                            id="sort"
+                            onChange={handleSortChange}
+                            value={sortOption}
+                            style={{
+                                fontSize: '16px',
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                border: '2px solid #4D94FF',
+                                backgroundColor: 'white',
+                                cursor: 'pointer',
+                                outline: 'none',
+                                transition: 'all 0.2s ease',
+                                ':hover': {
+                                    borderColor: '#FF4D4D'
+                                }
+                            }}
+                        >
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="mostPopular">Most Popular</option>
+                            <option value="mostDivisive">Most Divisive</option>
+                            <option value="mostDecisive">Most Decisive</option>
+                        </select>
+                    </div>
+
+                    {isLoading ? (
+                        <div style={{ 
+                            textAlign: 'center', 
+                            padding: '40px',
+                            fontSize: '20px',
+                            color: '#666'
+                        }}>
+                            Loading debates...
                         </div>
-                    );
-                })}
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            {debates.map((debate, index) => {
+                                const total = (debate.votesRed || 0) + (debate.votesBlue || 0);
+                                const redPercent = total > 0 ? ((debate.votesRed || 0) / total) * 100 : 50;
+                                const bluePercent = 100 - redPercent;
+
+                                return (
+                                    <div
+                                        key={debate._id}
+                                        style={{
+                                            backgroundColor: 'white',
+                                            borderRadius: '15px',
+                                            padding: '20px',
+                                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                            ':hover': {
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
+                                            }
+                                        }}
+                                    >
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            gap: '20px', 
+                                            marginBottom: '15px',
+                                            flexWrap: 'wrap'
+                                        }}>
+                                            <div style={{ 
+                                                flex: 1, 
+                                                minWidth: '300px',
+                                                padding: '20px', 
+                                                backgroundColor: '#FF4D4D', 
+                                                borderRadius: '12px', 
+                                                color: 'white',
+                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                                            }}>
+                                                <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', fontWeight: 'bold' }}>Instigate</h3>
+                                                <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.5' }}>{debate.instigateText}</p>
+                                            </div>
+                                            <div style={{ 
+                                                flex: 1, 
+                                                minWidth: '300px',
+                                                padding: '20px', 
+                                                backgroundColor: '#4D94FF', 
+                                                borderRadius: '12px', 
+                                                color: 'white',
+                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                                            }}>
+                                                <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', fontWeight: 'bold' }}>Debate</h3>
+                                                <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.5' }}>{debate.debateText}</p>
+                                            </div>
+                                        </div>
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            flexDirection: 'column',
+                                            padding: '15px',
+                                            backgroundColor: '#f8f8f8',
+                                            borderRadius: '8px'
+                                        }}>
+                                            <div style={{ 
+                                                textAlign: 'center',
+                                                padding: '0 0 15px 0',
+                                                borderBottom: '1px solid #ddd'
+                                            }}>
+                                                <p style={{ margin: 0, color: '#666', fontWeight: 'bold', fontSize: '18px' }}>Total: {total}</p>
+                                            </div>
+                                            <div style={{ 
+                                                display: 'flex', 
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center'
+                                            }}>
+                                                <div style={{ flex: 1, textAlign: 'center' }}>
+                                                    <div style={{ 
+                                                        height: '4px', 
+                                                        backgroundColor: '#FF4D4D',
+                                                        width: `${redPercent}%`,
+                                                        marginBottom: '5px'
+                                                    }} />
+                                                    <p style={{ margin: 0, color: '#FF4D4D', fontWeight: 'bold' }}>{debate.votesRed || 0} votes</p>
+                                                </div>
+                                                <div style={{ flex: 1, textAlign: 'center' }}>
+                                                    <div style={{ 
+                                                        height: '4px', 
+                                                        backgroundColor: '#4D94FF',
+                                                        width: `${bluePercent}%`,
+                                                        marginBottom: '5px'
+                                                    }} />
+                                                    <p style={{ margin: 0, color: '#4D94FF', fontWeight: 'bold' }}>{debate.votesBlue || 0} votes</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

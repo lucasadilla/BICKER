@@ -3,6 +3,16 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react'; // <-- IMPORTANT
 import NavBar from '../components/NavBar'; // If you have a NavBar; otherwise remove
 
+// Helper function to shuffle array
+const shuffleArray = (array) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+};
+
 export default function DeliberatePage({ initialDebates }) {
     const [debates, setDebates] = useState(initialDebates || []);
     const [currentDebateIndex, setCurrentDebateIndex] = useState(0);
@@ -34,57 +44,53 @@ export default function DeliberatePage({ initialDebates }) {
             const response = await fetch('/api/deliberate');
             if (!response.ok) throw new Error('HTTP error! ' + response.status);
             const data = await response.json();
-            setDebates(data);
+            // Shuffle the debates before setting them
+            setDebates(shuffleArray(data));
         } catch (error) {
             console.error('Error fetching debates:', error);
         }
     };
 
-    // The vote function checks if user is signed in.
-    const vote = async (debateId, side) => {
-        // If not signed in, show alert or do nothing
-        if (!session) {
-            alert('You must be signed in to vote.');
-            return;
-        }
-
+    const handleVote = async (side) => {
         try {
-            const body =
-                side === 'red'
-                    ? { debateId, votesRed: 1 }
-                    : { debateId, votesBlue: 1 };
+            const body = side === 'red' ? {
+                debateId: currentDebate._id,
+                votesRed: 1
+            } : {
+                debateId: currentDebate._id,
+                votesBlue: 1
+            };
 
-            // POST the vote
             const response = await fetch('/api/deliberate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
+
             if (!response.ok) {
-                throw new Error('Failed to update votes');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            // Updated doc from the API
-            const updatedDoc = await response.json();
+            const data = await response.json();
 
-            // Update local state
-            setDebates((prev) =>
-                prev.map((deb) =>
-                    deb._id === debateId
+            // Update local state with new vote counts
+            setDebates(prevDebates => 
+                prevDebates.map(debate => 
+                    debate._id === currentDebate._id
                         ? {
-                            ...deb,
-                            votesRed: updatedDoc.votesRed,
-                            votesBlue: updatedDoc.votesBlue,
+                            ...debate,
+                            votesRed: data.votesRed,
+                            votesBlue: data.votesBlue
                         }
-                        : deb
+                        : debate
                 )
             );
 
             // Show the vote results
             setShowVotes(true);
         } catch (error) {
-            console.error('Error submitting vote:', error);
-            alert('Failed to submit vote.');
+            console.error('Error voting:', error);
+            alert('Failed to vote. Please try again.');
         }
     };
 
@@ -125,14 +131,14 @@ export default function DeliberatePage({ initialDebates }) {
                 overflow: 'hidden',
             }}
         >
-            <NavBar /> {/* remove if you don’t have a NavBar */}
+            <NavBar /> {/* remove if you don't have a NavBar */}
 
             {/* Fullscreen Debate Section */}
             <div style={{ display: 'flex', height: '100%', width: '100%' }}>
                 {/* Left side: Red */}
                 <div
                     // If showVotes or no session, we won't let them click to vote
-                    onClick={() => (!showVotes ? vote(currentDebate._id, 'red') : null)}
+                    onClick={() => (!showVotes ? handleVote('red') : null)}
                     onMouseEnter={() => setHoveringSide('red')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
@@ -172,7 +178,7 @@ export default function DeliberatePage({ initialDebates }) {
 
                 {/* Right side: Blue */}
                 <div
-                    onClick={() => (!showVotes ? vote(currentDebate._id, 'blue') : null)}
+                    onClick={() => (!showVotes ? handleVote('blue') : null)}
                     onMouseEnter={() => setHoveringSide('blue')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
@@ -214,12 +220,17 @@ export default function DeliberatePage({ initialDebates }) {
     );
 }
 
-// Option 1: getServerSideProps
+// Server-side props with randomized debates
 export async function getServerSideProps() {
     const res = await fetch('http://localhost:3000/api/deliberate');
     let initialDebates = [];
     try {
         initialDebates = await res.json();
+        // Shuffle the debates on the server side
+        for (let i = initialDebates.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [initialDebates[i], initialDebates[j]] = [initialDebates[j], initialDebates[i]];
+        }
     } catch (error) {
         console.error('Error parsing JSON:', error);
     }

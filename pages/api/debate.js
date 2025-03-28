@@ -2,6 +2,8 @@ import dbConnect from '../../lib/dbConnect';
 import Debate from '../../models/Debate';
 import Instigate from '../../models/Instigate';
 import Deliberate from '../../models/Deliberate';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from './auth/[...nextauth]';
 
 export default async function handler(req, res) {
     await dbConnect();
@@ -15,6 +17,12 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Failed to fetch debates' });
         }
     } else if (req.method === 'POST') {
+        // Check user session
+        const session = await getServerSession(req, res, authOptions);
+        if (!session) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
         const { instigateId, debateText } = req.body;
         if (!instigateId || !debateText || debateText.length > 200) {
             return res
@@ -42,6 +50,7 @@ export default async function handler(req, res) {
             await Deliberate.create({
                 instigateText: newDebate.instigateText,
                 debateText: newDebate.debateText,
+                createdBy: session.user.email
             });
 
             return res.status(201).json(newDebate);

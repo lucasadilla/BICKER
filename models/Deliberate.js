@@ -21,6 +21,17 @@ const DeliberateSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        createdBy: {
+            type: String,
+            required: true
+        },
+        votedBy: [{
+            userId: String,
+            vote: {
+                type: String,
+                enum: ['red', 'blue']
+            }
+        }]
     },
     { timestamps: true }
 );

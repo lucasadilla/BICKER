@@ -72,7 +72,7 @@ export default function InstigatePage() {
             <NavBar />
 
             <h1 style={{ textAlign: 'center', color: '#ffffff', marginBottom: '20px' }}>
-                Instigate Topics
+                Instigate
             </h1>
 
             <div
@@ -82,25 +82,25 @@ export default function InstigatePage() {
                     textAlign: 'center',
                 }}
             >
-        <textarea
-            value={newInstigate}
-            onChange={(e) => setNewInstigate(e.target.value)}
-            placeholder="Write your opinion here (max 200 characters)"
-            maxLength={200}
-            style={{
-                width: '100%',
-                height: '450px',
-                marginBottom: '10px',
-                padding: '10px',
-                fontSize: '36px',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-                resize: 'none',
-            }}
-        />
+                <textarea
+                    value={newInstigate}
+                    onChange={(e) => setNewInstigate(e.target.value)}
+                    placeholder="Write your opinion here (max 200 characters)"
+                    maxLength={200}
+                    style={{
+                        width: '100%',
+                        height: '450px',
+                        marginBottom: '10px',
+                        padding: '10px',
+                        fontSize: '36px',
+                        borderRadius: '4px',
+                        border: '1px solid #ccc',
+                        resize: 'none',
+                    }}
+                />
                 <button
                     onClick={submitInstigate}
-                    disabled={!session} // Disabled if not signed in
+                    disabled={!session}
                     style={{
                         width: '50%',
                         padding: '10px',
@@ -111,23 +111,22 @@ export default function InstigatePage() {
                         border: 'none',
                         cursor: !session ? 'not-allowed' : 'pointer',
                         boxShadow: '10px 12px black',
-                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                        transition: 'all 0.2s ease',
+                        position: 'relative',
                     }}
                     onMouseEnter={(e) => {
-                        if (session) {
-                            e.target.style.boxShadow = 'none';
-                            e.target.style.transform = 'translateY(2px)';
-                        }
+                        if (!session) return;
+                        e.target.style.transform = 'translateY(4px)';
+                        e.target.style.boxShadow = 'none';
                     }}
                     onMouseLeave={(e) => {
-                        if (session) {
-                            e.target.style.boxShadow = '10px 12px black';
-                            e.target.style.transform = 'translateY(0)';
-                        }
+                        if (!session) return;
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '10px 12px black';
                     }}
-                    title={!session ? 'Sign in to submit an instigate' : ''}
+                    title={!session ? 'Sign in to submit a topic' : ''}
                 >
-                    Submit
+                    Submit Topic
                 </button>
             </div>
         </div>
