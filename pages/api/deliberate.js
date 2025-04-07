@@ -1,90 +1,87 @@
 import dbConnect from '../../lib/dbConnect';
 import Deliberate from '../../models/Deliberate';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
+import { authOptions } from '../api/auth/[...nextauth]';
 
 export default async function handler(req, res) {
     try {
         await dbConnect();
-        console.log('Database connected successfully');
 
         if (req.method === 'GET') {
-            try {
-                const deliberations = await Deliberate.find({});
-                return res.status(200).json(deliberations);
-            } catch (error) {
-                console.error('Error fetching deliberations:', error);
-                return res.status(500).json({ error: 'Failed to fetch deliberations' });
-            }
+            const deliberations = await Deliberate.find({});
+            res.status(200).json(deliberations);
         } else if (req.method === 'POST') {
-            // update existing doc's votes
-            try {
-                const { debateId, votesRed, votesBlue } = req.body;
-                console.log('Request body:', { debateId, votesRed, votesBlue });
-
-                if (!debateId) {
-                    return res.status(400).json({ error: 'debateId is required' });
-                }
-
-                // Use findOneAndUpdate to handle the update atomically
-                const update = {
-                    $inc: {
-                        votesRed: votesRed || 0,
-                        votesBlue: votesBlue || 0
-                    }
-                };
-
-                // If user is authenticated, add their vote to votedBy array
-                const session = await getServerSession(req, res, authOptions);
-                if (session) {
-                    update.$push = {
-                        votedBy: {
-                            userId: session.user.email,
-                            vote: votesRed ? 'red' : 'blue'
-                        }
-                    };
-                }
-
-                const doc = await Deliberate.findOneAndUpdate(
-                    { 
-                        _id: debateId,
-                        ...(session && { 'votedBy.userId': { $ne: session.user.email } }) // Only check if user is authenticated
-                    },
-                    update,
-                    { 
-                        new: true, // Return the updated document
-                        runValidators: true // Run schema validations
-                    }
-                );
-
-                if (!doc) {
-                    // Check if document exists at all
-                    const exists = await Deliberate.exists({ _id: debateId });
-                    if (!exists) {
-                        return res.status(404).json({ error: 'Deliberate record not found' });
-                    }
-                    if (session) {
-                        return res.status(400).json({ error: 'User has already voted on this debate' });
-                    }
-                }
-
-                console.log('Document updated successfully:', doc);
-                return res.status(200).json(doc);
-            } catch (error) {
-                console.error('Error updating deliberation:', error);
-                return res.status(500).json({ 
-                    error: 'Failed to update deliberation',
-                    details: error.message 
-                });
+            // Handle reset request
+            if (req.body.reset) {
+                console.log('Resetting collection...');
+                await Deliberate.collection.drop();
+                console.log('Collection dropped successfully');
+                return res.status(200).json({ message: 'Collection reset successfully' });
             }
+
+            const { debateId, vote } = req.body;
+            
+            if (!debateId || !vote) {
+                return res.status(400).json({ error: 'Missing debateId or vote' });
+            }
+
+            if (vote !== 'red' && vote !== 'blue') {
+                return res.status(400).json({ error: 'Invalid vote type' });
+            }
+
+            const session = await getServerSession(req, res, authOptions);
+            if (!session) {
+                return res.status(401).json({ error: 'Not authenticated' });
+            }
+
+            console.log('Finding deliberation with ID:', debateId);
+            const deliberation = await Deliberate.findById(debateId);
+            if (!deliberation) {
+                return res.status(404).json({ error: 'Deliberation not found' });
+            }
+
+            console.log('Current deliberation:', deliberation);
+
+            // Ensure createdBy field exists
+            if (!deliberation.createdBy) {
+                deliberation.createdBy = 'system';
+            }
+
+            // Update votes based on the vote type
+            if (vote === 'red') {
+                deliberation.votesRed = (deliberation.votesRed || 0) + 1;
+            } else if (vote === 'blue') {
+                deliberation.votesBlue = (deliberation.votesBlue || 0) + 1;
+            }
+
+            // Add user's vote to votedBy array
+            deliberation.votedBy = deliberation.votedBy || [];
+            deliberation.votedBy.push({
+                userId: session.user.email,
+                vote: vote,
+                timestamp: new Date()
+            });
+
+            console.log('Saving deliberation...');
+            const savedDeliberation = await deliberation.save();
+            console.log('Deliberation saved:', savedDeliberation);
+            
+            // Return only the necessary data
+            res.status(200).json({
+                _id: savedDeliberation._id,
+                votesRed: savedDeliberation.votesRed || 0,
+                votesBlue: savedDeliberation.votesBlue || 0,
+                votedBy: savedDeliberation.votedBy || []
+            });
         } else {
-            res.setHeader('Allow', ['GET', 'POST']);
-            return res.status(405).end(`Method ${req.method} Not Allowed`);
+            res.status(405).json({ error: 'Method not allowed' });
         }
     } catch (error) {
-        console.error('Top-level error:', error);
-        return res.status(500).json({ 
-            error: 'Internal server error',
+        console.error('API Error:', error);
+        console.error('Error details:', error.message);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ 
+            error: 'Failed to process request',
             details: error.message 
         });
     }

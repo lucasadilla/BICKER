@@ -12,10 +12,10 @@ const DebateSchema = new mongoose.Schema({
         required: true,
         maxlength: 200,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-});
+    createdBy: {
+        type: String,
+        required: true
+    }
+}, { timestamps: true });
 
 export default mongoose.models.Debate || mongoose.model('Debate', DebateSchema);

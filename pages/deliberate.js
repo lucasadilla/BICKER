@@ -1,6 +1,8 @@
 // pages/deliberate/index.js
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react'; // <-- IMPORTANT
+import { useSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from './api/auth/[...nextauth]';
 import NavBar from '../components/NavBar'; // If you have a NavBar; otherwise remove
 
 // Helper function to shuffle array
@@ -25,7 +27,7 @@ export default function DeliberatePage({ initialDebates }) {
     // If there were no initialDebates, fetch them client-side
     useEffect(() => {
         if (!initialDebates || initialDebates.length === 0) {
-            fetchDebates();
+            fetchDeliberations();
         }
     }, [initialDebates]);
 
@@ -39,58 +41,71 @@ export default function DeliberatePage({ initialDebates }) {
         }
     }, [showVotes]);
 
-    const fetchDebates = async () => {
+    const fetchDeliberations = async () => {
         try {
             const response = await fetch('/api/deliberate');
-            if (!response.ok) throw new Error('HTTP error! ' + response.status);
             const data = await response.json();
-            // Shuffle the debates before setting them
-            setDebates(shuffleArray(data));
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch deliberations');
+            }
+
+            // Shuffle the debates
+            const shuffledDebates = shuffleArray(data);
+            setDebates(shuffledDebates);
+            
+            // Reset current index if we have fewer debates
+            if (shuffledDebates.length > 0 && currentDebateIndex >= shuffledDebates.length) {
+                setCurrentDebateIndex(0);
+            }
         } catch (error) {
-            console.error('Error fetching debates:', error);
+            console.error('Error fetching deliberations:', error);
+            alert(error.message);
         }
     };
 
-    const handleVote = async (side) => {
-        try {
-            const body = side === 'red' ? {
-                debateId: currentDebate._id,
-                votesRed: 1
-            } : {
-                debateId: currentDebate._id,
-                votesBlue: 1
-            };
+    const handleVote = async (vote) => {
+        if (!session) {
+            alert('Please sign in to vote');
+            return;
+        }
 
+        try {
             const response = await fetch('/api/deliberate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    debateId: debates[currentDebateIndex]._id,
+                    vote: vote
+                }),
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
 
             const data = await response.json();
 
-            // Update local state with new vote counts
-            setDebates(prevDebates => 
-                prevDebates.map(debate => 
-                    debate._id === currentDebate._id
-                        ? {
-                            ...debate,
-                            votesRed: data.votesRed,
-                            votesBlue: data.votesBlue
-                        }
-                        : debate
-                )
-            );
-
-            // Show the vote results
+            if (!response.ok) {
+                console.error('Vote failed:', data);
+                throw new Error(data.details || data.error || 'Failed to update votes');
+            }
+            
+            // Update the local state with the new vote counts
+            const updatedDebates = [...debates];
+            updatedDebates[currentDebateIndex] = {
+                ...updatedDebates[currentDebateIndex],
+                votesRed: data.votesRed || 0,
+                votesBlue: data.votesBlue || 0
+            };
+            
+            // Move to the next debate
+            setDebates(updatedDebates);
             setShowVotes(true);
+            setTimeout(() => {
+                setShowVotes(false);
+                setCurrentDebateIndex((prevIndex) => (prevIndex + 1) % debates.length);
+            }, 4000);
         } catch (error) {
             console.error('Error voting:', error);
-            alert('Failed to vote. Please try again.');
+            alert(error.message || 'Failed to submit vote. Please try again.');
         }
     };
 
@@ -101,11 +116,63 @@ export default function DeliberatePage({ initialDebates }) {
 
     const currentDebate = debates[currentDebateIndex];
 
+    const resetCollection = async () => {
+        try {
+            const response = await fetch('/api/deliberate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ reset: true }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to reset collection');
+            }
+
+            // Refresh the page to load new data
+            window.location.reload();
+        } catch (error) {
+            console.error('Error resetting collection:', error);
+            alert('Failed to reset collection. Please try again.');
+        }
+    };
+
     // If no debates available, show fallback
     if (!currentDebate) {
         return (
             <div style={{ textAlign: 'center', marginTop: '50px' }}>
                 <h2>No debates available</h2>
+                <p>You've voted on all available debates! Check back later for new debates.</p>
+                <button 
+                    onClick={fetchDeliberations}
+                    style={{
+                        marginTop: '20px',
+                        padding: '10px 20px',
+                        backgroundColor: '#4D94FF',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Check for New Debates
+                </button>
+                <button 
+                    onClick={resetCollection}
+                    style={{
+                        marginTop: '20px',
+                        marginLeft: '10px',
+                        padding: '10px 20px',
+                        backgroundColor: '#FF4D4D',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Reset Collection
+                </button>
             </div>
         );
     }
@@ -226,11 +293,16 @@ export async function getServerSideProps() {
     let initialDebates = [];
     try {
         initialDebates = await res.json();
-        // Shuffle the debates on the server side
+        
+        // Better randomization using Fisher-Yates shuffle
         for (let i = initialDebates.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [initialDebates[i], initialDebates[j]] = [initialDebates[j], initialDebates[i]];
         }
+
+        // Add a random starting index
+        const randomStartIndex = Math.floor(Math.random() * initialDebates.length);
+        initialDebates = [...initialDebates.slice(randomStartIndex), ...initialDebates.slice(0, randomStartIndex)];
     } catch (error) {
         console.error('Error parsing JSON:', error);
     }

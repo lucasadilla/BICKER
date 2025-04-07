@@ -114,14 +114,14 @@ export default function DebatePage({ initialDebates }) {
 
     // Submit debate (only if signed in)
     const submitDebate = async () => {
-        if (!session) {
-            alert('You must be signed in to submit a debate.');
-            return;
-        }
-
         const selectedInstigate = instigates[currentInstigateIndex];
         if (!selectedInstigate) {
             alert('No instigate selected.');
+            return;
+        }
+
+        if (!debateText.trim()) {
+            alert('Please enter your debate text.');
             return;
         }
 
@@ -129,27 +129,53 @@ export default function DebatePage({ initialDebates }) {
             const response = await fetch('/api/debate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ instigateId: selectedInstigate._id, debateText }),
+                body: JSON.stringify({ 
+                    instigateId: selectedInstigate._id, 
+                    debateText: debateText.trim() 
+                }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error('Failed to create debate');
+                throw new Error(data.error || 'Failed to create debate');
             }
 
-            alert('Debate submitted successfully!');
-
-            // Remove the selected topic from local state
-            const updatedInstigates = instigates.filter(
-                (_, index) => index !== currentInstigateIndex
-            );
-            setInstigates(updatedInstigates);
-            setCurrentInstigateIndex(
-                updatedInstigates.length > 0 ? 0 : currentInstigateIndex
-            );
-            setDebateText('');
+            if (data.success) {
+                alert('Debate submitted successfully!');
+                // Remove the selected topic from local state
+                const updatedInstigates = instigates.filter(
+                    (_, index) => index !== currentInstigateIndex
+                );
+                setInstigates(updatedInstigates);
+                setCurrentInstigateIndex(
+                    updatedInstigates.length > 0 ? 0 : currentInstigateIndex
+                );
+                setDebateText('');
+            }
         } catch (error) {
             console.error('Error submitting debate:', error);
-            alert('Failed to submit debate. Please try again.');
+            alert(error.message);
+        }
+    };
+
+    const resetDeliberateCollection = async () => {
+        try {
+            const response = await fetch('/api/debate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reset: true })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to reset collection');
+            }
+
+            alert('Collection reset successfully');
+        } catch (error) {
+            console.error('Error resetting collection:', error);
+            alert(error.message);
         }
     };
 
