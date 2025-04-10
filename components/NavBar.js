@@ -238,14 +238,14 @@ export default function NavBar() {
                     }}
                 >
                     {[
-                        { label: 'Instigate', path: '/instigate' },
-                        { label: 'Debate', path: '/debate' },
-                        { label: 'Deliberate', path: '/deliberate' },
-                        { label: 'Leaderboard', path: '/Leaderboard/main' },
-                    ].map(({ label, path }) => (
-                        <Link key={label} href={path} passHref>
-                            <button
-                                style={{
+                { label: 'Instigate', path: '/instigate' },
+                { label: 'Debate', path: '/debate' },
+                { label: 'Deliberate', path: '/deliberate' },
+                { label: 'Leaderboard', path: '/Leaderboard/main' },
+            ].map(({ label, path }) => (
+                <Link key={label} href={path} passHref>
+                    <button
+                        style={{
                                     ...buttonStyle,
                                     width: '100%',
                                     margin: '5px 0',
@@ -253,13 +253,13 @@ export default function NavBar() {
                                     fontSize: '18px'
                                 }}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                {label}
-                            </button>
-                        </Link>
-                    ))}
-                    {authenticated ? (
-                        <button
+                    >
+                        {label}
+                    </button>
+                </Link>
+            ))}
+            {authenticated ? (
+                <button
                             onClick={() => {
                                 signOut();
                                 setIsMobileMenuOpen(false);
@@ -273,11 +273,11 @@ export default function NavBar() {
                                 backgroundColor: '#dc3545',
                                 boxShadow: '0 4px 0 #bd2130'
                             }}
-                        >
-                            Sign Out
-                        </button>
-                    ) : (
-                        <button
+                >
+                    Sign Out
+                </button>
+            ) : (
+                <button
                             onClick={() => {
                                 signIn();
                                 setIsMobileMenuOpen(false);
@@ -291,9 +291,9 @@ export default function NavBar() {
                                 backgroundColor: '#28a745',
                                 boxShadow: '0 4px 0 #1e7e34'
                             }}
-                        >
-                            Sign In
-                        </button>
+                >
+                    Sign In
+                </button>
                     )}
                 </div>
             )}

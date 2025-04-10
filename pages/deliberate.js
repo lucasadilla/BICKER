@@ -198,18 +198,23 @@ export default function DeliberatePage({ initialDebates }) {
                 overflow: 'hidden',
             }}
         >
-            <NavBar /> {/* remove if you don't have a NavBar */}
+            <NavBar />
 
             {/* Fullscreen Debate Section */}
-            <div style={{ display: 'flex', height: '100%', width: '100%' }}>
+            <div style={{ 
+                display: 'flex', 
+                flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
+                height: '100%', 
+                width: '100%' 
+            }}>
                 {/* Left side: Red */}
                 <div
-                    // If showVotes or no session, we won't let them click to vote
                     onClick={() => (!showVotes ? handleVote('red') : null)}
                     onMouseEnter={() => setHoveringSide('red')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
-                        width: redWidth,
+                        width: window.innerWidth <= 768 ? '100%' : redWidth,
+                        height: window.innerWidth <= 768 ? '50%' : '100%',
                         backgroundColor: hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D',
                         color: 'white',
                         display: 'flex',
@@ -217,7 +222,7 @@ export default function DeliberatePage({ initialDebates }) {
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: showVotes ? 'default' : 'pointer',
-                        transition: 'width 1s ease, background-color 0.3s ease',
+                        transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
                     title={!session ? 'Sign in to vote on this side' : ''}
                 >
@@ -230,7 +235,7 @@ export default function DeliberatePage({ initialDebates }) {
                             whiteSpace: 'normal',
                             wordBreak: 'break-word',
                             overflowWrap: 'break-word',
-                            maxWidth: '40%',
+                            maxWidth: '80%',
                             padding: '0 10px',
                         }}
                     >
@@ -249,7 +254,8 @@ export default function DeliberatePage({ initialDebates }) {
                     onMouseEnter={() => setHoveringSide('blue')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
-                        width: blueWidth,
+                        width: window.innerWidth <= 768 ? '100%' : blueWidth,
+                        height: window.innerWidth <= 768 ? '50%' : '100%',
                         backgroundColor: hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF',
                         color: 'white',
                         display: 'flex',
@@ -257,7 +263,7 @@ export default function DeliberatePage({ initialDebates }) {
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: showVotes ? 'default' : 'pointer',
-                        transition: 'width 1s ease, background-color 0.3s ease',
+                        transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
                     title={!session ? 'Sign in to vote on this side' : ''}
                 >
@@ -270,7 +276,7 @@ export default function DeliberatePage({ initialDebates }) {
                             whiteSpace: 'normal',
                             wordBreak: 'break-word',
                             overflowWrap: 'break-word',
-                            maxWidth: '40%',
+                            maxWidth: '80%',
                             padding: '0 10px',
                         }}
                     >

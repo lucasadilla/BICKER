@@ -8,6 +8,8 @@ export default function DebatePage({ initialDebates }) {
     const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0);
     const [debateText, setDebateText] = useState('');
     const [hovering, setHovering] = useState(false);
+    const [hoveringSide, setHoveringSide] = useState('');
+    const [isMobile, setIsMobile] = useState(false);
 
     // Search-related state
     const [searchTerm, setSearchTerm] = useState('');
@@ -19,6 +21,22 @@ export default function DebatePage({ initialDebates }) {
 
     // Add new state for search bar expansion
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+
+    // Add window size effect
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        // Initial check
+        checkMobile();
+
+        // Add event listener
+        window.addEventListener('resize', checkMobile);
+
+        // Cleanup
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Add click outside handler
     useEffect(() => {
@@ -183,9 +201,17 @@ export default function DebatePage({ initialDebates }) {
 
     return (
         <div style={{ 
-            display: 'flex', 
-            height: '100vh', 
-            fontFamily: 'Arial, sans-serif'
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100vh',
+            width: '100vw',
+            fontFamily: 'Arial, sans-serif',
+            overflow: 'hidden',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
         }}>
             <NavBar />
 
@@ -203,7 +229,7 @@ export default function DebatePage({ initialDebates }) {
                     padding: '0 20px',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     willChange: 'width, transform',
-                    display: 'flex',
+                    display: 'flex', 
                     justifyContent: 'center'
                 }}
             >
@@ -236,7 +262,7 @@ export default function DebatePage({ initialDebates }) {
                         strokeWidth="2" 
                         strokeLinecap="round" 
                         strokeLinejoin="round"
-                        style={{ 
+                        style={{
                             flexShrink: 0, 
                             opacity: isSearchExpanded ? 0.7 : 1,
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -318,32 +344,40 @@ export default function DebatePage({ initialDebates }) {
             {/* Left Side (Red) */}
             <div
                 onClick={handleNextInstigate}
-                onMouseEnter={() => setHovering(true)}
-                onMouseLeave={() => setHovering(false)}
+                onMouseEnter={() => setHoveringSide('red')}
+                onMouseLeave={() => setHoveringSide('')}
                 style={{
                     flex: 1,
-                    backgroundColor: hovering ? '#FF6A6A' : '#FF4D4D',
+                    backgroundColor: hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D',
                     padding: '20px',
                     color: 'white',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between',
+                    justifyContent: 'center',
                     alignItems: 'center',
                     cursor: 'pointer',
                     transition: 'background-color 0.3s ease',
                     position: 'absolute',
                     top: 0,
                     left: 0,
-                    bottom: 0,
-                    width: '50%'
+                    width: isMobile ? '100%' : '50%',
+                    height: isMobile ? '50%' : '100%',
+                    overflow: 'hidden'
                 }}
             >
                 {/* Topic Display (top part) */}
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                    overflow: 'hidden'
+                }}>
                     <p
                         style={{
                             textAlign: 'center',
-                            fontSize: '40px',
+                            fontSize: isMobile ? '24px' : '40px',
                             margin: '0 10px',
                             maxWidth: '400px',
                             whiteSpace: 'normal',
@@ -368,59 +402,76 @@ export default function DebatePage({ initialDebates }) {
                     justifyContent: 'center',
                     alignItems: 'center',
                     position: 'absolute',
-                    top: 0,
+                    top: isMobile ? '50%' : 0,
                     right: 0,
-                    bottom: 0,
-                    width: '50%'
+                    width: isMobile ? '100%' : '50%',
+                    height: isMobile ? '50%' : '100%',
+                    overflow: 'hidden'
                 }}
             >
-        <textarea
-            value={debateText}
-            onChange={(e) => setDebateText(e.target.value)}
-            placeholder="Write your debate response here (max 200 characters)"
-            maxLength={200}
-            style={{
-                width: '60%',
-                height: '500px',
-                marginBottom: '10px',
-                padding: '10px',
-                fontSize: '30px',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-                color: 'black',
-                resize: 'none',
-            }}
-        />
-                <button
-                    onClick={submitDebate}
-                    disabled={!session}
-                    style={{
-                        width: '30%',
-                        padding: '10px',
-                        backgroundColor: !session ? 'gray' : '#007BFF',
-                        color: 'white',
-                        fontSize: '30px',
-                        borderRadius: '4px',
-                        border: 'none',
-                        cursor: !session ? 'not-allowed' : 'pointer',
-                        boxShadow: '0 4px 0 #0056b3',
-                        transition: 'all 0.1s ease',
-                        position: 'relative',
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!session) return;
-                        e.target.style.transform = 'translateY(4px)';
-                        e.target.style.boxShadow = 'none';
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!session) return;
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '0 4px 0 #0056b3';
-                    }}
-                    title={!session ? 'Sign in to submit a debate' : ''}
-                >
-                    Submit Debate
-                </button>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: isMobile ? 'flex-start' : 'center',
+                    width: '100%',
+                    height: '100%',
+                    gap: '20px',
+                    paddingTop: isMobile ? '20px' : '0'
+                }}>
+                    <textarea
+                        value={debateText}
+                        onChange={(e) => setDebateText(e.target.value)}
+                        placeholder="Write your debate response here (max 200 characters)"
+                        maxLength={200}
+                        style={{
+                            width: isMobile ? '85%' : '60%',
+                            height: isMobile ? '40%' : '500px',
+                            marginBottom: '10px',
+                            padding: '10px',
+                            fontSize: isMobile ? '20px' : '30px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc',
+                            color: 'black',
+                            resize: 'none',
+                            overflow: 'hidden',
+                            marginLeft: 'auto',
+                            marginRight: 'auto'
+                        }}
+                    />
+                    <button
+                        onClick={submitDebate}
+                        disabled={!session}
+                        style={{
+                            width: isMobile ? '85%' : '30%',
+                            padding: '10px',
+                            backgroundColor: !session ? 'gray' : '#007BFF',
+                            color: 'white',
+                            fontSize: isMobile ? '20px' : '30px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            cursor: !session ? 'not-allowed' : 'pointer',
+                            boxShadow: '0 4px 0 #0056b3',
+                            transition: 'all 0.1s ease',
+                            position: 'relative',
+                            marginLeft: 'auto',
+                            marginRight: 'auto'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!session) return;
+                            e.target.style.transform = 'translateY(4px)';
+                            e.target.style.boxShadow = 'none';
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!session) return;
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 4px 0 #0056b3';
+                        }}
+                        title={!session ? 'Sign in to submit a debate' : ''}
+                    >
+                        Submit Debate
+                    </button>
+                </div>
             </div>
         </div>
     );

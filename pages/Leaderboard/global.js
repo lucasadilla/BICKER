@@ -67,8 +67,8 @@ export default function GlobalStats() {
                         color: '#333',
                         textShadow: '2px 2px 4px rgba(0, 0, 0, 0.1)'
                     }}>
-                    Global Stats
-                </h1>
+                        Global Stats
+                    </h1>
 
                     <div style={{ 
                         display: 'flex', 
@@ -121,21 +121,21 @@ export default function GlobalStats() {
                         alignItems: 'center',
                         gap: '10px'
                     }}>
-                    <label
-                        htmlFor="sort"
-                        style={{
+                        <label
+                            htmlFor="sort"
+                            style={{
                                 fontSize: '20px',
-                            fontWeight: 'bold',
+                                fontWeight: 'bold',
                                 color: '#333'
-                        }}
-                    >
-                        Sort By:
-                    </label>
-                    <select
-                        id="sort"
-                        onChange={handleSortChange}
-                        value={sortOption}
-                        style={{
+                            }}
+                        >
+                            Sort By:
+                        </label>
+                        <select
+                            id="sort"
+                            onChange={handleSortChange}
+                            value={sortOption}
+                            style={{
                                 fontSize: '16px',
                                 padding: '10px 20px',
                                 borderRadius: '8px',
@@ -147,15 +147,15 @@ export default function GlobalStats() {
                                 ':hover': {
                                     borderColor: '#FF4D4D'
                                 }
-                        }}
-                    >
-                        <option value="newest">Newest</option>
-                        <option value="oldest">Oldest</option>
-                        <option value="mostPopular">Most Popular</option>
-                        <option value="mostDivisive">Most Divisive</option>
-                        <option value="mostDecisive">Most Decisive</option>
-                    </select>
-                </div>
+                            }}
+                        >
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="mostPopular">Most Popular</option>
+                            <option value="mostDivisive">Most Divisive</option>
+                            <option value="mostDecisive">Most Decisive</option>
+                        </select>
+                    </div>
 
                     {isLoading ? (
                         <div style={{ 
@@ -169,17 +169,17 @@ export default function GlobalStats() {
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             {debates.map((debate, index) => {
-                    const total = (debate.votesRed || 0) + (debate.votesBlue || 0);
+                                const total = (debate.votesRed || 0) + (debate.votesBlue || 0);
                                 const redPercent = total > 0 ? ((debate.votesRed || 0) / total) * 100 : 50;
                                 const bluePercent = 100 - redPercent;
 
-                    return (
-                        <div
-                            key={debate._id}
-                            style={{
+                                return (
+                                    <div
+                                        key={debate._id}
+                                        style={{
                                             backgroundColor: 'white',
                                             borderRadius: '15px',
-                                padding: '20px',
+                                            padding: '20px',
                                             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                                             transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                                             ':hover': {
@@ -221,46 +221,43 @@ export default function GlobalStats() {
                                         </div>
                                         <div style={{ 
                                             display: 'flex', 
-                                            flexDirection: 'column',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
                                             padding: '15px',
                                             backgroundColor: '#f8f8f8',
                                             borderRadius: '8px'
                                         }}>
-                                            <div style={{ 
-                                                textAlign: 'center',
-                                                padding: '0 0 15px 0',
-                                                borderBottom: '1px solid #ddd'
-                                            }}>
-                                                <p style={{ margin: 0, color: '#666', fontWeight: 'bold', fontSize: '18px' }}>Total: {total}</p>
+                                            <div style={{ flex: 1, textAlign: 'center' }}>
+                                                <div style={{ 
+                                                    height: '4px', 
+                                                    backgroundColor: '#FF4D4D',
+                                                    width: `${redPercent}%`,
+                                                    marginBottom: '5px'
+                                                }} />
+                                                <p style={{ margin: 0, color: '#FF4D4D', fontWeight: 'bold' }}>{debate.votesRed || 0} votes</p>
                                             </div>
                                             <div style={{ 
-                                                display: 'flex', 
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center'
+                                                flex: 1, 
+                                                textAlign: 'center',
+                                                padding: '0 20px',
+                                                borderLeft: '1px solid #ddd',
+                                                borderRight: '1px solid #ddd'
                                             }}>
-                                                <div style={{ flex: 1, textAlign: 'center' }}>
-                                                    <div style={{ 
-                                                        height: '4px', 
-                                                        backgroundColor: '#FF4D4D',
-                                                        width: `${redPercent}%`,
-                                                        marginBottom: '5px'
-                                                    }} />
-                                                    <p style={{ margin: 0, color: '#FF4D4D', fontWeight: 'bold' }}>{debate.votesRed || 0} votes</p>
-                                                </div>
-                                                <div style={{ flex: 1, textAlign: 'center' }}>
-                                                    <div style={{ 
-                                                        height: '4px', 
-                                                        backgroundColor: '#4D94FF',
-                                                        width: `${bluePercent}%`,
-                                                        marginBottom: '5px'
-                                                    }} />
-                                                    <p style={{ margin: 0, color: '#4D94FF', fontWeight: 'bold' }}>{debate.votesBlue || 0} votes</p>
-                                                </div>
+                                                <p style={{ margin: 0, color: '#666', fontWeight: 'bold' }}>Total: {total}</p>
+                                            </div>
+                                            <div style={{ flex: 1, textAlign: 'center' }}>
+                                                <div style={{ 
+                                                    height: '4px', 
+                                                    backgroundColor: '#4D94FF',
+                                                    width: `${bluePercent}%`,
+                                                    marginBottom: '5px'
+                                                }} />
+                                                <p style={{ margin: 0, color: '#4D94FF', fontWeight: 'bold' }}>{debate.votesBlue || 0} votes</p>
                                             </div>
                                         </div>
-                        </div>
-                    );
-                })}
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
