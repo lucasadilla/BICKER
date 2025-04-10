@@ -7,38 +7,26 @@ export default function DebatePage({ initialDebates }) {
     const [instigates, setInstigates] = useState(initialDebates || []);
     const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0);
     const [debateText, setDebateText] = useState('');
-    const [hovering, setHovering] = useState(false);
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
-
     // Search-related state
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
-
     // NextAuth session info
     const { data: session } = useSession();
-
-    // Add new state for search bar expansion
+    // Toggle search bar expansion
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
-    // Add window size effect
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth <= 768);
         };
-
-        // Initial check
         checkMobile();
-
-        // Add event listener
         window.addEventListener('resize', checkMobile);
-
-        // Cleanup
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Add click outside handler
     useEffect(() => {
         const handleClickOutside = (event) => {
             const searchBar = document.querySelector('.search-bar-container');
@@ -46,21 +34,16 @@ export default function DebatePage({ initialDebates }) {
                 setIsSearchExpanded(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [searchTerm]);
 
-    // On mount, fetch all instigates (random order)
     useEffect(() => {
         if (!initialDebates || initialDebates.length === 0) {
             fetchInstigates();
         }
     }, [initialDebates]);
 
-    // Fetch instigates (optionally filtered by search)
     const fetchInstigates = async (search = '') => {
         try {
             const url = search
@@ -71,7 +54,6 @@ export default function DebatePage({ initialDebates }) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            // Shuffle for randomness
             const shuffled = data.sort(() => Math.random() - 0.5);
             setInstigates(shuffled);
             setCurrentInstigateIndex(0);
@@ -80,34 +62,35 @@ export default function DebatePage({ initialDebates }) {
         }
     };
 
-    // When user clicks the left side (outside the search controls), cycle to next topic
     const handleNextInstigate = () => {
         setCurrentInstigateIndex((prevIndex) =>
             prevIndex === instigates.length - 1 ? 0 : prevIndex + 1
         );
     };
 
-    // Debounced search function
     useEffect(() => {
         const delayDebounceFn = setTimeout(async () => {
             if (searchTerm.trim()) {
                 try {
-                    const response = await fetch(`/api/instigate?search=${encodeURIComponent(searchTerm)}`);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const response = await fetch(
+                        `/api/instigate?search=${encodeURIComponent(searchTerm)}`
+                    );
+                    if (!response.ok)
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     const results = await response.json();
-                    
-                    // Fetch debates for each instigate (limit to 5)
+
                     const resultsWithDebates = await Promise.all(
                         results.slice(0, 5).map(async (instigate) => {
-                            const debateResponse = await fetch(`/api/debate?instigateId=${instigate._id}`);
+                            const debateResponse = await fetch(
+                                `/api/debate?instigateId=${instigate._id}`
+                            );
                             const debates = await debateResponse.json();
                             return {
                                 ...instigate,
-                                debates: debates || []
+                                debates: debates || [],
                             };
                         })
                     );
-                    
                     setSearchResults(resultsWithDebates);
                     setShowSearchResults(true);
                 } catch (error) {
@@ -117,12 +100,10 @@ export default function DebatePage({ initialDebates }) {
                 setSearchResults([]);
                 setShowSearchResults(false);
             }
-        }, 300); // 300ms delay
-
+        }, 300);
         return () => clearTimeout(delayDebounceFn);
     }, [searchTerm]);
 
-    // When a user clicks on a search result, set that topic as the current topic
     const selectSearchResult = (instigate) => {
         setInstigates([instigate, ...instigates]);
         setCurrentInstigateIndex(0);
@@ -130,38 +111,31 @@ export default function DebatePage({ initialDebates }) {
         setShowSearchResults(false);
     };
 
-    // Submit debate (only if signed in)
     const submitDebate = async () => {
         const selectedInstigate = instigates[currentInstigateIndex];
         if (!selectedInstigate) {
             alert('No instigate selected.');
             return;
         }
-
         if (!debateText.trim()) {
             alert('Please enter your debate text.');
             return;
         }
-
         try {
             const response = await fetch('/api/debate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    instigateId: selectedInstigate._id, 
-                    debateText: debateText.trim() 
+                body: JSON.stringify({
+                    instigateId: selectedInstigate._id,
+                    debateText: debateText.trim(),
                 }),
             });
-
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to create debate');
             }
-
             if (data.success) {
                 alert('Debate submitted successfully!');
-                // Remove the selected topic from local state
                 const updatedInstigates = instigates.filter(
                     (_, index) => index !== currentInstigateIndex
                 );
@@ -177,169 +151,115 @@ export default function DebatePage({ initialDebates }) {
         }
     };
 
-    const resetDeliberateCollection = async () => {
-        try {
-            const response = await fetch('/api/debate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reset: true })
-            });
-
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to reset collection');
-            }
-
-            alert('Collection reset successfully');
-        } catch (error) {
-            console.error('Error resetting collection:', error);
-            alert(error.message);
-        }
-    };
-
     const currentInstigate = instigates[currentInstigateIndex];
 
-    return (
-        <div style={{ 
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100vh',
-            width: '100vw',
-            fontFamily: 'Arial, sans-serif',
-            overflow: 'hidden',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0
-        }}>
-            <NavBar />
-
-            {/* Search Bar (top of page) */}
-            <div 
-                className="search-bar-container"
-                style={{ 
-                    position: 'fixed',
-                    top: '80px',
-                    left: '25%',
-                    transform: 'translateX(-50%)',
-                    width: isSearchExpanded ? '600px' : '48px',
-                    maxWidth: isSearchExpanded ? '100%' : '48px',
-                    zIndex: 1000,
-                    padding: '0 20px',
+    // Shared search bar content
+    const searchBarContent = (
+        <div
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '19px',
+                backgroundColor: isSearchExpanded
+                    ? 'rgba(255, 255, 255, 0.98)'
+                    : 'transparent',
+                padding: isSearchExpanded ? '10px 20px' : '0',
+                borderRadius: isSearchExpanded ? '16px' : '0',
+                boxShadow: isSearchExpanded
+                    ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)'
+                    : 'none',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                border: isSearchExpanded ? '1px solid rgba(0, 0, 0, 0.05)' : 'none',
+                cursor: 'pointer',
+                width: isSearchExpanded ? '100%' : 'auto',
+            }}
+            onClick={() => setIsSearchExpanded(true)}
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={isSearchExpanded ? "#666" : 'white'}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                    flexShrink: 0,
+                    opacity: isSearchExpanded ? 0.7 : 1,
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    willChange: 'width, transform',
-                    display: 'flex', 
-                    justifyContent: 'center'
+                    transform: isSearchExpanded ? 'scale(1)' : 'scale(1.2)',
                 }}
             >
-                <div 
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '12px',
-                        backgroundColor: isSearchExpanded ? 'rgba(255, 255, 255, 0.98)' : 'transparent',
-                        padding: isSearchExpanded ? '10px 20px' : '0',
-                        borderRadius: isSearchExpanded ? '16px' : '0',
-                        boxShadow: isSearchExpanded ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)' : 'none',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        border: isSearchExpanded ? '1px solid rgba(0, 0, 0, 0.05)' : 'none',
-                        cursor: 'pointer',
-                        width: isSearchExpanded ? '100%' : 'auto',
-                        height: isSearchExpanded ? 'auto' : 'auto',
-                        willChange: 'width, height, padding'
-                    }}
-                    onClick={() => setIsSearchExpanded(true)}
-                >
-                    <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        width="24" 
-                        height="24" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke={isSearchExpanded ? "#666" : "white"} 
-                        strokeWidth="2" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round"
-                        style={{
-                            flexShrink: 0, 
-                            opacity: isSearchExpanded ? 0.7 : 1,
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            transform: isSearchExpanded ? 'scale(1)' : 'scale(1.2)',
-                            willChange: 'transform'
-                        }}
-                    >
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search debates..."
-                        style={{
-                            flex: 1,
-                            padding: '12px 8px',
-                            fontSize: '16px',
-                            border: 'none',
-                            outline: 'none',
-                            backgroundColor: 'transparent',
-                            color: '#333',
-                            fontWeight: '500',
-                            letterSpacing: '0.2px',
-                            width: isSearchExpanded ? '100%' : '0',
-                            opacity: isSearchExpanded ? 1 : 0,
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            pointerEvents: isSearchExpanded ? 'auto' : 'none',
-                            willChange: 'width, opacity'
-                        }}
-                    />
-                </div>
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search debates..."
+                style={{
+                    flex: 1,
+                    padding: '12px 8px',
+                    fontSize: '16px',
+                    border: 'none',
+                    outline: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#333',
+                    fontWeight: '500',
+                    letterSpacing: '0.2px',
+                    width: isSearchExpanded ? '100%' : '0',
+                    opacity: isSearchExpanded ? 1 : 0,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    pointerEvents: isSearchExpanded ? 'auto' : 'none',
+                }}
+            />
+        </div>
+    );
 
-                {/* Search Results Dropdown */}
-                {showSearchResults && searchResults.length > 0 && (
-                    <div style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: '0',
-                        width: '100%',
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05)',
-                        marginTop: '8px',
-                        maxHeight: '400px',
-                        overflowY: 'auto',
+    return (
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                width: '100vw',
+                fontFamily: 'Arial, sans-serif',
+                overflow: 'hidden',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+            }}
+        >
+            <NavBar />
+
+            {/* Mobile Search Bar */}
+            {isMobile && (
+                <div
+                    className="search-bar-container"
+                    style={{
+                        position: 'fixed',
+                        top: '80px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: isSearchExpanded ? '80%' : '48px',
+                        maxWidth: '600px',
                         zIndex: 1000,
-                        opacity: isSearchExpanded ? 1 : 0,
-                        transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        willChange: 'opacity'
-                    }}>
-                        {searchResults.map((result) => (
-                            <div
-                                key={result._id}
-                                onClick={() => selectSearchResult(result)}
-                                style={{
-                                    padding: '16px 20px',
-                                    borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s ease',
-                                    color: '#333',
-                                    fontSize: '16px',
-                                    fontWeight: '500',
-                                    ':hover': {
-                                        backgroundColor: '#f5f5f5'
-                                    }
-                                }}
-                                onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                            >
-                                {result.text}
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                        padding: '0 20px',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        willChange: 'width, transform',
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
+                    {searchBarContent}
+                </div>
+            )}
 
             {/* Left Side (Red) */}
             <div
@@ -362,18 +282,44 @@ export default function DebatePage({ initialDebates }) {
                     left: 0,
                     width: isMobile ? '100%' : '50%',
                     height: isMobile ? '50%' : '100%',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
                 }}
             >
-                {/* Topic Display (top part) */}
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    width: '100%',
-                    height: '100%',
-                    overflow: 'hidden'
-                }}>
+                {/* Desktop Search Bar: Stop propagation so clicks do not trigger parent onClick and adjust top */}
+                {!isMobile && (
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="search-bar-container"
+                        style={{
+                            position: 'absolute',
+                            top: '60px', // increased from 20px to lower the search bar
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: isSearchExpanded ? '80%' : '48px',
+                            maxWidth: '600px',
+                            zIndex: 1000,
+                            padding: '0 20px',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            willChange: 'width, transform',
+                            display: 'flex',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        {searchBarContent}
+                    </div>
+                )}
+
+                {/* Topic Display */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '100%',
+                        height: '100%',
+                        overflow: 'hidden',
+                    }}
+                >
                     <p
                         style={{
                             textAlign: 'center',
@@ -406,39 +352,41 @@ export default function DebatePage({ initialDebates }) {
                     right: 0,
                     width: isMobile ? '100%' : '50%',
                     height: isMobile ? '50%' : '100%',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
                 }}
             >
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: isMobile ? 'flex-start' : 'center',
-                    width: '100%',
-                    height: '100%',
-                    gap: '20px',
-                    paddingTop: isMobile ? '20px' : '0'
-                }}>
-                    <textarea
-                        value={debateText}
-                        onChange={(e) => setDebateText(e.target.value)}
-                        placeholder="Write your debate response here (max 200 characters)"
-                        maxLength={200}
-                        style={{
-                            width: isMobile ? '85%' : '60%',
-                            height: isMobile ? '40%' : '500px',
-                            marginBottom: '10px',
-                            padding: '10px',
-                            fontSize: isMobile ? '20px' : '30px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            color: 'black',
-                            resize: 'none',
-                            overflow: 'hidden',
-                            marginLeft: 'auto',
-                            marginRight: 'auto'
-                        }}
-                    />
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: isMobile ? 'flex-start' : 'center',
+                        width: '100%',
+                        height: '100%',
+                        gap: '20px',
+                        paddingTop: isMobile ? '20px' : '0',
+                    }}
+                >
+          <textarea
+              value={debateText}
+              onChange={(e) => setDebateText(e.target.value)}
+              placeholder="Write your debate response here (max 200 characters)"
+              maxLength={200}
+              style={{
+                  width: isMobile ? '85%' : '60%',
+                  height: isMobile ? '40%' : '500px',
+                  marginBottom: '10px',
+                  padding: '10px',
+                  fontSize: isMobile ? '20px' : '30px',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                  color: 'black',
+                  resize: 'none',
+                  overflow: 'hidden',
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+              }}
+          />
                     <button
                         onClick={submitDebate}
                         disabled={!session}
@@ -455,7 +403,7 @@ export default function DebatePage({ initialDebates }) {
                             transition: 'all 0.1s ease',
                             position: 'relative',
                             marginLeft: 'auto',
-                            marginRight: 'auto'
+                            marginRight: 'auto',
                         }}
                         onMouseEnter={(e) => {
                             if (!session) return;
@@ -477,7 +425,6 @@ export default function DebatePage({ initialDebates }) {
     );
 }
 
-// Use getServerSideProps to fetch initial instigates
 export async function getServerSideProps() {
     try {
         const res = await fetch('http://localhost:3000/api/instigate');
@@ -489,3 +436,34 @@ export async function getServerSideProps() {
         return { props: { initialDebates: [] } };
     }
 }
+
+<style jsx>{`
+    .search-bar-container {
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        padding: 0 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: width, transform;
+        display: flex;
+        justify-content: center;
+    }
+
+    @media (min-width: 769px) {
+        .search-bar-container {
+            width: 600px;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .search-bar-container {
+            width: 80%;
+            max-width: 600px;
+            left: 20%;
+            transform: translateX(0);
+        }
+    }
+`}</style>
