@@ -78,7 +78,7 @@ export default function DebatePage({ initialDebates }) {
                     if (!response.ok)
                         throw new Error(`HTTP error! status: ${response.status}`);
                     const results = await response.json();
-
+                    
                     const resultsWithDebates = await Promise.all(
                         results.slice(0, 5).map(async (instigate) => {
                             const debateResponse = await fetch(
@@ -125,8 +125,8 @@ export default function DebatePage({ initialDebates }) {
             const response = await fetch('/api/debate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    instigateId: selectedInstigate._id,
+                body: JSON.stringify({ 
+                    instigateId: selectedInstigate._id, 
                     debateText: debateText.trim(),
                 }),
             });
@@ -155,69 +155,69 @@ export default function DebatePage({ initialDebates }) {
 
     // Shared search bar content
     const searchBarContent = (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                <div 
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                 gap: '19px',
                 backgroundColor: isSearchExpanded
                     ? 'rgba(255, 255, 255, 0.98)'
                     : 'transparent',
-                padding: isSearchExpanded ? '10px 20px' : '0',
-                borderRadius: isSearchExpanded ? '16px' : '0',
+                        padding: isSearchExpanded ? '10px 20px' : '0',
+                        borderRadius: isSearchExpanded ? '16px' : '0',
                 boxShadow: isSearchExpanded
                     ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)'
                     : 'none',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                border: isSearchExpanded ? '1px solid rgba(0, 0, 0, 0.05)' : 'none',
-                cursor: 'pointer',
-                width: isSearchExpanded ? '100%' : 'auto',
-            }}
-            onClick={() => setIsSearchExpanded(true)}
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        border: isSearchExpanded ? '1px solid rgba(0, 0, 0, 0.05)' : 'none',
+                        cursor: 'pointer',
+                        width: isSearchExpanded ? '100%' : 'auto',
+                    }}
+                    onClick={() => setIsSearchExpanded(true)}
+                >
+                    <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="24" 
+                        height="24" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
                 stroke={isSearchExpanded ? "#666" : 'white'}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                    flexShrink: 0,
-                    opacity: isSearchExpanded ? 0.7 : 1,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    transform: isSearchExpanded ? 'scale(1)' : 'scale(1.2)',
-                }}
-            >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search debates..."
-                style={{
-                    flex: 1,
-                    padding: '12px 8px',
-                    fontSize: '16px',
-                    border: 'none',
-                    outline: 'none',
-                    backgroundColor: 'transparent',
-                    color: '#333',
-                    fontWeight: '500',
-                    letterSpacing: '0.2px',
-                    width: isSearchExpanded ? '100%' : '0',
-                    opacity: isSearchExpanded ? 1 : 0,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    pointerEvents: isSearchExpanded ? 'auto' : 'none',
-                }}
-            />
-        </div>
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                        style={{
+                            flexShrink: 0, 
+                            opacity: isSearchExpanded ? 0.7 : 1,
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            transform: isSearchExpanded ? 'scale(1)' : 'scale(1.2)',
+                        }}
+                    >
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search debates..."
+                        style={{
+                            flex: 1,
+                            padding: '12px 8px',
+                            fontSize: '16px',
+                            border: 'none',
+                            outline: 'none',
+                            backgroundColor: 'transparent',
+                            color: '#333',
+                            fontWeight: '500',
+                            letterSpacing: '0.2px',
+                            width: isSearchExpanded ? '100%' : '0',
+                            opacity: isSearchExpanded ? 1 : 0,
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            pointerEvents: isSearchExpanded ? 'auto' : 'none',
+                        }}
+                    />
+                </div>
     );
 
     return (
@@ -258,8 +258,8 @@ export default function DebatePage({ initialDebates }) {
                     }}
                 >
                     {searchBarContent}
-                </div>
-            )}
+                    </div>
+                )}
 
             {/* Left Side (Red) */}
             <div
@@ -312,11 +312,11 @@ export default function DebatePage({ initialDebates }) {
                 {/* Topic Display */}
                 <div
                     style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100%',
-                        height: '100%',
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
                         overflow: 'hidden',
                     }}
                 >
@@ -357,36 +357,36 @@ export default function DebatePage({ initialDebates }) {
             >
                 <div
                     style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: isMobile ? 'flex-start' : 'center',
-                        width: '100%',
-                        height: '100%',
-                        gap: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: isMobile ? 'flex-start' : 'center',
+                    width: '100%',
+                    height: '100%',
+                    gap: '20px',
                         paddingTop: isMobile ? '20px' : '0',
                     }}
                 >
-          <textarea
-              value={debateText}
-              onChange={(e) => setDebateText(e.target.value)}
-              placeholder="Write your debate response here (max 200 characters)"
-              maxLength={200}
-              style={{
-                  width: isMobile ? '85%' : '60%',
-                  height: isMobile ? '40%' : '500px',
-                  marginBottom: '10px',
-                  padding: '10px',
-                  fontSize: isMobile ? '20px' : '30px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                  color: 'black',
-                  resize: 'none',
-                  overflow: 'hidden',
-                  marginLeft: 'auto',
+                    <textarea
+                        value={debateText}
+                        onChange={(e) => setDebateText(e.target.value)}
+                        placeholder="Write your debate response here (max 200 characters)"
+                        maxLength={200}
+                        style={{
+                            width: isMobile ? '85%' : '60%',
+                            height: isMobile ? '40%' : '500px',
+                            marginBottom: '10px',
+                            padding: '10px',
+                            fontSize: isMobile ? '20px' : '30px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc',
+                            color: 'black',
+                            resize: 'none',
+                            overflow: 'hidden',
+                            marginLeft: 'auto',
                   marginRight: 'auto',
-              }}
-          />
+                        }}
+                    />
                     <button
                         onClick={submitDebate}
                         disabled={!session}
