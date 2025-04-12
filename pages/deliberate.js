@@ -295,7 +295,7 @@ export default function DeliberatePage({ initialDebates }) {
 
 // Server-side props with randomized debates
 export async function getServerSideProps() {
-    const res = await fetch('http://localhost:3000/api/deliberate');
+    const res = await fetch('https://bicker-rosy.vercel.app/deliberate');
     let initialDebates = [];
     try {
         initialDebates = await res.json();
