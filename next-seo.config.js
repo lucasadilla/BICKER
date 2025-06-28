@@ -4,7 +4,7 @@ export default {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://www.yoursite.com/',
+    url: 'https://bicker.ca/',
     site_name: 'Bicker',
   },
 
