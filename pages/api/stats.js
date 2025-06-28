@@ -1,6 +1,6 @@
 // pages/api/debates/stats.js
-import dbConnect from '/lib/dbConnect';
-import Debate from '/models/Debate';
+import dbConnect from '../../lib/dbConnect';
+import Debate from '../../models/Debate';
 
 export default async function handler(req, res) {
     await dbConnect();
