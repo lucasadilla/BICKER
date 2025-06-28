@@ -1,6 +1,6 @@
 // pages/api/debates/stats.js
-import dbConnect from '/lib/dbConnect';
-import Deliberate from '/models/Deliberate';
+import dbConnect from '../../../lib/dbConnect';
+import Deliberate from '../../../models/Deliberate';
 
 export default async function handler(req, res) {
     await dbConnect();
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
             // Sort by closest split (difference ratio near 0)
             debates.sort((a, b) => {
                 const totalA = a.votesRed + a.votesBlue;
-                const totalB = b.votesBlue + b.votesBlue;
+                const totalB = b.votesRed + b.votesBlue;
                 const ratioA = Math.abs(a.votesRed - a.votesBlue) / totalA;
                 const ratioB = Math.abs(b.votesRed - b.votesBlue) / totalB;
                 return ratioA - ratioB; // smaller ratio => more divisive
