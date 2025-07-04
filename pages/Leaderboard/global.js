@@ -1,6 +1,7 @@
 // pages/leaderboard/global.js
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import NavBar from '../../components/NavBar';
 
 export default function GlobalStats() {
@@ -174,8 +175,8 @@ export default function GlobalStats() {
                                 const bluePercent = 100 - redPercent;
 
                                 return (
+                                    <Link key={debate._id} href={`/debates/${debate._id}`} passHref>
                                     <div
-                                        key={debate._id}
                                         style={{
                                             backgroundColor: 'white',
                                             borderRadius: '15px',
@@ -256,6 +257,7 @@ export default function GlobalStats() {
                                             </div>
                                         </div>
                                     </div>
+                                    </Link>
                                 );
                             })}
                         </div>
