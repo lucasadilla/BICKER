@@ -43,7 +43,7 @@ export default function DeliberatePage({ initialDebates }) {
 
     const fetchDeliberations = async () => {
         try {
-            const response = await fetch('https://bicker-rosy.vercel.app/deliberate');
+            const response = await fetch('/api/deliberate');
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to fetch deliberations');
@@ -294,8 +294,11 @@ export default function DeliberatePage({ initialDebates }) {
 }
 
 // Server-side props with randomized debates
-export async function getServerSideProps() {
-    const res = await fetch('https://bicker-rosy.vercel.app/deliberate');
+export async function getServerSideProps(context) {
+    const protocol = context.req.headers["x-forwarded-proto"] || "http";
+    const host = context.req.headers["host"];
+    const baseUrl = `${protocol}://${host}`;
+    const res = await fetch(`${baseUrl}/api/deliberate`);
     let initialDebates = [];
     try {
         initialDebates = await res.json();
