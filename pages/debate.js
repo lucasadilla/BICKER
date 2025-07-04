@@ -136,7 +136,6 @@ export default function DebatePage({ initialDebates }) {
                 throw new Error(data.error || 'Failed to create debate');
             }
             if (data.success) {
-                alert('Debate submitted successfully!');
                 const updatedInstigates = instigates.filter(
                     (_, index) => index !== currentInstigateIndex
                 );
@@ -371,26 +370,45 @@ export default function DebatePage({ initialDebates }) {
                         paddingTop: isMobile ? '20px' : '0',
                     }}
                 >
-                    <textarea
-                        value={debateText}
-                        onChange={(e) => setDebateText(e.target.value)}
-                        placeholder="Write your debate response here (max 200 characters)"
-                        maxLength={200}
+                    <div
                         style={{
+                            position: 'relative',
                             width: isMobile ? '85%' : '60%',
-                            height: isMobile ? '40%' : '500px',
-                            marginBottom: '10px',
-                            padding: '10px',
-                            fontSize: isMobile ? '20px' : '30px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            color: 'black',
-                            resize: 'none',
-                            overflow: 'hidden',
-                            marginLeft: 'auto',
-                  marginRight: 'auto',
                         }}
-                    />
+                    >
+                        <textarea
+                            value={debateText}
+                            onChange={(e) => setDebateText(e.target.value)}
+                            placeholder="Write your debate response here (max 200 characters)"
+                            maxLength={200}
+                            style={{
+                                width: '100%',
+                                height: isMobile ? '40%' : '500px',
+                                marginBottom: '10px',
+                                padding: '10px',
+                                fontSize: isMobile ? '20px' : '30px',
+                                borderRadius: '4px',
+                                border: '1px solid #ccc',
+                                color: 'black',
+                                resize: 'none',
+                                overflow: 'hidden',
+                                marginLeft: 'auto',
+                                marginRight: 'auto',
+                            }}
+                        />
+                        <div
+                            style={{
+                                position: 'absolute',
+                                bottom: '15px',
+                                right: '15px',
+                                fontSize: '14px',
+                                color: '#555',
+                                pointerEvents: 'none',
+                            }}
+                        >
+                            {debateText.length}/200
+                        </div>
+                    </div>
                     <button
                         onClick={submitDebate}
                         disabled={!session}
