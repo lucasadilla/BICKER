@@ -1,6 +1,13 @@
 export default {
   title: 'Bicker',
-  description: 'the game of instigating, debating, and deliberating!',
+  description: 'The game of instigating, debating, and deliberating!',
+  additionalMetaTags: [
+    {
+      name: 'keywords',
+      content:
+        'bicker, debate, deliberate, instigate, online debate game',
+    },
+  ],
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -8,4 +15,4 @@ export default {
     site_name: 'Bicker',
   },
 
-}; 
+};

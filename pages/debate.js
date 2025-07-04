@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
 import { useSession } from 'next-auth/react';
+import { NextSeo } from 'next-seo';
 
 export default function DebatePage({ initialDebates }) {
     const [instigates, setInstigates] = useState(initialDebates || []);
@@ -237,6 +238,9 @@ export default function DebatePage({ initialDebates }) {
             }}
         >
             <NavBar />
+            <NextSeo
+                title="Debate - Bicker"
+                description="Join ongoing debates and share your stance."/>
 
             {/* Mobile Search Bar */}
             {isMobile && (
