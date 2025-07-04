@@ -80,6 +80,7 @@ export default function InstigatePage() {
                     maxWidth: '500px',
                     width: '100%',
                     textAlign: 'center',
+                    position: 'relative',
                 }}
             >
                 <textarea
@@ -98,6 +99,18 @@ export default function InstigatePage() {
                         resize: 'none',
                     }}
                 />
+                <div
+                    style={{
+                        position: 'absolute',
+                        bottom: '15px',
+                        right: '15px',
+                        fontSize: '14px',
+                        color: '#555',
+                        pointerEvents: 'none',
+                    }}
+                >
+                    {newInstigate.length}/200
+                </div>
                 <button
                     onClick={submitInstigate}
                     disabled={!session}
