@@ -1,15 +1,8 @@
 import { useRouter } from 'next/router';
 import NavBar from '../components/NavBar';
-import { useSession } from 'next-auth/react';
 
 export default function Home() {
     const router = useRouter();
-    const { status } = useSession();
-
-    // While NextAuth is checking the session, show a loading state
-    if (status === 'loading') {
-        return <div style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</div>;
-    }
 
     // Whether user is signed in or not, we show the main content
     return (

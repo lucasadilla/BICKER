@@ -2,8 +2,6 @@ import dbConnect from '../../lib/dbConnect';
 import Debate from '../../models/Debate';
 import Instigate from '../../models/Instigate';
 import Deliberate from '../../models/Deliberate';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
 
 export default async function handler(req, res) {
     await dbConnect();
@@ -28,12 +26,6 @@ export default async function handler(req, res) {
             }
         }
 
-        // Check user session
-        const session = await getServerSession(req, res, authOptions);
-        if (!session || !session.user || !session.user.email) {
-            return res.status(401).json({ error: 'Not authenticated' });
-        }
-
         const { instigateId, debateText } = req.body;
         
         // Validate input
@@ -56,14 +48,14 @@ export default async function handler(req, res) {
             const newDebate = await Debate.create({
                 instigateText: instigate.text,
                 debateText: debateText.trim(),
-                createdBy: session.user.email
+                createdBy: 'anonymous'
             });
 
             // 3) Create a Deliberate doc with the same text
             await Deliberate.create({
                 instigateText: instigate.text,
                 debateText: debateText.trim(),
-                createdBy: session.user.email,
+                createdBy: 'anonymous',
                 votesRed: 0,
                 votesBlue: 0,
                 votedBy: []

@@ -1,8 +1,6 @@
 // pages/deliberate/index.js
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { getServerSession } from 'next-auth';
-import { authOptions } from './api/auth/[...nextauth]';
+
 import NavBar from '../components/NavBar'; // If you have a NavBar; otherwise remove
 import { NextSeo } from 'next-seo';
 
@@ -22,8 +20,6 @@ export default function DeliberatePage({ initialDebates }) {
     const [showVotes, setShowVotes] = useState(false);
     const [hoveringSide, setHoveringSide] = useState('');
 
-    // Check if user is signed in or not
-    const { data: session, status } = useSession();
 
     // If there were no initialDebates, fetch them client-side
     useEffect(() => {
@@ -65,10 +61,6 @@ export default function DeliberatePage({ initialDebates }) {
     };
 
     const handleVote = async (vote) => {
-        if (!session) {
-            alert('Please sign in to vote');
-            return;
-        }
 
         try {
             const response = await fetch('/api/deliberate', {
@@ -228,7 +220,7 @@ export default function DeliberatePage({ initialDebates }) {
                         cursor: showVotes ? 'default' : 'pointer',
                         transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
-                    title={!session ? 'Sign in to vote on this side' : ''}
+                    
                 >
                     <p
                         style={{
@@ -269,7 +261,7 @@ export default function DeliberatePage({ initialDebates }) {
                         cursor: showVotes ? 'default' : 'pointer',
                         transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
-                    title={!session ? 'Sign in to vote on this side' : ''}
+                    
                 >
                     <p
                         style={{
