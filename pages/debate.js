@@ -152,7 +152,7 @@ export default function DebatePage({ initialDebates }) {
 
     // Shared search bar content
     const searchBarContent = (
-                <div 
+                <div
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -217,6 +217,40 @@ export default function DebatePage({ initialDebates }) {
                 </div>
     );
 
+    const searchResultsList =
+        showSearchResults && searchResults.length > 0 ? (
+            <div
+                style={{
+                    position: 'fixed',
+                    top: isMobile ? '120px' : '100px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '80%',
+                    maxWidth: '600px',
+                    backgroundColor: '#fff',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    zIndex: 1000,
+                    overflow: 'hidden',
+                }}
+            >
+                {searchResults.map((instigate) => (
+                    <div
+                        key={instigate._id}
+                        onClick={() => selectSearchResult(instigate)}
+                        style={{
+                            padding: '10px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #eee',
+                            backgroundColor: '#fff',
+                        }}
+                    >
+                        <p style={{ margin: 0, color: '#333' }}>{instigate.text}</p>
+                    </div>
+                ))}
+            </div>
+        ) : null;
+
     return (
         <div
             style={{
@@ -237,6 +271,8 @@ export default function DebatePage({ initialDebates }) {
             <NextSeo
                 title="Debate - Bicker"
                 description="Join ongoing debates and share your stance."/>
+
+            {searchResultsList}
 
             {/* Mobile Search Bar */}
             {isMobile && (
