@@ -13,13 +13,12 @@ export default function Leaderboard() {
     // Added mobile state detection
     const [isMobile, setIsMobile] = useState(false);
 
-    // If you have a latest debate object, replace this accordingly.
-    // For now we assume an empty object.
-    const latestDebate = {};
+    const [latestDebate, setLatestDebate] = useState(null);
 
     // Fetch stats and set mobile detection on mount
     useEffect(() => {
         fetchStats();
+        fetchLatestDebate();
 
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
@@ -70,6 +69,21 @@ export default function Leaderboard() {
             console.error('Error fetching stats:', error);
         }
     };
+
+    async function fetchLatestDebate() {
+        try {
+            const response = await fetch('/api/debate');
+            if (!response.ok) {
+                throw new Error('Failed to fetch latest debate');
+            }
+            const debates = await response.json();
+            if (debates && debates.length > 0) {
+                setLatestDebate(debates[0]);
+            }
+        } catch (error) {
+            console.error('Error fetching latest debate:', error);
+        }
+    }
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
