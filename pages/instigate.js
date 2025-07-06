@@ -1,6 +1,5 @@
 // pages/instigate/index.js
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react'; // For checking if user is signed in
 import NavBar from '../components/NavBar';
 
 export default function InstigatePage() {
@@ -15,8 +14,6 @@ export default function InstigatePage() {
         };
     }, []);
 
-    // Fetch session info (to see if user is signed in)
-    const { data: session } = useSession();
 
     useEffect(() => {
         fetchInstigates();
@@ -37,11 +34,6 @@ export default function InstigatePage() {
     };
 
     const submitInstigate = async () => {
-        // If not signed in, block submission
-        if (!session) {
-            alert('You must be signed in to submit a new topic.');
-            return;
-        }
 
         try {
             await fetch('/api/instigate', {
@@ -113,31 +105,27 @@ export default function InstigatePage() {
                 </div>
                 <button
                     onClick={submitInstigate}
-                    disabled={!session}
                     style={{
                         width: '50%',
                         padding: '10px',
-                        backgroundColor: !session ? 'gray' : '#007BFF',
+                        backgroundColor: '#007BFF',
                         color: 'white',
                         fontSize: '26px',
                         borderRadius: '4px',
                         border: 'none',
-                        cursor: !session ? 'not-allowed' : 'pointer',
+                        cursor: 'pointer',
                         boxShadow: '10px 12px black',
                         transition: 'all 0.2s ease',
                         position: 'relative',
                     }}
                     onMouseEnter={(e) => {
-                        if (!session) return;
                         e.target.style.transform = 'translateY(4px)';
                         e.target.style.boxShadow = 'none';
                     }}
                     onMouseLeave={(e) => {
-                        if (!session) return;
                         e.target.style.transform = 'translateY(0)';
                         e.target.style.boxShadow = '10px 12px black';
                     }}
-                    title={!session ? 'Sign in to submit a topic' : ''}
                 >
                     Submit Topic
                 </button>

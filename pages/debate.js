@@ -1,7 +1,6 @@
 // pages/debate.js
 import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
-import { useSession } from 'next-auth/react';
 import { NextSeo } from 'next-seo';
 
 export default function DebatePage({ initialDebates }) {
@@ -14,8 +13,6 @@ export default function DebatePage({ initialDebates }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
-    // NextAuth session info
-    const { data: session } = useSession();
     // Toggle search bar expansion
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
@@ -411,16 +408,15 @@ export default function DebatePage({ initialDebates }) {
                     </div>
                     <button
                         onClick={submitDebate}
-                        disabled={!session}
                         style={{
                             width: isMobile ? '85%' : '30%',
                             padding: '10px',
-                            backgroundColor: !session ? 'gray' : '#007BFF',
+                            backgroundColor: '#007BFF',
                             color: 'white',
                             fontSize: isMobile ? '20px' : '30px',
                             borderRadius: '4px',
                             border: 'none',
-                            cursor: !session ? 'not-allowed' : 'pointer',
+                            cursor: 'pointer',
                             boxShadow: '0 4px 0 #0056b3',
                             transition: 'all 0.1s ease',
                             position: 'relative',
@@ -428,16 +424,13 @@ export default function DebatePage({ initialDebates }) {
                             marginRight: 'auto',
                         }}
                         onMouseEnter={(e) => {
-                            if (!session) return;
                             e.target.style.transform = 'translateY(4px)';
                             e.target.style.boxShadow = 'none';
                         }}
                         onMouseLeave={(e) => {
-                            if (!session) return;
                             e.target.style.transform = 'translateY(0)';
                             e.target.style.boxShadow = '0 4px 0 #0056b3';
                         }}
-                        title={!session ? 'Sign in to submit a debate' : ''}
                     >
                         Submit Debate
                     </button>
