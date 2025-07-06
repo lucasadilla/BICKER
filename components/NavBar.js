@@ -148,7 +148,7 @@ export default function NavBar() {
                         { label: 'Instigate', path: '/instigate' },
                         { label: 'Debate', path: '/debate' },
                         { label: 'Deliberate', path: '/deliberate' },
-                        { label: 'Leaderboard', path: '/Leaderboard/global' },
+                        { label: 'Leaderboard', path: '/leaderboard' },
                     ].map(({ label, path }) => (
                         <Link key={label} href={path} passHref>
                             <button
@@ -185,7 +185,7 @@ export default function NavBar() {
                 { label: 'Instigate', path: '/instigate' },
                 { label: 'Debate', path: '/debate' },
                 { label: 'Deliberate', path: '/deliberate' },
-                { label: 'Leaderboard', path: '/Leaderboard/main' },
+                { label: 'Leaderboard', path: '/leaderboard' },
             ].map(({ label, path }) => (
                 <Link key={label} href={path} passHref>
                     <button
