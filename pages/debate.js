@@ -255,16 +255,13 @@ export default function DebatePage({ initialDebates }) {
         <div
             style={{
                 display: 'flex',
-                flexDirection: 'column',
-                height: '100vh',
+                flexDirection: isMobile ? 'column' : 'row',
+                minHeight: '100vh',
                 width: '100vw',
                 fontFamily: 'Arial, sans-serif',
-                overflow: 'hidden',
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                position: 'relative',
             }}
         >
             <NavBar />
@@ -313,11 +310,9 @@ export default function DebatePage({ initialDebates }) {
                     alignItems: 'center',
                     cursor: 'pointer',
                     transition: 'background-color 0.3s ease',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: isMobile ? '100%' : '50%',
-                    height: isMobile ? '50%' : '100%',
+                    position: 'relative',
+                    width: '100%',
+                    height: isMobile ? '50vh' : '100vh',
                     overflow: 'hidden',
                 }}
             >
@@ -383,11 +378,9 @@ export default function DebatePage({ initialDebates }) {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    position: 'absolute',
-                    top: isMobile ? '50%' : 0,
-                    right: 0,
-                    width: isMobile ? '100%' : '50%',
-                    height: isMobile ? '50%' : '100%',
+                    position: 'relative',
+                    width: '100%',
+                    height: isMobile ? '50vh' : '100vh',
                     overflow: 'hidden',
                 }}
             >
@@ -416,7 +409,7 @@ export default function DebatePage({ initialDebates }) {
                             maxLength={200}
                             style={{
                                 width: '100%',
-                                height: isMobile ? '40%' : '500px',
+                                height: isMobile ? '150px' : '500px',
                                 marginBottom: '10px',
                                 padding: '10px',
                                 fontSize: isMobile ? '20px' : '30px',
