@@ -1,7 +1,5 @@
 import dbConnect from '../../lib/dbConnect';
 import Deliberate from '../../models/Deliberate';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../api/auth/[...nextauth]';
 
 export default async function handler(req, res) {
     try {
@@ -29,11 +27,6 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Invalid vote type' });
             }
 
-            const session = await getServerSession(req, res, authOptions);
-            if (!session) {
-                return res.status(401).json({ error: 'Not authenticated' });
-            }
-
             console.log('Finding deliberation with ID:', debateId);
             const deliberation = await Deliberate.findById(debateId);
             if (!deliberation) {
@@ -57,7 +50,7 @@ export default async function handler(req, res) {
             // Add user's vote to votedBy array
             deliberation.votedBy = deliberation.votedBy || [];
             deliberation.votedBy.push({
-                userId: session.user.email,
+                userId: 'anonymous',
                 vote: vote,
                 timestamp: new Date()
             });

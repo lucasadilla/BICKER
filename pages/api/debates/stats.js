@@ -1,11 +1,13 @@
 // pages/api/debates/stats.js
-import dbConnect from '/lib/dbConnect';
-import Deliberate from '/models/Deliberate';
+import dbConnect from '../../../lib/dbConnect';
+import Deliberate from '../../../models/Deliberate';
 
 export default async function handler(req, res) {
     await dbConnect();
 
-    const { sort } = req.query;
+    const { sort, page = '1', limit = '25' } = req.query;
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10) || 25;
     try {
         // 1. Fetch all deliberations
         let debates = await Deliberate.find({}).lean();
@@ -21,24 +23,34 @@ export default async function handler(req, res) {
                 (a, b) => (b.votesRed + b.votesBlue) - (a.votesRed + a.votesBlue)
             );
         } else if (sort === 'mostDivisive') {
-            // Sort by closest split (difference ratio near 0)
-            debates.sort((a, b) => {
-                const totalA = a.votesRed + a.votesBlue;
-                const totalB = b.votesBlue + b.votesBlue;
-                const ratioA = Math.abs(a.votesRed - a.votesBlue) / totalA;
-                const ratioB = Math.abs(b.votesRed - b.votesBlue) / totalB;
-                return ratioA - ratioB; // smaller ratio => more divisive
-            });
-        } else if (sort === 'mostDecisive') {
-            // Sort by most lopsided (largest ratio)
+            // Sort by closest split with more votes taking precedence
             debates.sort((a, b) => {
                 const totalA = a.votesRed + a.votesBlue;
                 const totalB = b.votesRed + b.votesBlue;
-                const ratioA = Math.abs(a.votesRed - a.votesBlue) / totalA;
-                const ratioB = Math.abs(b.votesRed - b.votesBlue) / totalB;
+                const ratioA = totalA === 0 ? Infinity : Math.abs(a.votesRed - a.votesBlue) / totalA;
+                const ratioB = totalB === 0 ? Infinity : Math.abs(b.votesRed - b.votesBlue) / totalB;
+                if (ratioA === ratioB) {
+                    return totalB - totalA; // more total votes first when equally divisive
+                }
+                return ratioA - ratioB; // smaller ratio => more divisive
+            });
+        } else if (sort === 'mostDecisive') {
+            // Sort by most lopsided with more votes taking precedence
+            debates.sort((a, b) => {
+                const totalA = a.votesRed + a.votesBlue;
+                const totalB = b.votesRed + b.votesBlue;
+                const ratioA = totalA === 0 ? 0 : Math.abs(a.votesRed - a.votesBlue) / totalA;
+                const ratioB = totalB === 0 ? 0 : Math.abs(b.votesRed - b.votesBlue) / totalB;
+                if (ratioA === ratioB) {
+                    return totalB - totalA; // more total votes first when ratio equal
+                }
                 return ratioB - ratioA; // bigger ratio => more decisive
             });
         }
+
+        const totalDebates = debates.length;
+        const startIndex = (pageNum - 1) * limitNum;
+        const pagedDebates = debates.slice(startIndex, startIndex + limitNum);
 
         // 3. Calculate total votes across the site
         const totalVotes = debates.reduce(
@@ -46,7 +58,7 @@ export default async function handler(req, res) {
             0
         );
 
-        return res.status(200).json({ debates, totalVotes });
+        return res.status(200).json({ debates: pagedDebates, totalVotes, totalDebates });
     } catch (error) {
         console.error('Error fetching stats:', error);
         return res.status(500).json({ error: 'Something went wrong.' });

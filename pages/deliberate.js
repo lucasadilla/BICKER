@@ -1,9 +1,8 @@
 // pages/deliberate/index.js
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { getServerSession } from 'next-auth';
-import { authOptions } from './api/auth/[...nextauth]';
+
 import NavBar from '../components/NavBar'; // If you have a NavBar; otherwise remove
+import { NextSeo } from 'next-seo';
 
 // Helper function to shuffle array
 const shuffleArray = (array) => {
@@ -21,8 +20,6 @@ export default function DeliberatePage({ initialDebates }) {
     const [showVotes, setShowVotes] = useState(false);
     const [hoveringSide, setHoveringSide] = useState('');
 
-    // Check if user is signed in or not
-    const { data: session, status } = useSession();
 
     // If there were no initialDebates, fetch them client-side
     useEffect(() => {
@@ -43,7 +40,7 @@ export default function DeliberatePage({ initialDebates }) {
 
     const fetchDeliberations = async () => {
         try {
-            const response = await fetch('https://bicker-rosy.vercel.app/deliberate');
+            const response = await fetch('/api/deliberate');
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to fetch deliberations');
@@ -64,10 +61,6 @@ export default function DeliberatePage({ initialDebates }) {
     };
 
     const handleVote = async (vote) => {
-        if (!session) {
-            alert('Please sign in to vote');
-            return;
-        }
 
         try {
             const response = await fetch('/api/deliberate', {
@@ -196,9 +189,31 @@ export default function DeliberatePage({ initialDebates }) {
                 flexDirection: 'column',
                 height: '100vh',
                 overflow: 'hidden',
+                position: 'relative'
             }}
         >
             <NavBar />
+            <NextSeo
+                title="Deliberate - Bicker"
+                description="Vote on debates and see how others feel."/>
+
+            <button
+                onClick={nextDebate}
+                style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    padding: '10px 20px',
+                    backgroundColor: '#f0f0f0',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    zIndex: 1000
+                }}
+            >
+                Skip
+            </button>
 
             {/* Fullscreen Debate Section */}
             <div style={{ 
@@ -224,7 +239,7 @@ export default function DeliberatePage({ initialDebates }) {
                         cursor: showVotes ? 'default' : 'pointer',
                         transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
-                    title={!session ? 'Sign in to vote on this side' : ''}
+                    
                 >
                     <p
                         style={{
@@ -265,7 +280,7 @@ export default function DeliberatePage({ initialDebates }) {
                         cursor: showVotes ? 'default' : 'pointer',
                         transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
-                    title={!session ? 'Sign in to vote on this side' : ''}
+                    
                 >
                     <p
                         style={{
@@ -294,8 +309,11 @@ export default function DeliberatePage({ initialDebates }) {
 }
 
 // Server-side props with randomized debates
-export async function getServerSideProps() {
-    const res = await fetch('https://bicker-rosy.vercel.app/deliberate');
+export async function getServerSideProps(context) {
+    const protocol = context.req.headers["x-forwarded-proto"] || "http";
+    const host = context.req.headers["host"];
+    const baseUrl = `${protocol}://${host}`;
+    const res = await fetch(`${baseUrl}/api/deliberate`);
     let initialDebates = [];
     try {
         initialDebates = await res.json();

@@ -1,10 +1,7 @@
 import Link from 'next/link';
-import { useSession, signIn, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 
 export default function NavBar() {
-    const { data: session, status } = useSession();
-    const authenticated = status === 'authenticated';
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -151,7 +148,7 @@ export default function NavBar() {
                         { label: 'Instigate', path: '/instigate' },
                         { label: 'Debate', path: '/debate' },
                         { label: 'Deliberate', path: '/deliberate' },
-                        { label: 'Leaderboard', path: '/Leaderboard/global' },
+                        { label: 'Leaderboard', path: '/leaderboard' },
                     ].map(({ label, path }) => (
                         <Link key={label} href={path} passHref>
                             <button
@@ -163,60 +160,7 @@ export default function NavBar() {
                             </button>
                         </Link>
                     ))}
-                    <button
-                        onClick={() => authenticated ? signOut() : signIn()}
-                        style={{
-                            ...buttonStyle,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '10px',
-                            marginLeft: '0',
-                            position: 'absolute',
-                            right: '20px',
-                            backgroundColor: authenticated ? '#4CAF50' : '#FF4D4D',
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '50%',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                        }}
-                        onMouseEnter={handleCircularMouseEnter}
-                        onMouseLeave={handleCircularMouseLeave}
-                    >
-                        {authenticated ? (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24" 
-                                height="24" 
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                        ) : (
-                            <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                width="24" 
-                                height="24" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                strokeWidth="2" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round"
-                            >
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                                <line x1="12" y1="11" x2="12" y2="17"></line>
-                                <line x1="9" y1="14" x2="15" y2="14"></line>
-                            </svg>
-                        )}
-                    </button>
+                    {/* Sign in/out removed */}
                 </>
             )}
 
@@ -241,7 +185,7 @@ export default function NavBar() {
                 { label: 'Instigate', path: '/instigate' },
                 { label: 'Debate', path: '/debate' },
                 { label: 'Deliberate', path: '/deliberate' },
-                { label: 'Leaderboard', path: '/Leaderboard/main' },
+                { label: 'Leaderboard', path: '/leaderboard' },
             ].map(({ label, path }) => (
                 <Link key={label} href={path} passHref>
                     <button
@@ -258,43 +202,7 @@ export default function NavBar() {
                     </button>
                 </Link>
             ))}
-            {authenticated ? (
-                <button
-                            onClick={() => {
-                                signOut();
-                                setIsMobileMenuOpen(false);
-                            }}
-                            style={{
-                                ...buttonStyle,
-                                width: '100%',
-                                margin: '5px 0',
-                                padding: '15px 20px',
-                                fontSize: '18px',
-                                backgroundColor: '#dc3545',
-                                boxShadow: '0 4px 0 #bd2130'
-                            }}
-                >
-                    Sign Out
-                </button>
-            ) : (
-                <button
-                            onClick={() => {
-                                signIn();
-                                setIsMobileMenuOpen(false);
-                            }}
-                            style={{
-                                ...buttonStyle,
-                                width: '100%',
-                                margin: '5px 0',
-                                padding: '15px 20px',
-                                fontSize: '18px',
-                                backgroundColor: '#28a745',
-                                boxShadow: '0 4px 0 #1e7e34'
-                            }}
-                >
-                    Sign In
-                </button>
-                    )}
+            {/* Authentication buttons removed */}
                 </div>
             )}
         </nav>

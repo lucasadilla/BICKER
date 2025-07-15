@@ -4,6 +4,7 @@ export default function Document() {
   return (
     <Html>
       <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon_io/android-chrome-512x512.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/android-chrome-192x192.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png" />

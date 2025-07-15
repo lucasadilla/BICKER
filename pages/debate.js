@@ -1,7 +1,7 @@
 // pages/debate.js
 import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
-import { useSession } from 'next-auth/react';
+import { NextSeo } from 'next-seo';
 
 export default function DebatePage({ initialDebates }) {
     const [instigates, setInstigates] = useState(initialDebates || []);
@@ -13,8 +13,6 @@ export default function DebatePage({ initialDebates }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
-    // NextAuth session info
-    const { data: session } = useSession();
     // Toggle search bar expansion
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
@@ -135,7 +133,6 @@ export default function DebatePage({ initialDebates }) {
                 throw new Error(data.error || 'Failed to create debate');
             }
             if (data.success) {
-                alert('Debate submitted successfully!');
                 const updatedInstigates = instigates.filter(
                     (_, index) => index !== currentInstigateIndex
                 );
@@ -155,7 +152,7 @@ export default function DebatePage({ initialDebates }) {
 
     // Shared search bar content
     const searchBarContent = (
-                <div 
+                <div
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -220,23 +217,59 @@ export default function DebatePage({ initialDebates }) {
                 </div>
     );
 
+    const searchResultsList =
+        showSearchResults && searchResults.length > 0 ? (
+            <div
+                style={{
+                    position: 'fixed',
+                    top: isMobile ? '120px' : '100px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '80%',
+                    maxWidth: '600px',
+                    backgroundColor: '#fff',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    zIndex: 1000,
+                    overflow: 'hidden',
+                }}
+            >
+                {searchResults.map((instigate) => (
+                    <div
+                        key={instigate._id}
+                        onClick={() => selectSearchResult(instigate)}
+                        style={{
+                            padding: '10px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #eee',
+                            backgroundColor: '#fff',
+                        }}
+                    >
+                        <p style={{ margin: 0, color: '#333' }}>{instigate.text}</p>
+                    </div>
+                ))}
+            </div>
+        ) : null;
+
     return (
         <div
             style={{
                 display: 'flex',
-                flexDirection: 'column',
-                height: '100vh',
+                flexDirection: isMobile ? 'column' : 'row',
+                minHeight: '100vh',
                 width: '100vw',
                 fontFamily: 'Arial, sans-serif',
-                overflow: 'hidden',
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                position: 'relative',
             }}
         >
             <NavBar />
+            <NextSeo
+                title="Debate - Bicker"
+                description="Join ongoing debates and share your stance."/>
+
+            {searchResultsList}
 
             {/* Mobile Search Bar */}
             {isMobile && (
@@ -277,11 +310,9 @@ export default function DebatePage({ initialDebates }) {
                     alignItems: 'center',
                     cursor: 'pointer',
                     transition: 'background-color 0.3s ease',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: isMobile ? '100%' : '50%',
-                    height: isMobile ? '50%' : '100%',
+                    position: 'relative',
+                    width: '100%',
+                    height: isMobile ? '50vh' : '100vh',
                     overflow: 'hidden',
                 }}
             >
@@ -347,11 +378,9 @@ export default function DebatePage({ initialDebates }) {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    position: 'absolute',
-                    top: isMobile ? '50%' : 0,
-                    right: 0,
-                    width: isMobile ? '100%' : '50%',
-                    height: isMobile ? '50%' : '100%',
+                    position: 'relative',
+                    width: '100%',
+                    height: isMobile ? '50vh' : '100vh',
                     overflow: 'hidden',
                 }}
             >
@@ -367,38 +396,56 @@ export default function DebatePage({ initialDebates }) {
                         paddingTop: isMobile ? '20px' : '0',
                     }}
                 >
-                    <textarea
-                        value={debateText}
-                        onChange={(e) => setDebateText(e.target.value)}
-                        placeholder="Write your debate response here (max 200 characters)"
-                        maxLength={200}
+                    <div
                         style={{
+                            position: 'relative',
                             width: isMobile ? '85%' : '60%',
-                            height: isMobile ? '40%' : '500px',
-                            marginBottom: '10px',
-                            padding: '10px',
-                            fontSize: isMobile ? '20px' : '30px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            color: 'black',
-                            resize: 'none',
-                            overflow: 'hidden',
-                            marginLeft: 'auto',
-                  marginRight: 'auto',
                         }}
-                    />
+                    >
+                        <textarea
+                            value={debateText}
+                            onChange={(e) => setDebateText(e.target.value)}
+                            placeholder="Write your debate response here (max 200 characters)"
+                            maxLength={200}
+                            style={{
+                                width: '100%',
+                                height: isMobile ? '150px' : '500px',
+                                marginBottom: '10px',
+                                padding: '10px',
+                                fontSize: isMobile ? '20px' : '30px',
+                                borderRadius: '4px',
+                                border: '1px solid #ccc',
+                                color: 'black',
+                                resize: 'none',
+                                overflow: 'hidden',
+                                marginLeft: 'auto',
+                                marginRight: 'auto',
+                            }}
+                        />
+                        <div
+                            style={{
+                                position: 'absolute',
+                                bottom: '15px',
+                                right: '15px',
+                                fontSize: '14px',
+                                color: '#555',
+                                pointerEvents: 'none',
+                            }}
+                        >
+                            {debateText.length}/200
+                        </div>
+                    </div>
                     <button
                         onClick={submitDebate}
-                        disabled={!session}
                         style={{
                             width: isMobile ? '85%' : '30%',
                             padding: '10px',
-                            backgroundColor: !session ? 'gray' : '#007BFF',
+                            backgroundColor: '#007BFF',
                             color: 'white',
                             fontSize: isMobile ? '20px' : '30px',
                             borderRadius: '4px',
                             border: 'none',
-                            cursor: !session ? 'not-allowed' : 'pointer',
+                            cursor: 'pointer',
                             boxShadow: '0 4px 0 #0056b3',
                             transition: 'all 0.1s ease',
                             position: 'relative',
@@ -406,16 +453,13 @@ export default function DebatePage({ initialDebates }) {
                             marginRight: 'auto',
                         }}
                         onMouseEnter={(e) => {
-                            if (!session) return;
                             e.target.style.transform = 'translateY(4px)';
                             e.target.style.boxShadow = 'none';
                         }}
                         onMouseLeave={(e) => {
-                            if (!session) return;
                             e.target.style.transform = 'translateY(0)';
                             e.target.style.boxShadow = '0 4px 0 #0056b3';
                         }}
-                        title={!session ? 'Sign in to submit a debate' : ''}
                     >
                         Submit Debate
                     </button>
