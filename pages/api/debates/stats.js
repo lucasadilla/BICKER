@@ -5,7 +5,9 @@ import Deliberate from '../../../models/Deliberate';
 export default async function handler(req, res) {
     await dbConnect();
 
-    const { sort } = req.query;
+    const { sort, page = '1', limit = '25' } = req.query;
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10) || 25;
     try {
         // 1. Fetch all deliberations
         let debates = await Deliberate.find({}).lean();
@@ -46,13 +48,17 @@ export default async function handler(req, res) {
             });
         }
 
+        const totalDebates = debates.length;
+        const startIndex = (pageNum - 1) * limitNum;
+        const pagedDebates = debates.slice(startIndex, startIndex + limitNum);
+
         // 3. Calculate total votes across the site
         const totalVotes = debates.reduce(
             (sum, d) => sum + (d.votesRed || 0) + (d.votesBlue || 0),
             0
         );
 
-        return res.status(200).json({ debates, totalVotes });
+        return res.status(200).json({ debates: pagedDebates, totalVotes, totalDebates });
     } catch (error) {
         console.error('Error fetching stats:', error);
         return res.status(500).json({ error: 'Something went wrong.' });
