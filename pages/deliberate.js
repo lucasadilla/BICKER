@@ -33,7 +33,7 @@ export default function DeliberatePage({ initialDebates }) {
         if (showVotes) {
             const timer = setTimeout(() => {
                 nextDebate();
-            }, 4000);
+            }, 2000);
             return () => clearTimeout(timer);
         }
     }, [showVotes]);
@@ -95,7 +95,7 @@ export default function DeliberatePage({ initialDebates }) {
             setTimeout(() => {
                 setShowVotes(false);
                 setCurrentDebateIndex((prevIndex) => (prevIndex + 1) % debates.length);
-            }, 4000);
+            }, 2000);
         } catch (error) {
             console.error('Error voting:', error);
             alert(error.message || 'Failed to submit vote. Please try again.');

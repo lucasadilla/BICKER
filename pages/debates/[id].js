@@ -11,9 +11,9 @@ export default function DebateDetail({ debate }) {
       <NextSeo
         title={`Debate: ${debate.instigateText}`}
         description={debate.debateText}
-        canonical={`https://www.yoursite.com/debates/${debate._id}`}
+        canonical={`https://bicker.ca/debates/${debate._id}`}
         openGraph={{
-          url: `https://www.yoursite.com/debates/${debate._id}`,
+          url: `https://bicker.ca/debates/${debate._id}`,
           title: `Debate: ${debate.instigateText}`,
           description: debate.debateText,
         }}

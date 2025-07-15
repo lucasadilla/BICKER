@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.yoursite.com/</loc>
+    <loc>https://bicker.ca/</loc>
   </url>
   <url>
-    <loc>https://www.yoursite.com/debate</loc>
+    <loc>https://bicker.ca/debate</loc>
   </url>
   <url>
-    <loc>https://www.yoursite.com/deliberate</loc>
+    <loc>https://bicker.ca/deliberate</loc>
   </url>
   <url>
-    <loc>https://www.yoursite.com/leaderboard</loc>
+    <loc>https://bicker.ca/leaderboard</loc>
   </url>
 </urlset>
