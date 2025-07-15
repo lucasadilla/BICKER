@@ -189,12 +189,31 @@ export default function DeliberatePage({ initialDebates }) {
                 flexDirection: 'column',
                 height: '100vh',
                 overflow: 'hidden',
+                position: 'relative'
             }}
         >
             <NavBar />
             <NextSeo
                 title="Deliberate - Bicker"
                 description="Vote on debates and see how others feel."/>
+
+            <button
+                onClick={nextDebate}
+                style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    padding: '10px 20px',
+                    backgroundColor: '#f0f0f0',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    zIndex: 1000
+                }}
+            >
+                Skip
+            </button>
 
             {/* Fullscreen Debate Section */}
             <div style={{ 
