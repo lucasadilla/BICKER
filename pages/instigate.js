@@ -72,36 +72,40 @@ export default function InstigatePage() {
                     maxWidth: '500px',
                     width: '100%',
                     textAlign: 'center',
-                    position: 'relative',
                 }}
             >
-                <textarea
-                    value={newInstigate}
-                    onChange={(e) => setNewInstigate(e.target.value)}
-                    placeholder="Write your opinion here (max 200 characters)"
-                    maxLength={200}
-                    style={{
-                        width: '100%',
-                        height: '450px',
-                        marginBottom: '10px',
-                        padding: '10px',
-                        fontSize: '36px',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        resize: 'none',
-                    }}
-                />
                 <div
                     style={{
-                        position: 'absolute',
-                        bottom: '15px',
-                        right: '15px',
-                        fontSize: '14px',
-                        color: '#555',
-                        pointerEvents: 'none',
+                        position: 'relative',
                     }}
                 >
-                    {newInstigate.length}/200
+                    <textarea
+                        value={newInstigate}
+                        onChange={(e) => setNewInstigate(e.target.value)}
+                        placeholder="Write your opinion here (max 200 characters)"
+                        maxLength={200}
+                        style={{
+                            width: '100%',
+                            height: '450px',
+                            padding: '10px',
+                            fontSize: '36px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc',
+                            resize: 'none',
+                        }}
+                    />
+                    <div
+                        style={{
+                            position: 'absolute',
+                            bottom: '15px',
+                            right: '15px',
+                            fontSize: '14px',
+                            color: '#555',
+                            pointerEvents: 'none',
+                        }}
+                    >
+                        {newInstigate.length}/200
+                    </div>
                 </div>
                 <button
                     onClick={submitInstigate}
@@ -117,6 +121,7 @@ export default function InstigatePage() {
                         boxShadow: '10px 12px black',
                         transition: 'all 0.2s ease',
                         position: 'relative',
+                        marginTop: '10px',
                     }}
                     onMouseEnter={(e) => {
                         e.target.style.transform = 'translateY(4px)';
