@@ -202,14 +202,15 @@ export default function DeliberatePage({ initialDebates }) {
                 style={{
                     position: 'absolute',
                     top: '50%',
-                    left: '50%',
+                    left: window.innerWidth <= 768 ? '50%' : redWidth,
                     transform: 'translate(-50%, -50%)',
                     padding: '10px 20px',
                     backgroundColor: '#f0f0f0',
                     border: 'none',
                     borderRadius: '5px',
                     cursor: 'pointer',
-                    zIndex: 1000
+                    zIndex: 1000,
+                    transition: 'left 1s ease'
                 }}
             >
                 Skip
