@@ -16,22 +16,22 @@ export default function MyStats() {
 
   const totalParticipated = debates.length;
   let wins = 0;
-  let votedCount = 0;
+  let writtenCount = 0;
   processedDebates.forEach((d) => {
-    if (d.userSide) {
-      votedCount += 1;
+    if (d.userWroteSide) {
+      writtenCount += 1;
       const winningSide =
         d.votesRed === d.votesBlue
           ? null
           : d.votesRed > d.votesBlue
           ? 'red'
           : 'blue';
-      if (winningSide && d.userSide === winningSide) {
+      if (winningSide && d.userWroteSide === winningSide) {
         wins += 1;
       }
     }
   });
-  const winRate = votedCount ? ((wins / votedCount) * 100).toFixed(0) : '0';
+  const winRate = writtenCount ? ((wins / writtenCount) * 100).toFixed(0) : '0';
 
   useEffect(() => {
     if (!session) return;
