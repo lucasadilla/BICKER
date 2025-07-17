@@ -10,7 +10,8 @@ export default function MyStats() {
 
   const processedDebates = debates.map((debate) => {
     const vote = debate.votedBy?.find((v) => v.userId === userId);
-    return { ...debate, userSide: vote ? vote.vote : null };
+    const wroteSide = debate.createdBy === userId ? 'blue' : null;
+    return { ...debate, userSide: vote ? vote.vote : null, userWroteSide: wroteSide };
   });
 
   const totalParticipated = debates.length;
@@ -93,9 +94,9 @@ export default function MyStats() {
               <span style={{ color: '#FF4D4D' }}>Red Votes: {debate.votesRed || 0}</span>
               <span style={{ color: '#4D94FF' }}>Blue Votes: {debate.votesBlue || 0}</span>
             </div>
-            {debate.userSide && (
+            {debate.userWroteSide && (
               <div style={{ marginTop: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-                You voted: {debate.userSide === 'red' ? 'Red' : 'Blue'}
+                You wrote: {debate.userWroteSide === 'red' ? 'Red' : 'Blue'}
               </div>
             )}
           </div>
