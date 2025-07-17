@@ -6,6 +6,31 @@ export default function MyStats() {
   const { data: session } = useSession();
   const [debates, setDebates] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const userId = session?.user?.email;
+
+  const processedDebates = debates.map((debate) => {
+    const vote = debate.votedBy?.find((v) => v.userId === userId);
+    return { ...debate, userSide: vote ? vote.vote : null };
+  });
+
+  const totalParticipated = debates.length;
+  let wins = 0;
+  let votedCount = 0;
+  processedDebates.forEach((d) => {
+    if (d.userSide) {
+      votedCount += 1;
+      const winningSide =
+        d.votesRed === d.votesBlue
+          ? null
+          : d.votesRed > d.votesBlue
+          ? 'red'
+          : 'blue';
+      if (winningSide && d.userSide === winningSide) {
+        wins += 1;
+      }
+    }
+  });
+  const winRate = votedCount ? ((wins / votedCount) * 100).toFixed(0) : '0';
 
   useEffect(() => {
     if (!session) return;
@@ -46,7 +71,11 @@ export default function MyStats() {
       <NavBar />
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '10px' }}>My Debates</h1>
-        {debates.map((debate) => (
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <p style={{ margin: '4px 0' }}>Debates Participated: {totalParticipated}</p>
+          <p style={{ margin: '4px 0' }}>Win Rate: {winRate}%</p>
+        </div>
+        {processedDebates.map((debate) => (
           <div key={debate._id} style={{ backgroundColor: 'white', color: '#333', padding: '15px', borderRadius: '8px', marginBottom: '25px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ alignSelf: 'flex-start', maxWidth: isMobile ? '80%' : '60%', backgroundColor: '#FF4D4D', color: 'white', padding: '12px 16px', borderRadius: '16px', borderTopLeftRadius: '4px', marginLeft: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
@@ -64,6 +93,11 @@ export default function MyStats() {
               <span style={{ color: '#FF4D4D' }}>Red Votes: {debate.votesRed || 0}</span>
               <span style={{ color: '#4D94FF' }}>Blue Votes: {debate.votesBlue || 0}</span>
             </div>
+            {debate.userSide && (
+              <div style={{ marginTop: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+                You voted: {debate.userSide === 'red' ? 'Red' : 'Blue'}
+              </div>
+            )}
           </div>
         ))}
         {debates.length === 0 && (
