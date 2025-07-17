@@ -12,6 +12,10 @@ const DeliberateSchema = new mongoose.Schema({
         required: true,
         maxlength: 200,
     },
+    createdBy: {
+        type: String,
+        default: 'anonymous'
+    },
     votesRed: {
         type: Number,
         default: 0

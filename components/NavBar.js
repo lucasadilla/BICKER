@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 
 export default function NavBar() {
+    const { data: session } = useSession();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -149,6 +151,7 @@ export default function NavBar() {
                         { label: 'Debate', path: '/debate' },
                         { label: 'Deliberate', path: '/deliberate' },
                         { label: 'Leaderboard', path: '/leaderboard' },
+                        ...(session ? [{ label: 'My Stats', path: '/my-stats' }] : [])
                     ].map(({ label, path }) => (
                         <Link key={label} href={path} passHref>
                             <button
@@ -160,7 +163,25 @@ export default function NavBar() {
                             </button>
                         </Link>
                     ))}
-                    {/* Sign in/out removed */}
+                    {session ? (
+                        <button
+                            style={buttonStyle}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                            onClick={() => signOut()}
+                        >
+                            Sign Out
+                        </button>
+                    ) : (
+                        <button
+                            style={buttonStyle}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                            onClick={() => signIn('google')}
+                        >
+                            Sign In
+                        </button>
+                    )}
                 </>
             )}
 
@@ -186,6 +207,7 @@ export default function NavBar() {
                 { label: 'Debate', path: '/debate' },
                 { label: 'Deliberate', path: '/deliberate' },
                 { label: 'Leaderboard', path: '/leaderboard' },
+                ...(session ? [{ label: 'My Stats', path: '/my-stats' }] : [])
             ].map(({ label, path }) => (
                 <Link key={label} href={path} passHref>
                     <button
@@ -202,7 +224,21 @@ export default function NavBar() {
                     </button>
                 </Link>
             ))}
-            {/* Authentication buttons removed */}
+            {session ? (
+                <button
+                    style={{ ...buttonStyle, width: '100%', marginTop: '10px' }}
+                    onClick={() => { setIsMobileMenuOpen(false); signOut(); }}
+                >
+                    Sign Out
+                </button>
+            ) : (
+                <button
+                    style={{ ...buttonStyle, width: '100%', marginTop: '10px' }}
+                    onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
+                >
+                    Sign In
+                </button>
+            )}
                 </div>
             )}
         </nav>
