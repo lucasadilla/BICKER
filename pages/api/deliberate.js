@@ -1,5 +1,7 @@
 import dbConnect from '../../lib/dbConnect';
 import Deliberate from '../../models/Deliberate';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from './auth/[...nextauth]';
 
 export default async function handler(req, res) {
     try {
@@ -47,10 +49,13 @@ export default async function handler(req, res) {
                 deliberation.votesBlue = (deliberation.votesBlue || 0) + 1;
             }
 
+            const session = await getServerSession(req, res, authOptions);
+            const voter = session?.user?.email || 'anonymous';
+
             // Add user's vote to votedBy array
             deliberation.votedBy = deliberation.votedBy || [];
             deliberation.votedBy.push({
-                userId: 'anonymous',
+                userId: voter,
                 vote: vote,
                 timestamp: new Date()
             });

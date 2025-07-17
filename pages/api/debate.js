@@ -2,6 +2,8 @@ import dbConnect from '../../lib/dbConnect';
 import Debate from '../../models/Debate';
 import Instigate from '../../models/Instigate';
 import Deliberate from '../../models/Deliberate';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from './auth/[...nextauth]';
 
 export default async function handler(req, res) {
     await dbConnect();
@@ -44,18 +46,21 @@ export default async function handler(req, res) {
                 return res.status(404).json({ error: 'Instigate not found' });
             }
 
+            const session = await getServerSession(req, res, authOptions);
+            const creator = session?.user?.email || 'anonymous';
+
             // 2) Create the Debate
             const newDebate = await Debate.create({
                 instigateText: instigate.text,
                 debateText: debateText.trim(),
-                createdBy: 'anonymous'
+                createdBy: creator
             });
 
             // 3) Create a Deliberate doc with the same text
             await Deliberate.create({
                 instigateText: instigate.text,
                 debateText: debateText.trim(),
-                createdBy: 'anonymous',
+                createdBy: creator,
                 votesRed: 0,
                 votesBlue: 0,
                 votedBy: []
