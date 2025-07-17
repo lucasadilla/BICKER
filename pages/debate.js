@@ -221,17 +221,18 @@ export default function DebatePage({ initialDebates }) {
         showSearchResults && searchResults.length > 0 ? (
             <div
                 style={{
-                    position: 'fixed',
-                    top: isMobile ? '120px' : '100px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: '80%',
-                    maxWidth: '600px',
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    width: '100%',
                     backgroundColor: '#fff',
-                    borderRadius: '8px',
+                    border: '1px solid #eee',
+                    borderTop: 'none',
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                    borderRadius: '0 0 8px 8px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     zIndex: 1000,
-                    overflow: 'hidden',
                 }}
             >
                 {searchResults.map((instigate) => (
@@ -269,8 +270,6 @@ export default function DebatePage({ initialDebates }) {
                 title="Debate - Bicker"
                 description="Join ongoing debates and share your stance."/>
 
-            {searchResultsList}
-
             {/* Mobile Search Bar */}
             {isMobile && (
                 <div
@@ -288,11 +287,14 @@ export default function DebatePage({ initialDebates }) {
                         willChange: 'width, transform',
                         display: 'flex',
                         justifyContent: 'center',
+                        flexDirection: 'column',
+                        alignItems: 'stretch',
                     }}
                 >
                     {searchBarContent}
-                    </div>
-                )}
+                    {searchResultsList}
+                </div>
+            )}
 
             {/* Left Side (Red) */}
             <div
@@ -334,9 +336,12 @@ export default function DebatePage({ initialDebates }) {
                             willChange: 'width, transform',
                             display: 'flex',
                             justifyContent: 'center',
+                            flexDirection: 'column',
+                            alignItems: 'stretch',
                         }}
                     >
                         {searchBarContent}
+                        {searchResultsList}
                     </div>
                 )}
 
