@@ -12,10 +12,7 @@ export default async function handler(req, res) {
     try {
         const userId = session.user.email;
         const debates = await Deliberate.find({
-            $or: [
-                { createdBy: userId },
-                { 'votedBy.userId': userId }
-            ]
+            createdBy: userId
         }).lean();
         return res.status(200).json({ debates });
     } catch (e) {
