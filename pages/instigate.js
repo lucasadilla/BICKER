@@ -108,6 +108,7 @@ export default function InstigatePage() {
                     </div>
                 </div>
                 <button
+                    className="submit-topic-button"
                     onClick={submitInstigate}
                     style={{
                         width: '50%',
@@ -134,6 +135,14 @@ export default function InstigatePage() {
                 >
                     Submit Topic
                 </button>
+                <style jsx>{`
+                    @media (max-width: 480px) {
+                        .submit-topic-button {
+                            width: 100% !important;
+                            white-space: nowrap;
+                        }
+                    }
+                `}</style>
             </div>
         </div>
     );
