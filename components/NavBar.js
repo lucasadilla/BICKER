@@ -82,9 +82,8 @@ export default function NavBar() {
                         width: isMobile ? '54px' : '44px',
                         height: isMobile ? '54px' : '44px',
                         borderRadius: '50%',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                        backgroundColor: isMobile ? '#28a745' : '#007BFF',
-                        boxShadow: isMobile ? '0 4px 0 #1e7e34' : '0 2px 4px rgba(0,0,0,0.2)'
+                        backgroundColor: '#007BFF',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}
                     onMouseEnter={handleCircularMouseEnter}
                     onMouseLeave={handleCircularMouseLeave}
@@ -121,8 +120,8 @@ export default function NavBar() {
                         justifyContent: 'center',
                         position: 'absolute',
                         right: '20px',
-                        backgroundColor: '#6c757d',
-                        boxShadow: '0 4px 0 #545b62'
+                        backgroundColor: '#dc3545',
+                        boxShadow: '0 4px 0 #a71d2a'
                     }}
                 >
                     <svg
