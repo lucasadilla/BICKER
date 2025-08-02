@@ -225,14 +225,26 @@ export default function NavBar() {
             ))}
             {session ? (
                 <button
-                    style={{ ...buttonStyle, width: '100%', marginTop: '10px' }}
+                    style={{
+                        ...buttonStyle,
+                        width: '100%',
+                        margin: '5px 0',
+                        padding: '15px 20px',
+                        fontSize: '18px'
+                    }}
                     onClick={() => { setIsMobileMenuOpen(false); signOut(); }}
                 >
                     Sign Out
                 </button>
             ) : (
                 <button
-                    style={{ ...buttonStyle, width: '100%', marginTop: '10px' }}
+                    style={{
+                        ...buttonStyle,
+                        width: '100%',
+                        margin: '5px 0',
+                        padding: '15px 20px',
+                        fontSize: '18px'
+                    }}
                     onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
                 >
                     Sign In
