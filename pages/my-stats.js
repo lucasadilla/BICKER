@@ -15,7 +15,7 @@ export default function MyStats() {
 
   const processedDebates = debates.map((debate) => {
     const vote = debate.votedBy?.find((v) => v.userId === userId);
-    const wroteSide = debate.createdBy === userId ? 'blue' : null;
+    const wroteSide = debate.createdBy === userId ? 'blue' : (debate.instigatedBy === userId ? 'red' : null);
     return { ...debate, userSide: vote ? vote.vote : null, userWroteSide: wroteSide };
   });
 
