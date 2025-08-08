@@ -15,6 +15,10 @@ const DebateSchema = new mongoose.Schema({
     createdBy: {
         type: String,
         required: true
+    },
+    instigatedBy: {
+        type: String,
+        default: 'anonymous'
     }
 }, { timestamps: true });
 

@@ -8,6 +8,10 @@ const InstigateSchema = new mongoose.Schema(
             required: true,
             maxlength: 200,
         },
+        createdBy: {
+            type: String,
+            default: 'anonymous',
+        },
     },
     { timestamps: true } // adds createdAt, updatedAt automatically
 );

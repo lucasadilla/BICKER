@@ -49,12 +49,14 @@ export default async function handler(req, res) {
 
             const session = await getServerSession(req, res, authOptions);
             const creator = session?.user?.email || 'anonymous';
+            const instigator = instigate.createdBy || 'anonymous';
 
             // 2) Create the Debate
             const newDebate = await Debate.create({
                 instigateText: instigate.text,
                 debateText: debateText.trim(),
-                createdBy: creator
+                createdBy: creator,
+                instigatedBy: instigator
             });
 
             // Notify the creator that their debate was created
@@ -68,6 +70,7 @@ export default async function handler(req, res) {
                 instigateText: instigate.text,
                 debateText: debateText.trim(),
                 createdBy: creator,
+                instigatedBy: instigator,
                 votesRed: 0,
                 votesBlue: 0,
                 votedBy: []

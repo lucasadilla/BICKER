@@ -1,18 +1,22 @@
 import dbConnect from '../../lib/dbConnect';
 import Instigate from '../../models/Instigate';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from './auth/[...nextauth]';
 
 export default async function handler(req, res) {
     await dbConnect();
 
     if (req.method === 'POST') {
         const { text } = req.body;
+        const session = await getServerSession(req, res, authOptions);
+        const creator = session?.user?.email || 'anonymous';
         if (!text || text.length > 200) {
             return res
                 .status(400)
                 .json({ error: 'Text is required and must be under 200 characters.' });
         }
         try {
-            const newInstigate = await Instigate.create({ text });
+            const newInstigate = await Instigate.create({ text, createdBy: creator });
             return res.status(201).json(newInstigate);
         } catch (error) {
             console.error('Error creating instigate:', error);

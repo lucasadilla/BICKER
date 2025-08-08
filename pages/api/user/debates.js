@@ -18,7 +18,13 @@ export default async function handler(req, res) {
     try {
         const userId = session.user.email;
 
-        let debates = await Deliberate.find({ createdBy: userId }).lean();
+        let debates = await Deliberate.find({
+            $or: [
+                { createdBy: userId },
+                { instigatedBy: userId },
+                { 'votedBy.userId': userId }
+            ]
+        }).lean();
 
         // Sort debates using the same logic as the public stats endpoint
         if (sort === 'oldest') {
@@ -53,12 +59,14 @@ export default async function handler(req, res) {
         const startIndex = (pageNum - 1) * limitNum;
         const pagedDebates = debates.slice(startIndex, startIndex + limitNum);
 
-        // Calculate wins for the user (blue side victory)
+        // Calculate wins for the user on either side
         const wins = debates.reduce((sum, d) => {
             const winningSide = (d.votesRed === d.votesBlue)
                 ? null
                 : (d.votesRed > d.votesBlue ? 'red' : 'blue');
-            return winningSide === 'blue' ? sum + 1 : sum;
+            if (winningSide === 'blue' && d.createdBy === userId) return sum + 1;
+            if (winningSide === 'red' && d.instigatedBy === userId) return sum + 1;
+            return sum;
         }, 0);
 
         return res.status(200).json({ debates: pagedDebates, totalDebates, wins });
