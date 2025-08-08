@@ -282,13 +282,13 @@ export default function DebatePage({ initialDebates }) {
                         width: isSearchExpanded ? '80%' : '48px',
                         maxWidth: '600px',
                         zIndex: 1000,
-                        padding: '0 20px',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         willChange: 'width, transform',
                         display: 'flex',
                         justifyContent: 'center',
                         flexDirection: 'column',
-                        alignItems: 'stretch',
+                        alignItems: 'center',
+                        boxSizing: 'border-box',
                     }}
                 >
                     {searchBarContent}
