@@ -6,6 +6,8 @@ export default function NavBar() {
     const { data: session } = useSession();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -17,6 +19,29 @@ export default function NavBar() {
         
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useEffect(() => {
+        if (session) {
+            fetch('/api/notifications')
+                .then(res => res.json())
+                .then(data => setNotifications(data))
+                .catch(() => {});
+        }
+    }, [session]);
+
+    const handleBellClick = async () => {
+        const newState = !showNotifications;
+        setShowNotifications(newState);
+        if (!showNotifications && notifications.length > 0) {
+            const ids = notifications.map(n => n._id);
+            await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids })
+            });
+            setNotifications([]);
+        }
+    };
 
     // Common button style
     const buttonStyle = {
@@ -104,6 +129,95 @@ export default function NavBar() {
                     </svg>
                 </button>
             </Link>
+
+            {/* Notification bell */}
+            {session && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        right: isMobile ? '80px' : '20px'
+                    }}
+                >
+                    <button
+                        style={{
+                            ...buttonStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: isMobile ? '15px' : '10px',
+                            width: isMobile ? '54px' : '44px',
+                            height: isMobile ? '54px' : '44px',
+                            borderRadius: '50%',
+                            backgroundColor: '#ffc107',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        }}
+                        onMouseEnter={handleCircularMouseEnter}
+                        onMouseLeave={handleCircularMouseLeave}
+                        onClick={handleBellClick}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width={isMobile ? '28' : '24'}
+                            height={isMobile ? '28' : '24'}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        {notifications.length > 0 && (
+                            <span
+                                style={{
+                                    position: 'absolute',
+                                    top: '5px',
+                                    right: '5px',
+                                    backgroundColor: 'red',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    padding: '2px 6px',
+                                    fontSize: '12px'
+                                }}
+                            >
+                                {notifications.length}
+                            </span>
+                        )}
+                    </button>
+                    {showNotifications && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: '60px',
+                                right: '0',
+                                backgroundColor: 'white',
+                                padding: '10px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                width: '250px',
+                                zIndex: 1000
+                            }}
+                        >
+                            {notifications.length === 0 ? (
+                                <div style={{ padding: '10px' }}>No new notifications</div>
+                            ) : (
+                                notifications.map((n) => (
+                                    <div
+                                        key={n._id}
+                                        style={{
+                                            borderBottom: '1px solid #eee',
+                                            padding: '5px 0'
+                                        }}
+                                    >
+                                        {n.message}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Mobile menu button */}
             {isMobile && (

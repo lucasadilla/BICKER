@@ -2,6 +2,7 @@ import dbConnect from '../../lib/dbConnect';
 import Debate from '../../models/Debate';
 import Instigate from '../../models/Instigate';
 import Deliberate from '../../models/Deliberate';
+import Notification from '../../models/Notification';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 
@@ -54,6 +55,12 @@ export default async function handler(req, res) {
                 instigateText: instigate.text,
                 debateText: debateText.trim(),
                 createdBy: creator
+            });
+
+            // Notify the creator that their debate was created
+            await Notification.create({
+                userId: creator,
+                message: 'Your debate has been created.'
             });
 
             // 3) Create a Deliberate doc with the same text
