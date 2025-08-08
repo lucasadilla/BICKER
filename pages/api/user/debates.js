@@ -1,5 +1,6 @@
 import dbConnect from '../../../lib/dbConnect';
 import Deliberate from '../../../models/Deliberate';
+import User from '../../../models/User';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -73,7 +74,16 @@ export default async function handler(req, res) {
             return sum;
         }, 0);
 
-        return res.status(200).json({ debates: pagedDebates, totalDebates, wins });
+        const userDoc = await User.findOne({ email: userId }).lean();
+
+        return res.status(200).json({
+            debates: pagedDebates,
+            totalDebates,
+            wins,
+            points: userDoc?.points || 0,
+            streak: userDoc?.streak || 0,
+            badges: userDoc?.badges || []
+        });
     } catch (e) {
         console.error('Error fetching user debates:', e);
         return res.status(500).json({ error: 'Failed to fetch user debates' });

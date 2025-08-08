@@ -11,6 +11,9 @@ export default function MyStats() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalDebates, setTotalDebates] = useState(0);
   const [wins, setWins] = useState(0);
+  const [points, setPoints] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [badges, setBadges] = useState([]);
 
   const winRate = totalDebates ? ((wins / totalDebates) * 100).toFixed(0) : '0';
 
@@ -24,6 +27,9 @@ export default function MyStats() {
         setDebates(data.debates || []);
         setTotalDebates(data.totalDebates || 0);
         setWins(data.wins || 0);
+        setPoints(data.points || 0);
+        setStreak(data.streak || 0);
+        setBadges(data.badges || []);
         setTotalPages(Math.ceil((data.totalDebates || 0) / 25) || 1);
       } catch (err) {
         console.error('Error fetching user debates:', err);
@@ -59,6 +65,9 @@ export default function MyStats() {
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <p style={{ margin: '4px 0' }}>Debates Participated: {totalDebates}</p>
           <p style={{ margin: '4px 0' }}>Win Rate: {winRate}%</p>
+          <p style={{ margin: '4px 0' }}>Total Points: {points}</p>
+          <p style={{ margin: '4px 0' }}>Current Streak: {streak}</p>
+          <p style={{ margin: '4px 0' }}>Badges: {badges.length ? badges.join(', ') : 'None'}</p>
         </div>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <select value={sort} onChange={(e) => setSort(e.target.value)} style={{ padding: '8px', borderRadius: '4px' }}>
