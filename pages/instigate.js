@@ -5,6 +5,7 @@ import NavBar from '../components/NavBar';
 export default function InstigatePage() {
     const [instigates, setInstigates] = useState([]);
     const [newInstigate, setNewInstigate] = useState('');
+    const [tags, setTags] = useState('');
 
     // Disable scrolling on mount
     useEffect(() => {
@@ -39,9 +40,16 @@ export default function InstigatePage() {
             await fetch('/api/instigate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: newInstigate }),
+                body: JSON.stringify({
+                    text: newInstigate,
+                    tags: tags
+                        .split(',')
+                        .map((t) => t.trim())
+                        .filter((t) => t),
+                }),
             });
             setNewInstigate('');
+            setTags('');
             fetchInstigates();
         } catch (error) {
             console.error('Error submitting instigate:', error);
@@ -107,6 +115,20 @@ export default function InstigatePage() {
                         {newInstigate.length}/200
                     </div>
                 </div>
+                <input
+                    type="text"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    placeholder="Add tags separated by commas"
+                    style={{
+                        width: '100%',
+                        marginTop: '10px',
+                        padding: '8px',
+                        fontSize: '18px',
+                        borderRadius: '4px',
+                        border: '1px solid #ccc',
+                    }}
+                />
                 <button
                     className="submit-topic-button"
                     onClick={submitInstigate}

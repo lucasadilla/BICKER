@@ -15,6 +15,8 @@ export default function DebatePage({ initialDebates }) {
     const [showSearchResults, setShowSearchResults] = useState(false);
     // Toggle search bar expansion
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    const [tagFilter, setTagFilter] = useState('');
+    const [trendingTags, setTrendingTags] = useState([]);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -42,11 +44,30 @@ export default function DebatePage({ initialDebates }) {
         }
     }, [initialDebates]);
 
-    const fetchInstigates = async (search = '') => {
+    useEffect(() => {
+        const loadTrending = async () => {
+            try {
+                const res = await fetch('/api/trending');
+                const data = await res.json();
+                setTrendingTags(data);
+            } catch (error) {
+                console.error('Error fetching trending tags:', error);
+            }
+        };
+        loadTrending();
+    }, []);
+
+    useEffect(() => {
+        fetchInstigates('', tagFilter);
+    }, [tagFilter]);
+
+    const fetchInstigates = async (search = '', tag = '') => {
         try {
-            const url = search
-                ? `/api/instigate?search=${encodeURIComponent(search)}`
-                : `/api/instigate`;
+            let url = '/api/instigate';
+            const params = [];
+            if (search) params.push(`search=${encodeURIComponent(search)}`);
+            if (tag) params.push(`tags=${encodeURIComponent(tag)}`);
+            if (params.length) url += `?${params.join('&')}`;
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -70,13 +91,15 @@ export default function DebatePage({ initialDebates }) {
         const delayDebounceFn = setTimeout(async () => {
             if (searchTerm.trim()) {
                 try {
-                    const response = await fetch(
-                        `/api/instigate?search=${encodeURIComponent(searchTerm)}`
-                    );
+                    let url = `/api/instigate?search=${encodeURIComponent(searchTerm)}`;
+                    if (tagFilter.trim()) {
+                        url += `&tags=${encodeURIComponent(tagFilter)}`;
+                    }
+                    const response = await fetch(url);
                     if (!response.ok)
                         throw new Error(`HTTP error! status: ${response.status}`);
                     const results = await response.json();
-                    
+
                     const resultsWithDebates = await Promise.all(
                         results.slice(0, 5).map(async (instigate) => {
                             const debateResponse = await fetch(
@@ -100,11 +123,17 @@ export default function DebatePage({ initialDebates }) {
             }
         }, 300);
         return () => clearTimeout(delayDebounceFn);
-    }, [searchTerm]);
+    }, [searchTerm, tagFilter]);
 
     const selectSearchResult = (instigate) => {
         setInstigates([instigate, ...instigates]);
-        setCurrentInstigateIndex(0);
+       setCurrentInstigateIndex(0);
+       setSearchTerm('');
+       setShowSearchResults(false);
+    };
+
+    const handleTagClick = (tag) => {
+        setTagFilter(tag);
         setSearchTerm('');
         setShowSearchResults(false);
     };
@@ -217,6 +246,23 @@ export default function DebatePage({ initialDebates }) {
                 </div>
     );
 
+    const tagInput = (
+        <input
+            type="text"
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            placeholder="Filter by tag"
+            style={{
+                width: '100%',
+                marginTop: '10px',
+                padding: '8px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+            }}
+        />
+    );
+
     const searchResultsList =
         showSearchResults && searchResults.length > 0 ? (
             <div
@@ -251,6 +297,36 @@ export default function DebatePage({ initialDebates }) {
                 ))}
             </div>
         ) : null;
+
+    const trendingSection = (
+        <div style={{ marginTop: '10px', textAlign: 'center' }}>
+            <h4 style={{ margin: '10px 0', color: '#333' }}>Trending</h4>
+            <div
+                style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    justifyContent: 'center',
+                }}
+            >
+                {trendingTags.map((tag) => (
+                    <span
+                        key={tag._id}
+                        onClick={() => handleTagClick(tag._id)}
+                        style={{
+                            backgroundColor: '#007BFF',
+                            color: '#fff',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        {tag._id} ({tag.count})
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
 
     return (
         <div
@@ -292,7 +368,9 @@ export default function DebatePage({ initialDebates }) {
                     }}
                 >
                     {searchBarContent}
+                    {tagInput}
                     {searchResultsList}
+                    {trendingSection}
                 </div>
             )}
 
@@ -342,7 +420,9 @@ export default function DebatePage({ initialDebates }) {
                         }}
                     >
                         {searchBarContent}
+                        {tagInput}
                         {searchResultsList}
+                        {trendingSection}
                     </div>
                 )}
 
