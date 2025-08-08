@@ -1,5 +1,6 @@
 import dbConnect from '../../lib/dbConnect';
 import Deliberate from '../../models/Deliberate';
+import Notification from '../../models/Notification';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 
@@ -63,6 +64,14 @@ export default async function handler(req, res) {
             console.log('Saving deliberation...');
             const savedDeliberation = await deliberation.save();
             console.log('Deliberation saved:', savedDeliberation);
+
+            // Notify the creator of the debate about the new vote
+            if (deliberation.createdBy && deliberation.createdBy !== voter) {
+                await Notification.create({
+                    userId: deliberation.createdBy,
+                    message: `Your debate received a new ${vote} vote.`
+                });
+            }
             
             // Return only the necessary data
             res.status(200).json({
