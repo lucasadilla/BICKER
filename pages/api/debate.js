@@ -3,6 +3,7 @@ import Debate from '../../models/Debate';
 import Instigate from '../../models/Instigate';
 import Deliberate from '../../models/Deliberate';
 import Notification from '../../models/Notification';
+import User from '../../models/User';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 
@@ -58,6 +59,13 @@ export default async function handler(req, res) {
                 createdBy: creator,
                 instigatedBy: instigator
             });
+
+            if (creator !== 'anonymous') {
+                await User.findOneAndUpdate(
+                    { email: creator },
+                    { $inc: { points: 1, streak: 1 } }
+                );
+            }
 
             // Notify the creator that their debate was created
             await Notification.create({

@@ -1,6 +1,7 @@
 import dbConnect from '../../lib/dbConnect';
 import Deliberate from '../../models/Deliberate';
 import Notification from '../../models/Notification';
+import User from '../../models/User';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 
@@ -64,6 +65,13 @@ export default async function handler(req, res) {
             console.log('Saving deliberation...');
             const savedDeliberation = await deliberation.save();
             console.log('Deliberation saved:', savedDeliberation);
+
+            if (voter !== 'anonymous') {
+                await User.findOneAndUpdate(
+                    { email: voter },
+                    { $inc: { points: 1, streak: 1 } }
+                );
+            }
 
             // Notify the creator of the debate about the new vote
             if (deliberation.createdBy && deliberation.createdBy !== voter) {

@@ -1,5 +1,7 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import dbConnect from '../../../lib/dbConnect';
+import User from '../../../models/User';
 
 export const authOptions = {
     providers: [
@@ -9,6 +11,24 @@ export const authOptions = {
         }),
     ],
     callbacks: {
+        async signIn({ user }) {
+            await dbConnect();
+            if (user?.email) {
+                await User.findOneAndUpdate(
+                    { email: user.email },
+                    {
+                        $setOnInsert: {
+                            email: user.email,
+                            points: 0,
+                            streak: 0,
+                            badges: []
+                        }
+                    },
+                    { upsert: true }
+                );
+            }
+            return true;
+        },
         // The redirect callback is called anytime NextAuth needs to redirect
         async redirect({ url, baseUrl }) {
             // If sign-in succeeded, send them to the homepage
