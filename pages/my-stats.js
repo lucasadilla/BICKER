@@ -11,13 +11,6 @@ export default function MyStats() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalDebates, setTotalDebates] = useState(0);
   const [wins, setWins] = useState(0);
-  const userId = session?.user?.email;
-
-  const processedDebates = debates.map((debate) => {
-    const vote = debate.votedBy?.find((v) => v.userId === userId);
-    const wroteSide = debate.createdBy === userId ? 'blue' : (debate.instigatedBy === userId ? 'red' : null);
-    return { ...debate, userSide: vote ? vote.vote : null, userWroteSide: wroteSide };
-  });
 
   const winRate = totalDebates ? ((wins / totalDebates) * 100).toFixed(0) : '0';
 
@@ -75,7 +68,7 @@ export default function MyStats() {
             <option value="mostDecisive">Most Decisive</option>
           </select>
         </div>
-        {processedDebates.map((debate) => (
+        {debates.map((debate) => (
           <div key={debate._id} style={{ backgroundColor: 'white', color: '#333', padding: '15px', borderRadius: '8px', marginBottom: '25px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ alignSelf: 'flex-start', maxWidth: isMobile ? '80%' : '60%', backgroundColor: '#FF4D4D', color: 'white', padding: '12px 16px', borderRadius: '16px', borderTopLeftRadius: '4px', marginLeft: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>

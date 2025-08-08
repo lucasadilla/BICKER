@@ -21,10 +21,14 @@ export default async function handler(req, res) {
         let debates = await Deliberate.find({
             $or: [
                 { createdBy: userId },
-                { instigatedBy: userId },
-                { 'votedBy.userId': userId }
+                { instigatedBy: userId }
             ]
         }).lean();
+
+        debates = debates.map(d => ({
+            ...d,
+            userWroteSide: d.createdBy === userId ? 'blue' : 'red'
+        }));
 
         // Sort debates using the same logic as the public stats endpoint
         if (sort === 'oldest') {
