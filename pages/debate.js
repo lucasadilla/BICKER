@@ -407,6 +407,7 @@ export default function DebatePage({ initialDebates }) {
                         style={{
                             position: 'relative',
                             width: isMobile ? '85%' : '60%',
+                            margin: '0 auto',
                         }}
                     >
                         <textarea
@@ -425,8 +426,8 @@ export default function DebatePage({ initialDebates }) {
                                 color: 'black',
                                 resize: 'none',
                                 overflow: 'hidden',
-                                marginLeft: 'auto',
-                                marginRight: 'auto',
+                                boxSizing: 'border-box',
+                                margin: '0 auto',
                             }}
                         />
                         <div
