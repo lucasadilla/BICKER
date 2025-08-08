@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     await dbConnect();
 
     if (req.method === 'POST') {
-        const { text, tags = [] } = req.body;
+        const { text } = req.body;
         const session = await getServerSession(req, res, authOptions);
         const creator = session?.user?.email || 'anonymous';
         if (!text || text.length > 200) {
@@ -16,11 +16,7 @@ export default async function handler(req, res) {
                 .json({ error: 'Text is required and must be under 200 characters.' });
         }
         try {
-            const newInstigate = await Instigate.create({
-                text,
-                createdBy: creator,
-                tags,
-            });
+            const newInstigate = await Instigate.create({ text, createdBy: creator });
             return res.status(201).json(newInstigate);
         } catch (error) {
             console.error('Error creating instigate:', error);
@@ -29,17 +25,15 @@ export default async function handler(req, res) {
 
     } else if (req.method === 'GET') {
         try {
-            const { search, tags } = req.query;
+            const { search } = req.query;
             let filter = {};
 
+            // If there's a search query, filter by partial match (case-insensitive)
             if (search) {
-                filter.text = { $regex: search, $options: 'i' };
-            }
-            if (tags) {
-                const tagArray = Array.isArray(tags) ? tags : tags.split(',');
-                filter.tags = { $in: tagArray };
+                filter = { text: { $regex: search, $options: 'i' } };
             }
 
+            // Fetch either all instigates or those matching the search
             const instigates = await Instigate.find(filter);
             return res.status(200).json(instigates);
 
