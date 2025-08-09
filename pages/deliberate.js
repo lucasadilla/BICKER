@@ -20,6 +20,30 @@ export default function DeliberatePage({ initialDebates }) {
     const [showVotes, setShowVotes] = useState(false);
     const [hoveringSide, setHoveringSide] = useState('');
 
+    // Subscribe to live vote updates
+    useEffect(() => {
+        const eventSource = new EventSource('/api/deliberate/live');
+
+        eventSource.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                setDebates((prevDebates) =>
+                    prevDebates.map((debate) =>
+                        debate._id === data.debateId
+                            ? { ...debate, votesRed: data.votesRed, votesBlue: data.votesBlue }
+                            : debate
+                    )
+                );
+            } catch (err) {
+                console.error('Error parsing SSE data:', err);
+            }
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, []);
+
 
     // If there were no initialDebates, fetch them client-side
     useEffect(() => {
