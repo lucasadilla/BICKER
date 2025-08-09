@@ -4,7 +4,7 @@ import Notification from '../../models/Notification';
 import User from '../../models/User';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
-import updateBadges from '../../lib/badgeHelper';
+import updateBadges from '../../lib/badges';
 import emitter from '../../lib/deliberateEvents';
 
 export default async function handler(req, res) {
