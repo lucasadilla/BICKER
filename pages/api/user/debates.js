@@ -1,7 +1,7 @@
 import dbConnect from '../../../lib/dbConnect';
 import Deliberate from '../../../models/Deliberate';
 import User from '../../../models/User';
-import updateBadges from '../../../lib/updateBadges';
+import updateBadges from '../../../lib/badges';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -76,10 +76,11 @@ export default async function handler(req, res) {
         }, 0);
 
         const instigateCount = debates.filter(d => d.instigatedBy === userId).length;
+        const createdCount = debates.filter(d => d.createdBy === userId).length;
         const winRate = totalDebates ? Math.round((wins / totalDebates) * 100) : 0;
 
         const userDoc = await User.findOne({ email: userId }).lean();
-        const updatedBadges = updateBadges(userDoc, winRate, instigateCount);
+        const updatedBadges = await updateBadges(userDoc, winRate, instigateCount, createdCount);
         if (userDoc) {
             await User.updateOne({ email: userId }, { badges: updatedBadges });
         }

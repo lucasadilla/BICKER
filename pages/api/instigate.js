@@ -2,7 +2,7 @@ import dbConnect from '../../lib/dbConnect';
 import Instigate from '../../models/Instigate';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
-import updateBadges from '../../lib/badgeHelper';
+import updateBadges from '../../lib/badges';
 
 export default async function handler(req, res) {
     await dbConnect();
