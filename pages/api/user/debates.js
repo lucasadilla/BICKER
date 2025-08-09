@@ -89,6 +89,7 @@ export default async function handler(req, res) {
             totalDebates,
             wins,
             winRate,
+            instigateCount,
             points: userDoc?.points || 0,
             streak: userDoc?.streak || 0,
             badges: updatedBadges
