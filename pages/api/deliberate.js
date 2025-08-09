@@ -5,6 +5,7 @@ import User from '../../models/User';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 import updateBadges from '../../lib/badgeHelper';
+import emitter from '../../lib/deliberateEvents';
 
 export default async function handler(req, res) {
     try {
@@ -82,7 +83,14 @@ export default async function handler(req, res) {
                     message: `Your debate received a new ${vote} vote.`
                 });
             }
-            
+
+            // Emit vote update to connected clients
+            emitter.emit('vote', {
+                debateId: savedDeliberation._id.toString(),
+                votesRed: savedDeliberation.votesRed || 0,
+                votesBlue: savedDeliberation.votesBlue || 0
+            });
+
             // Return only the necessary data
             res.status(200).json({
                 _id: savedDeliberation._id,
