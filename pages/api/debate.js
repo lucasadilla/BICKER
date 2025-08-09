@@ -6,6 +6,7 @@ import Notification from '../../models/Notification';
 import User from '../../models/User';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
+import updateBadges from '../../lib/badgeHelper';
 
 export default async function handler(req, res) {
     await dbConnect();
@@ -65,6 +66,7 @@ export default async function handler(req, res) {
                     { email: creator },
                     { $inc: { points: 1, streak: 1 } }
                 );
+                await updateBadges(creator);
             }
 
             // Notify the creator that their debate was created
