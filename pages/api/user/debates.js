@@ -1,6 +1,7 @@
 import dbConnect from '../../../lib/dbConnect';
 import Deliberate from '../../../models/Deliberate';
 import User from '../../../models/User';
+import updateBadges from '../../../lib/updateBadges';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -74,15 +75,23 @@ export default async function handler(req, res) {
             return sum;
         }, 0);
 
+        const instigateCount = debates.filter(d => d.instigatedBy === userId).length;
+        const winRate = totalDebates ? Math.round((wins / totalDebates) * 100) : 0;
+
         const userDoc = await User.findOne({ email: userId }).lean();
+        const updatedBadges = updateBadges(userDoc, winRate, instigateCount);
+        if (userDoc) {
+            await User.updateOne({ email: userId }, { badges: updatedBadges });
+        }
 
         return res.status(200).json({
             debates: pagedDebates,
             totalDebates,
             wins,
+            winRate,
             points: userDoc?.points || 0,
             streak: userDoc?.streak || 0,
-            badges: userDoc?.badges || []
+            badges: updatedBadges
         });
     } catch (e) {
         console.error('Error fetching user debates:', e);
