@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 export default function MyStats() {
   const { data: session } = useSession();
@@ -60,6 +60,7 @@ export default function MyStats() {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
         <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>My Debates</h1>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <button onClick={() => signOut()} style={{ padding: '8px 16px', borderRadius: '4px', marginBottom: '10px' }}>Sign Out</button>
           <p className="text-base" style={{ margin: '4px 0' }}>Debates Participated: {totalDebates}</p>
           <p className="text-base" style={{ margin: '4px 0' }}>Win Rate: {winRate}%</p>
           <p className="text-base" style={{ margin: '4px 0' }}>Total Points: {points}</p>

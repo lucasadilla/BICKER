@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
+import Avatar from './Avatar';
 
 export default function NavBar() {
     const { data: session } = useSession();
@@ -130,12 +131,31 @@ export default function NavBar() {
                 </button>
             </Link>
 
+            {/* User avatar */}
+            {session && (
+                <Link href="/my-stats" passHref>
+                    <div
+                        style={{
+                            position: 'absolute',
+                            right: isMobile ? '80px' : '20px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <Avatar
+                            src={session.user?.image}
+                            alt={session.user?.name || 'User Avatar'}
+                            size={isMobile ? 54 : 44}
+                        />
+                    </div>
+                </Link>
+            )}
+
             {/* Notification bell */}
             {session && (
                 <div
                     style={{
                         position: 'absolute',
-                        right: isMobile ? '80px' : '20px'
+                        right: isMobile ? '140px' : '80px'
                     }}
                 >
                     <button
@@ -263,8 +283,7 @@ export default function NavBar() {
                         { label: 'Instigate', path: '/instigate' },
                         { label: 'Debate', path: '/debate' },
                         { label: 'Deliberate', path: '/deliberate' },
-                        { label: 'Leaderboard', path: '/leaderboard' },
-                        ...(session ? [{ label: 'My Stats', path: '/my-stats' }] : [])
+                        { label: 'Leaderboard', path: '/leaderboard' }
                     ].map(({ label, path }) => (
                         <Link key={label} href={path} passHref>
                             <button
@@ -276,16 +295,7 @@ export default function NavBar() {
                             </button>
                         </Link>
                     ))}
-                    {session ? (
-                        <button
-                            style={buttonStyle}
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
-                            onClick={() => signOut()}
-                        >
-                            Sign Out
-                        </button>
-                    ) : (
+                    {!session && (
                         <button
                             style={buttonStyle}
                             onMouseEnter={handleMouseEnter}
@@ -319,8 +329,7 @@ export default function NavBar() {
                 { label: 'Instigate', path: '/instigate' },
                 { label: 'Debate', path: '/debate' },
                 { label: 'Deliberate', path: '/deliberate' },
-                { label: 'Leaderboard', path: '/leaderboard' },
-                ...(session ? [{ label: 'My Stats', path: '/my-stats' }] : [])
+                { label: 'Leaderboard', path: '/leaderboard' }
             ].map(({ label, path }) => (
                 <Link key={label} href={path} passHref>
                     <button
@@ -337,20 +346,7 @@ export default function NavBar() {
                     </button>
                 </Link>
             ))}
-            {session ? (
-                <button
-                    style={{
-                        ...buttonStyle,
-                        width: '100%',
-                        margin: '5px 0',
-                        padding: '15px 20px',
-                        fontSize: '18px'
-                    }}
-                    onClick={() => { setIsMobileMenuOpen(false); signOut(); }}
-                >
-                    Sign Out
-                </button>
-            ) : (
+            {!session && (
                 <button
                     style={{
                         ...buttonStyle,
