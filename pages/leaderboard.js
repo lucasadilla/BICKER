@@ -42,9 +42,24 @@ export default function Leaderboard() {
     <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
         <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>Debate Leaderboard</h1>
-        <p className="text-base" style={{ textAlign: 'center', marginBottom: '20px' }}>
-          Total Debates: {totalDebates} | Total Votes: {totalVotes}
-        </p>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            gap: '20px',
+            justifyItems: 'center',
+            marginBottom: '20px'
+          }}
+        >
+          <div>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{totalDebates}</p>
+            <p className="text-sm" style={{ margin: 0 }}>Total Debates</p>
+          </div>
+          <div>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{totalVotes}</p>
+            <p className="text-sm" style={{ margin: 0 }}>Total Votes</p>
+          </div>
+        </div>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <select value={sort} onChange={(e) => setSort(e.target.value)} style={{ padding: '8px', borderRadius: '4px' }}>
             <option value="newest">Newest First</option>
