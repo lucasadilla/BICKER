@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import Avatar from './Avatar';
 
 export default function NavBar() {
@@ -9,6 +9,7 @@ export default function NavBar() {
     const [isMobile, setIsMobile] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -133,13 +134,17 @@ export default function NavBar() {
 
             {/* User avatar */}
             {session && (
-                <Link href="/my-stats" passHref>
+                <div
+                    style={{
+                        position: 'absolute',
+                        right: isMobile ? '80px' : '20px'
+                    }}
+                    onMouseEnter={() => setShowUserMenu(true)}
+                    onMouseLeave={() => setShowUserMenu(false)}
+                >
                     <div
-                        style={{
-                            position: 'absolute',
-                            right: isMobile ? '80px' : '20px',
-                            cursor: 'pointer'
-                        }}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setShowUserMenu(prev => !prev)}
                     >
                         <Avatar
                             src={session.user?.image}
@@ -147,7 +152,30 @@ export default function NavBar() {
                             size={isMobile ? 54 : 44}
                         />
                     </div>
-                </Link>
+                    {showUserMenu && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: isMobile ? '60px' : '60px',
+                                right: 0,
+                                backgroundColor: 'white',
+                                padding: '10px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                zIndex: 1000
+                            }}
+                        >
+                            <Link href="/my-stats" passHref>
+                                <div style={{ padding: '5px 10px', cursor: 'pointer' }}>My Stats</div>
+                            </Link>
+                            <div
+                                style={{ padding: '5px 10px', cursor: 'pointer' }}
+                                onClick={() => signOut()}
+                            >
+                                Sign Out
+                            </div>
+                        </div>
+                    )}
+                </div>
             )}
 
             {/* Notification bell */}

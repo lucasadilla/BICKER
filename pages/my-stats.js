@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { Badge } from '../components/ui/badge';
 
 export default function MyStats() {
@@ -61,7 +61,6 @@ export default function MyStats() {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
         <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>My Debates</h1>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <button onClick={() => signOut()} style={{ padding: '8px 16px', borderRadius: '4px', marginBottom: '10px' }}>Sign Out</button>
           <div
             style={{
               display: 'grid',
