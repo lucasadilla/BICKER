@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
+import { Badge } from '../components/ui/badge';
 
 export default function MyStats() {
   const { data: session } = useSession();
@@ -65,7 +66,18 @@ export default function MyStats() {
           <p className="text-base" style={{ margin: '4px 0' }}>Win Rate: {winRate}%</p>
           <p className="text-base" style={{ margin: '4px 0' }}>Total Points: {points}</p>
           <p className="text-base" style={{ margin: '4px 0' }}>Current Streak: {streak}</p>
-          <p className="text-base" style={{ margin: '4px 0' }}>Badges: {badges.length ? badges.join(', ') : 'None'}</p>
+          <div className="text-base" style={{ margin: '4px 0' }}>
+            Badges:
+            {badges.length ? (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                {badges.map((badge) => (
+                  <Badge key={badge} variant="secondary">{badge}</Badge>
+                ))}
+              </div>
+            ) : (
+              ' None'
+            )}
+          </div>
         </div>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <select value={sort} onChange={(e) => setSort(e.target.value)} style={{ padding: '8px', borderRadius: '4px' }}>
