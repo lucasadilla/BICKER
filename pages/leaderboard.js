@@ -13,13 +13,16 @@ export default function Leaderboard() {
   useEffect(() => {
     const fetchDebates = async () => {
       try {
-        const res = await fetch(`/api/debates/stats?sort=${sort}&page=${page}`);
+        const res = await fetch(`/api/stats?sort=${sort}`);
         if (!res.ok) throw new Error('Failed to fetch debates');
         const data = await res.json();
-        setDebates(data.debates || []);
+        const allDebates = data.debates || [];
+        const debatesCount = data.totalDebates ?? allDebates.length;
+        const start = (page - 1) * 25;
+        setDebates(allDebates.slice(start, start + 25));
         setTotalVotes(data.totalVotes || 0);
-        setTotalDebates(data.totalDebates || 0);
-        setTotalPages(Math.ceil((data.totalDebates || 0) / 25) || 1);
+        setTotalDebates(debatesCount);
+        setTotalPages(Math.ceil(debatesCount / 25) || 1);
       } catch (err) {
         console.error('Error fetching debates:', err);
       }
