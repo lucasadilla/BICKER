@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
-import NavBar from '../components/NavBar';
 
 export default function MyStats() {
   const { data: session } = useSession();
@@ -50,7 +49,6 @@ export default function MyStats() {
   if (!session) {
     return (
       <div style={{ paddingTop: '60px', textAlign: 'center' }}>
-        <NavBar />
         <h2>Please sign in to view your stats.</h2>
         <button onClick={() => signIn('google')}>Sign In with Google</button>
       </div>
@@ -59,7 +57,6 @@ export default function MyStats() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
-      <NavBar />
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '10px' }}>My Debates</h1>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
