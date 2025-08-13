@@ -137,7 +137,10 @@ export default function NavBar() {
                 <div
                     style={{
                         position: 'absolute',
-                        right: isMobile ? '80px' : '20px'
+                        right: isMobile ? '80px' : '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end'
                     }}
                     onMouseEnter={() => setShowUserMenu(true)}
                     onMouseLeave={() => setShowUserMenu(false)}
@@ -155,20 +158,28 @@ export default function NavBar() {
                     {showUserMenu && (
                         <div
                             style={{
-                                position: 'absolute',
-                                top: isMobile ? '60px' : '60px',
-                                right: 0,
+                                marginTop: '10px',
                                 backgroundColor: 'white',
-                                padding: '10px',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                padding: '10px 20px',
+                                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                borderRadius: '8px',
+                                minWidth: '160px',
                                 zIndex: 1000
                             }}
                         >
                             <Link href="/my-stats" passHref>
-                                <div style={{ padding: '5px 10px', cursor: 'pointer' }}>My Stats</div>
+                                <div
+                                    style={{
+                                        padding: '8px 0',
+                                        cursor: 'pointer',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    My Stats
+                                </div>
                             </Link>
                             <div
-                                style={{ padding: '5px 10px', cursor: 'pointer' }}
+                                style={{ padding: '8px 0', cursor: 'pointer', whiteSpace: 'nowrap' }}
                                 onClick={() => signOut()}
                             >
                                 Sign Out
