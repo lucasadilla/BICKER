@@ -41,8 +41,8 @@ export default function Leaderboard() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '10px' }}>Debate Leaderboard</h1>
-        <p style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>Debate Leaderboard</h1>
+        <p className="text-base" style={{ textAlign: 'center', marginBottom: '20px' }}>
           Total Debates: {totalDebates} | Total Votes: {totalVotes}
         </p>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
@@ -69,7 +69,7 @@ export default function Leaderboard() {
                   boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                 }}
               >
-                <p style={{ margin: 0, fontSize: isMobile ? '16px' : '18px', lineHeight: '1.4' }}>
+                <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
                   {debate.instigateText}
                 </p>
               </div>
@@ -86,7 +86,7 @@ export default function Leaderboard() {
                   boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                 }}
               >
-                <p style={{ margin: 0, fontSize: isMobile ? '16px' : '18px', lineHeight: '1.4' }}>
+                <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
                   {debate.debateText}
                 </p>
               </div>

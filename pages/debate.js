@@ -245,7 +245,7 @@ export default function DebatePage({ initialDebates }) {
                             backgroundColor: '#fff',
                         }}
                     >
-                        <p style={{ margin: 0, color: '#333' }}>{instigate.text}</p>
+                        <p className="text-base" style={{ margin: 0, color: '#333' }}>{instigate.text}</p>
                     </div>
                 ))}
             </div>
@@ -258,7 +258,6 @@ export default function DebatePage({ initialDebates }) {
                 flexDirection: isMobile ? 'column' : 'row',
                 minHeight: '100vh',
                 width: '100vw',
-                fontFamily: 'Arial, sans-serif',
                 overflowX: 'hidden',
                 overflowY: 'auto',
                 position: 'relative',
@@ -356,6 +355,7 @@ export default function DebatePage({ initialDebates }) {
                     }}
                 >
                     <p
+                        className="heading-1"
                         style={{
                             textAlign: 'center',
                             fontSize: isMobile ? '24px' : '40px',

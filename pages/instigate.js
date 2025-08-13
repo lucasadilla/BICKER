@@ -51,7 +51,6 @@ export default function InstigatePage() {
     return (
         <div
             style={{
-                fontFamily: 'Arial, sans-serif',
                 padding: '70px',
                 backgroundColor: '#ee4343',
                 minHeight: '100vh',
@@ -60,7 +59,7 @@ export default function InstigatePage() {
                 alignItems: 'center',
             }}
         >
-            <h1 style={{ textAlign: 'center', color: '#ffffff', marginBottom: '20px' }}>
+            <h1 className="heading-1" style={{ textAlign: 'center', color: '#ffffff', marginBottom: '20px' }}>
                 Instigate
             </h1>
 

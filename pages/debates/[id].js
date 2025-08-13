@@ -16,7 +16,7 @@ export default function DebateDetail({ debate }) {
   }, []);
 
   return (
-    <div style={{ paddingTop: '70px', fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ paddingTop: '70px' }}>
       <NextSeo
         title={`Debate: ${debate.instigateText}`}
         description={debate.debateText}
@@ -27,8 +27,8 @@ export default function DebateDetail({ debate }) {
           description: debate.debateText,
         }}
       />
-      <h1 style={{ textAlign: 'center' }}>{debate.instigateText}</h1>
-      <p style={{ maxWidth: '600px', margin: '20px auto' }}>{debate.debateText}</p>
+      <h1 className="heading-1" style={{ textAlign: 'center' }}>{debate.instigateText}</h1>
+      <p className="text-base" style={{ maxWidth: '600px', margin: '20px auto' }}>{debate.debateText}</p>
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
         <Link href={`/deliberates/${debate._id}`}>Vote on this debate</Link>
       </div>

@@ -69,7 +69,7 @@ export default function DeliberateDetail({ deliberation }) {
   }
 
   return (
-    <div style={{ paddingTop: '70px', fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ paddingTop: '70px' }}>
       <NextSeo
         title={`Deliberation: ${deliberation.instigateText}`}
         description={deliberation.debateText}
@@ -80,8 +80,8 @@ export default function DeliberateDetail({ deliberation }) {
           description: deliberation.debateText,
         }}
       />
-      <h1 style={{ textAlign: 'center' }}>{deliberation.instigateText}</h1>
-      <p style={{ maxWidth: '600px', margin: '20px auto' }}>{deliberation.debateText}</p>
+      <h1 className="heading-1" style={{ textAlign: 'center' }}>{deliberation.instigateText}</h1>
+      <p className="text-base" style={{ maxWidth: '600px', margin: '20px auto' }}>{deliberation.debateText}</p>
 
       <div
         style={{
