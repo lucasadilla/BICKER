@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import NavBar from '../components/NavBar';
 
 export default function Leaderboard() {
   const [debates, setDebates] = useState([]);
@@ -41,7 +40,6 @@ export default function Leaderboard() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
-      <NavBar />
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '10px' }}>Debate Leaderboard</h1>
         <p style={{ textAlign: 'center', marginBottom: '20px' }}>

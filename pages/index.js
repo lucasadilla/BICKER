@@ -1,6 +1,5 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
-import NavBar from '../components/NavBar';
 
 export default function Home() {
     const router = useRouter();
@@ -25,9 +24,6 @@ export default function Home() {
                 overflow: 'hidden',
             }}
         >
-            {/* Navbar */}
-            <NavBar />
-
             {/* Split Screen */}
             <div
                 style={{

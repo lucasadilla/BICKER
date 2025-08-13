@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { NextSeo } from 'next-seo';
-import NavBar from '../../components/NavBar';
 
 export default function DeliberateDetail({ deliberation }) {
   const [votes, setVotes] = useState({
@@ -81,7 +80,6 @@ export default function DeliberateDetail({ deliberation }) {
           description: deliberation.debateText,
         }}
       />
-      <NavBar />
       <h1 style={{ textAlign: 'center' }}>{deliberation.instigateText}</h1>
       <p style={{ maxWidth: '600px', margin: '20px auto' }}>{deliberation.debateText}</p>
 

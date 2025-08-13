@@ -1,6 +1,5 @@
 // pages/instigate/index.js
 import { useState, useEffect } from 'react';
-import NavBar from '../components/NavBar';
 
 export default function InstigatePage() {
     const [instigates, setInstigates] = useState([]);
@@ -61,8 +60,6 @@ export default function InstigatePage() {
                 alignItems: 'center',
             }}
         >
-            <NavBar />
-
             <h1 style={{ textAlign: 'center', color: '#ffffff', marginBottom: '20px' }}>
                 Instigate
             </h1>

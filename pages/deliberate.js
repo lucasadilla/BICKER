@@ -1,7 +1,6 @@
 // pages/deliberate/index.js
 import { useState, useEffect } from 'react';
 
-import NavBar from '../components/NavBar'; // If you have a NavBar; otherwise remove
 import { NextSeo } from 'next-seo';
 
 // Helper function to shuffle array
@@ -216,7 +215,6 @@ export default function DeliberatePage({ initialDebates }) {
                 position: 'relative'
             }}
         >
-            <NavBar />
             <NextSeo
                 title="Deliberate - Bicker"
                 description="Vote on debates and see how others feel."/>

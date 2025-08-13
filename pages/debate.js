@@ -1,6 +1,5 @@
 // pages/debate.js
 import { useState, useEffect } from 'react';
-import NavBar from '../components/NavBar';
 import { NextSeo } from 'next-seo';
 
 export default function DebatePage({ initialDebates }) {
@@ -265,7 +264,6 @@ export default function DebatePage({ initialDebates }) {
                 position: 'relative',
             }}
         >
-            <NavBar />
             <NextSeo
                 title="Debate - Bicker"
                 description="Join ongoing debates and share your stance."/>
