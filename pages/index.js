@@ -51,6 +51,7 @@ export default function Home() {
                     onMouseLeave={(e) => (e.target.style.backgroundColor = '#FF4D4D')}
                 >
                     <h1
+                        className="heading-1"
                         style={{
                             fontSize: isMobile ? '28px' : '36px',
                             textAlign: 'center',
@@ -82,6 +83,7 @@ export default function Home() {
                     onMouseLeave={(e) => (e.target.style.backgroundColor = '#4D94FF')}
                 >
                     <h1
+                        className="heading-1"
                         style={{
                             fontSize: isMobile ? '28px' : '36px',
                             textAlign: 'center',

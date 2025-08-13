@@ -158,8 +158,8 @@ export default function DeliberatePage({ initialDebates }) {
     if (!currentDebate) {
         return (
             <div style={{ textAlign: 'center', marginTop: '50px' }}>
-                <h2>No debates available</h2>
-                <p>You've voted on all available debates! Check back later for new debates.</p>
+                <h2 className="heading-2">No debates available</h2>
+                <p className="text-base">You've voted on all available debates! Check back later for new debates.</p>
                 <button 
                     onClick={fetchDeliberations}
                     style={{
@@ -265,9 +265,8 @@ export default function DeliberatePage({ initialDebates }) {
                     
                 >
                     <p
+                        className="heading-3"
                         style={{
-                            fontWeight: 'bold',
-                            fontSize: '24px',
                             textAlign: 'center',
                             margin: 0,
                             whiteSpace: 'normal',
@@ -280,7 +279,7 @@ export default function DeliberatePage({ initialDebates }) {
                         {currentDebate.instigateText || 'Unknown Instigate'}
                     </p>
                     {showVotes && (
-                        <p style={{ fontSize: '18px', marginTop: '20px' }}>
+                        <p className="text-lg" style={{ marginTop: '20px' }}>
                             Votes: {currentDebate.votesRed || 0}
                         </p>
                     )}
@@ -306,9 +305,8 @@ export default function DeliberatePage({ initialDebates }) {
                     
                 >
                     <p
+                        className="heading-3"
                         style={{
-                            fontWeight: 'bold',
-                            fontSize: '24px',
                             textAlign: 'center',
                             margin: 0,
                             whiteSpace: 'normal',
@@ -321,7 +319,7 @@ export default function DeliberatePage({ initialDebates }) {
                         {currentDebate.debateText || 'Unknown Debate'}
                     </p>
                     {showVotes && (
-                        <p style={{ fontSize: '18px', marginTop: '20px' }}>
+                        <p className="text-lg" style={{ marginTop: '20px' }}>
                             Votes: {currentDebate.votesBlue || 0}
                         </p>
                     )}
