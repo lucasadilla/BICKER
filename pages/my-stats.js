@@ -62,14 +62,36 @@ export default function MyStats() {
         <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>My Debates</h1>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <button onClick={() => signOut()} style={{ padding: '8px 16px', borderRadius: '4px', marginBottom: '10px' }}>Sign Out</button>
-          <p className="text-base" style={{ margin: '4px 0' }}>Debates Participated: {totalDebates}</p>
-          <p className="text-base" style={{ margin: '4px 0' }}>Win Rate: {winRate}%</p>
-          <p className="text-base" style={{ margin: '4px 0' }}>Total Points: {points}</p>
-          <p className="text-base" style={{ margin: '4px 0' }}>Current Streak: {streak}</p>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+              gap: '20px',
+              justifyItems: 'center',
+              marginBottom: '20px'
+            }}
+          >
+            <div>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{totalDebates}</p>
+              <p className="text-sm" style={{ margin: 0 }}>Debates</p>
+            </div>
+            <div>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{winRate}%</p>
+              <p className="text-sm" style={{ margin: 0 }}>Win Rate</p>
+            </div>
+            <div>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{points}</p>
+              <p className="text-sm" style={{ margin: 0 }}>Total Points</p>
+            </div>
+            <div>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{streak}</p>
+              <p className="text-sm" style={{ margin: 0 }}>Current Streak</p>
+            </div>
+          </div>
           <div className="text-base" style={{ margin: '4px 0' }}>
             Badges:
             {badges.length ? (
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px', justifyContent: 'center' }}>
                 {badges.map((badge) => (
                   <Badge key={badge} variant="secondary">{badge}</Badge>
                 ))}
