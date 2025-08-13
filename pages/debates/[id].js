@@ -1,5 +1,6 @@
 import { NextSeo } from 'next-seo';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import NavBar from '../../components/NavBar';
 
 export default function DebateDetail({ debate }) {
@@ -30,6 +31,9 @@ export default function DebateDetail({ debate }) {
       <NavBar />
       <h1 style={{ textAlign: 'center' }}>{debate.instigateText}</h1>
       <p style={{ maxWidth: '600px', margin: '20px auto' }}>{debate.debateText}</p>
+      <div style={{ textAlign: 'center', marginTop: '10px' }}>
+        <Link href={`/deliberates/${debate._id}`}>Vote on this debate</Link>
+      </div>
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <button
           onClick={() => navigator.clipboard.writeText(shareUrl)}
