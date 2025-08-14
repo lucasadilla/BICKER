@@ -21,7 +21,9 @@ export const authOptions = {
                             email: user.email,
                             points: 0,
                             streak: 0,
-                            badges: []
+                            badges: [],
+                            username: user.name || '',
+                            avatar: user.image || ''
                         }
                     },
                     { upsert: true }
@@ -29,11 +31,23 @@ export const authOptions = {
             }
             return true;
         },
+        async session({ session }) {
+            await dbConnect();
+            if (session.user?.email) {
+                const dbUser = await User.findOne({ email: session.user.email });
+                if (dbUser) {
+                    session.user.username = dbUser.username || session.user.name;
+                    session.user.bio = dbUser.bio || '';
+                    session.user.image = dbUser.avatar || session.user.image;
+                    session.user.badges = dbUser.badges || [];
+                    session.user.selectedBadge = dbUser.selectedBadge || '';
+                }
+            }
+            return session;
+        },
         // The redirect callback is called anytime NextAuth needs to redirect
         async redirect({ url, baseUrl }) {
-            // If sign-in succeeded, send them to the homepage
             if (url.startsWith('/')) return `${baseUrl}${url}`;
-            // If you want to force them to always go to the homepage:
             return baseUrl;
         },
     },

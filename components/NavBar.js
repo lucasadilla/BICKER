@@ -146,7 +146,7 @@ export default function NavBar() {
                     onMouseLeave={() => setShowUserMenu(false)}
                 >
                     <div
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                         onClick={() => setShowUserMenu(prev => !prev)}
                     >
                         <Avatar
@@ -154,6 +154,9 @@ export default function NavBar() {
                             alt={session.user?.name || 'User Avatar'}
                             size={isMobile ? 54 : 44}
                         />
+                        {session.user?.selectedBadge && (
+                            <span style={{ fontSize: '12px' }}>{session.user.selectedBadge}</span>
+                        )}
                     </div>
                     {showUserMenu && (
                         <div
@@ -176,6 +179,17 @@ export default function NavBar() {
                                     }}
                                 >
                                     My Stats
+                                </div>
+                            </Link>
+                            <Link href="/profile" passHref>
+                                <div
+                                    style={{
+                                        padding: '8px 0',
+                                        cursor: 'pointer',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    Edit Profile
                                 </div>
                             </Link>
                             <div
