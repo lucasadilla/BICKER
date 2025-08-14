@@ -20,13 +20,16 @@ const UserSchema = new mongoose.Schema({
         default: []
     },
     username: {
-        type: String
+        type: String,
+        default: ''
     },
     bio: {
-        type: String
+        type: String,
+        default: ''
     },
-    avatar: {
-        type: String
+    profilePicture: {
+        type: String,
+        default: ''
     },
     selectedBadge: {
         type: String

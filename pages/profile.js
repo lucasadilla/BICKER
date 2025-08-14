@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 export default function Profile() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [form, setForm] = useState({ avatar: '', username: '', bio: '', selectedBadge: '' });
+  const [form, setForm] = useState({ profilePicture: '', username: '', bio: '', selectedBadge: '' });
   const [badges, setBadges] = useState([]);
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export default function Profile() {
         .then(res => res.json())
         .then(data => {
           setForm({
-            avatar: data.avatar || '',
+            profilePicture: data.profilePicture || '',
             username: data.username || '',
             bio: data.bio || '',
             selectedBadge: data.selectedBadge || ''
@@ -27,6 +27,14 @@ export default function Profile() {
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setForm(prev => ({ ...prev, profilePicture: reader.result }));
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async e => {
@@ -46,8 +54,15 @@ export default function Profile() {
     <div style={{ padding: '20px', maxWidth: '600px', margin: '80px auto' }}>
       <h1>Edit Profile</h1>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <label>Avatar URL</label>
-        <input name="avatar" value={form.avatar} onChange={handleChange} />
+        <label>Profile Picture</label>
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+        {form.profilePicture && (
+          <img
+            src={form.profilePicture}
+            alt="Profile preview"
+            style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+          />
+        )}
         <label>Username</label>
         <input name="username" value={form.username} onChange={handleChange} />
         <label>Bio</label>
