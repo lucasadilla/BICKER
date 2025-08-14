@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { Badge } from '../components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 export default function MyStats() {
   const { data: session } = useSession();
@@ -101,12 +108,18 @@ export default function MyStats() {
           </div>
         </div>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <select value={sort} onChange={(e) => setSort(e.target.value)} style={{ padding: '8px', borderRadius: '4px' }}>
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="mostDivisive">Most Divisive</option>
-            <option value="mostDecisive">Most Decisive</option>
-          </select>
+          <Select value={sort} onValueChange={setSort}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="mostPopular">Most Popular</SelectItem>
+              <SelectItem value="mostDivisive">Most Divisive</SelectItem>
+              <SelectItem value="mostDecisive">Most Decisive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {debates.map((debate) => (
           <div key={debate._id} style={{ backgroundColor: 'white', color: '#333', padding: '15px', borderRadius: '8px', marginBottom: '25px' }}>

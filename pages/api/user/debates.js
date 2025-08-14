@@ -37,6 +37,10 @@ export default async function handler(req, res) {
             debates.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         } else if (sort === 'newest') {
             debates.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (sort === 'mostPopular') {
+            debates.sort(
+                (a, b) => (b.votesRed || 0) + (b.votesBlue || 0) - ((a.votesRed || 0) + (a.votesBlue || 0))
+            );
         } else if (sort === 'mostDivisive') {
             debates.sort((a, b) => {
                 const totalA = (a.votesRed || 0) + (a.votesBlue || 0);
