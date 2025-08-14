@@ -23,7 +23,7 @@ export const authOptions = {
                             streak: 0,
                             badges: [],
                             username: user.name || '',
-                            avatar: user.image || ''
+                            profilePicture: user.image || ''
                         }
                     },
                     { upsert: true }
@@ -38,7 +38,7 @@ export const authOptions = {
                 if (dbUser) {
                     session.user.username = dbUser.username || session.user.name;
                     session.user.bio = dbUser.bio || '';
-                    session.user.image = dbUser.avatar || session.user.image;
+                    session.user.image = dbUser.profilePicture || session.user.image;
                     session.user.badges = dbUser.badges || [];
                     session.user.selectedBadge = dbUser.selectedBadge || '';
                 }

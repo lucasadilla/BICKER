@@ -132,7 +132,7 @@ export default function NavBar() {
                 </button>
             </Link>
 
-            {/* User avatar */}
+            {/* User profile picture */}
             {session && (
                 <div
                     style={{
