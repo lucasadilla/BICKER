@@ -18,6 +18,18 @@ const UserSchema = new mongoose.Schema({
     badges: {
         type: [String],
         default: []
+    },
+    username: {
+        type: String
+    },
+    bio: {
+        type: String
+    },
+    avatar: {
+        type: String
+    },
+    selectedBadge: {
+        type: String
     }
 });
 
