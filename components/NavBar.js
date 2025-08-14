@@ -159,9 +159,6 @@ export default function NavBar() {
                             alt={session.user?.name || 'User Avatar'}
                             size={isMobile ? 54 : 44}
                         />
-                        {session.user?.selectedBadge && (
-                            <span style={{ fontSize: '12px' }}>{session.user.selectedBadge}</span>
-                        )}
                     </div>
                     {showUserMenu && (
                         <div
