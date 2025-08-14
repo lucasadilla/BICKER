@@ -10,6 +10,7 @@ export default function NavBar() {
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [profilePicture, setProfilePicture] = useState('');
 
     useEffect(() => {
         const checkMobile = () => {
@@ -27,6 +28,10 @@ export default function NavBar() {
             fetch('/api/notifications')
                 .then(res => res.json())
                 .then(data => setNotifications(data))
+                .catch(() => {});
+            fetch('/api/profile')
+                .then(res => res.json())
+                .then(data => setProfilePicture(data.profilePicture || ''))
                 .catch(() => {});
         }
     }, [session]);
@@ -150,7 +155,7 @@ export default function NavBar() {
                         onClick={() => setShowUserMenu(prev => !prev)}
                     >
                         <Avatar
-                            src={session.user?.image}
+                            src={profilePicture || session.user?.image}
                             alt={session.user?.name || 'User Avatar'}
                             size={isMobile ? 54 : 44}
                         />
