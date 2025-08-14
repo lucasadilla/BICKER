@@ -58,9 +58,9 @@ body {
 
 /* Mobile hamburger button */
 .hamburger-button {
-    padding: 10px;
-    width: 44px;
-    height: 44px;
+    padding: 8px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
@@ -76,14 +76,14 @@ body {
 .hamburger-button span {
     background: #fff;
     border-radius: 10px;
-    height: 4px;
-    margin: 4px 0;
+    height: 3px;
+    margin: 3px 0;
     width: 60%;
     transition: 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
 }
 
 .hamburger-button.open span:nth-of-type(1) {
-    transform: translateY(8px) rotate(45deg);
+    transform: translateY(9px) rotate(45deg);
 }
 
 .hamburger-button.open span:nth-of-type(2) {
@@ -91,6 +91,6 @@ body {
 }
 
 .hamburger-button.open span:nth-of-type(3) {
-    transform: translateY(-8px) rotate(-45deg);
+    transform: translateY(-9px) rotate(-45deg);
 }
 
