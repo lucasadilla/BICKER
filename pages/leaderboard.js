@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Select,
   SelectContent,
@@ -113,7 +114,7 @@ export default function Leaderboard() {
                 <ol>
                   {playerStats.highestWinRate.map((p, i) => (
                     <li key={p.username || i}>
-                      {p.username}: {(p.winRate * 100).toFixed(0)}%
+                      <Link href={`/user/${encodeURIComponent(p.username)}`}>{p.username}</Link>: {(p.winRate * 100).toFixed(0)}%
                     </li>
                   ))}
                 </ol>
@@ -123,7 +124,7 @@ export default function Leaderboard() {
                 <ol>
                   {playerStats.mostVotes.map((p, i) => (
                     <li key={p.username || i}>
-                      {p.username}: {p.votes}
+                      <Link href={`/user/${encodeURIComponent(p.username)}`}>{p.username}</Link>: {p.votes}
                     </li>
                   ))}
                 </ol>
@@ -133,7 +134,7 @@ export default function Leaderboard() {
                 <ol>
                   {playerStats.mostDebates.map((p, i) => (
                     <li key={p.username || i}>
-                      {p.username}: {p.debates}
+                      <Link href={`/user/${encodeURIComponent(p.username)}`}>{p.username}</Link>: {p.debates}
                     </li>
                   ))}
                 </ol>
@@ -143,7 +144,7 @@ export default function Leaderboard() {
                 <ol>
                   {playerStats.lowestWinRate.map((p, i) => (
                     <li key={p.username || i}>
-                      {p.username}: {(p.winRate * 100).toFixed(0)}%
+                      <Link href={`/user/${encodeURIComponent(p.username)}`}>{p.username}</Link>: {(p.winRate * 100).toFixed(0)}%
                     </li>
                   ))}
                 </ol>
