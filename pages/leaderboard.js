@@ -23,6 +23,8 @@ export default function Leaderboard() {
   const [totalDebates, setTotalDebates] = useState(0);
   const [totalVotes, setTotalVotes] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [showTopPlayers, setShowTopPlayers] = useState(false);
+  const [playerStats, setPlayerStats] = useState(null);
 
   useEffect(() => {
     const fetchDebates = async () => {
@@ -53,6 +55,20 @@ export default function Leaderboard() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const toggleTopPlayers = async () => {
+    if (!showTopPlayers && !playerStats) {
+      try {
+        const res = await fetch('/api/topplayers');
+        if (!res.ok) throw new Error('Failed to fetch top players');
+        const data = await res.json();
+        setPlayerStats(data);
+      } catch (err) {
+        console.error('Error fetching top players:', err);
+      }
+    }
+    setShowTopPlayers(!showTopPlayers);
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
@@ -75,6 +91,66 @@ export default function Leaderboard() {
             <p className="text-sm" style={{ margin: 0 }}>Total Votes</p>
           </div>
         </div>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <button
+            onClick={toggleTopPlayers}
+            style={{
+              backgroundColor: 'white',
+              color: '#333',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: 'bold'
+            }}
+          >
+            Top Players
+          </button>
+        </div>
+        {showTopPlayers && playerStats && (
+          <div style={{ backgroundColor: 'white', color: '#333', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+              <div>
+                <h3 style={{ marginTop: 0 }}>Highest Win Rate</h3>
+                <ol>
+                  {playerStats.highestWinRate.map((p, i) => (
+                    <li key={p.username || i}>
+                      {p.username}: {(p.winRate * 100).toFixed(0)}%
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div>
+                <h3 style={{ marginTop: 0 }}>Most Total Votes</h3>
+                <ol>
+                  {playerStats.mostVotes.map((p, i) => (
+                    <li key={p.username || i}>
+                      {p.username}: {p.votes}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div>
+                <h3 style={{ marginTop: 0 }}>Most Debates Participated</h3>
+                <ol>
+                  {playerStats.mostDebates.map((p, i) => (
+                    <li key={p.username || i}>
+                      {p.username}: {p.debates}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div>
+                <h3 style={{ marginTop: 0 }}>Biggest Loser</h3>
+                <ol>
+                  {playerStats.lowestWinRate.map((p, i) => (
+                    <li key={p.username || i}>
+                      {p.username}: {(p.winRate * 100).toFixed(0)}%
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </div>
+        )}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <Select value={sort} onValueChange={setSort}>
             <SelectTrigger className="w-[180px]">
