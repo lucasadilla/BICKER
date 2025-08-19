@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 export default function Profile() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [form, setForm] = useState({ profilePicture: '', username: '', bio: '', selectedBadge: '' });
+  const [form, setForm] = useState({ profilePicture: '', username: '', bio: '', selectedBadge: '', colorScheme: 'light' });
   const [badges, setBadges] = useState([]);
 
   useEffect(() => {
@@ -17,7 +17,8 @@ export default function Profile() {
             profilePicture: data.profilePicture || '',
             username: data.username || '',
             bio: data.bio || '',
-            selectedBadge: data.selectedBadge || ''
+            selectedBadge: data.selectedBadge || '',
+            colorScheme: data.colorScheme || 'light'
           });
           setBadges(data.badges || []);
         });
@@ -73,6 +74,12 @@ export default function Profile() {
           {badges.map(b => (
             <option key={b} value={b}>{b}</option>
           ))}
+        </select>
+        <label>Color Scheme</label>
+        <select name="colorScheme" value={form.colorScheme} onChange={handleChange}>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="blue">Blue</option>
         </select>
         <button type="submit" style={{ marginTop: '10px' }}>Save</button>
       </form>
