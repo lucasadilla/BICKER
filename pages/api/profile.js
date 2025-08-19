@@ -15,8 +15,8 @@ export default async function handler(req, res) {
     return res.json(user);
   }
   if (req.method === 'POST') {
-    const { username, bio, profilePicture, selectedBadge } = req.body;
-    const update = { username, bio, profilePicture, selectedBadge };
+    const { username, bio, profilePicture, selectedBadge, colorScheme } = req.body;
+    const update = { username, bio, profilePicture, selectedBadge, colorScheme };
     const user = await User.findOneAndUpdate(
       { email },
       { $set: update },

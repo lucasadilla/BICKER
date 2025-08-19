@@ -33,6 +33,10 @@ const UserSchema = new mongoose.Schema({
     },
     selectedBadge: {
         type: String
+    },
+    colorScheme: {
+        type: String,
+        default: 'light'
     }
 });
 
