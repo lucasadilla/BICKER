@@ -46,6 +46,17 @@ export default async function handler(req, res) {
                 deliberation.createdBy = 'system';
             }
 
+            const session = await getServerSession(req, res, authOptions);
+            const voter = session?.user?.email || 'anonymous';
+
+            // Initialize votedBy array if missing
+            deliberation.votedBy = deliberation.votedBy || [];
+
+            // Prevent users from voting more than once on the same debate
+            if (deliberation.votedBy.some(v => v.userId === voter)) {
+                return res.status(400).json({ error: 'You have already voted on this debate' });
+            }
+
             // Update votes based on the vote type
             if (vote === 'red') {
                 deliberation.votesRed = (deliberation.votesRed || 0) + 1;
@@ -53,11 +64,7 @@ export default async function handler(req, res) {
                 deliberation.votesBlue = (deliberation.votesBlue || 0) + 1;
             }
 
-            const session = await getServerSession(req, res, authOptions);
-            const voter = session?.user?.email || 'anonymous';
-
-            // Add user's vote to votedBy array
-            deliberation.votedBy = deliberation.votedBy || [];
+            // Record this user's vote
             deliberation.votedBy.push({
                 userId: voter,
                 vote: vote,
