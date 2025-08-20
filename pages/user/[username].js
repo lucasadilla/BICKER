@@ -1,8 +1,20 @@
+import { useState, useEffect } from 'react';
 import dbConnect from '../../lib/dbConnect';
 import User from '../../models/User';
 import Deliberate from '../../models/Deliberate';
 
 export default function UserProfile({ user, debates }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (!user) {
     return <div style={{ padding: '20px', maxWidth: '800px', margin: '80px auto' }}>User not found.</div>;
   }
@@ -21,14 +33,61 @@ export default function UserProfile({ user, debates }) {
       {debates.length === 0 ? (
         <p>No debates found.</p>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <div>
           {debates.map((d) => (
-            <li key={d._id} style={{ marginBottom: '15px', backgroundColor: 'white', padding: '10px', borderRadius: '8px' }}>
-              <p style={{ margin: 0, color: '#FF4D4D' }}>{d.instigateText}</p>
-              <p style={{ margin: 0, color: '#4D94FF' }}>{d.debateText}</p>
-            </li>
+            <div
+              key={d._id}
+              style={{
+                backgroundColor: 'white',
+                color: '#333',
+                padding: '15px',
+                borderRadius: '8px',
+                marginBottom: '25px'
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div
+                  style={{
+                    alignSelf: 'flex-start',
+                    maxWidth: isMobile ? '80%' : '60%',
+                    backgroundColor: '#FF4D4D',
+                    color: 'white',
+                    padding: '12px 16px',
+                    borderRadius: '16px',
+                    borderTopLeftRadius: '4px',
+                    marginLeft: 0,
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
+                    {d.instigateText}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    alignSelf: 'flex-end',
+                    maxWidth: isMobile ? '80%' : '60%',
+                    backgroundColor: '#4D94FF',
+                    color: 'white',
+                    padding: '12px 16px',
+                    borderRadius: '16px',
+                    borderTopRightRadius: '4px',
+                    marginRight: 0,
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
+                    {d.debateText}
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+                <span style={{ color: '#FF4D4D' }}>Red Votes: {d.votesRed || 0}</span>
+                <span style={{ color: '#4D94FF' }}>Blue Votes: {d.votesBlue || 0}</span>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
