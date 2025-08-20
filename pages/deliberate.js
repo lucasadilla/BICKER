@@ -291,6 +291,7 @@ export default function DeliberatePage({ initialDebates }) {
                                 textDecoration: 'none',
                                 fontSize: '0.875rem'
                             }}
+                            onClick={(e) => e.stopPropagation()}
                         >
                             {currentDebate.instigator.profilePicture && (
                                 <img
@@ -354,6 +355,7 @@ export default function DeliberatePage({ initialDebates }) {
                                 textDecoration: 'none',
                                 fontSize: '0.875rem'
                             }}
+                            onClick={(e) => e.stopPropagation()}
                         >
                             {currentDebate.creator.profilePicture && (
                                 <img
