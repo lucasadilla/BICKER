@@ -338,7 +338,7 @@ export async function getServerSideProps(context) {
     let initialDebates = [];
     try {
         initialDebates = await res.json();
-        
+
         // Better randomization using Fisher-Yates shuffle
         for (let i = initialDebates.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -347,9 +347,29 @@ export async function getServerSideProps(context) {
 
         // Add a random starting index
         const randomStartIndex = Math.floor(Math.random() * initialDebates.length);
-        initialDebates = [...initialDebates.slice(randomStartIndex), ...initialDebates.slice(0, randomStartIndex)];
+        initialDebates = [
+            ...initialDebates.slice(randomStartIndex),
+            ...initialDebates.slice(0, randomStartIndex),
+        ];
     } catch (error) {
         console.error('Error parsing JSON:', error);
+    }
+
+    // If a specific debate ID is provided, fetch it and place it first
+    const { id } = context.query;
+    if (id) {
+        try {
+            const specificRes = await fetch(`${baseUrl}/api/deliberate/${id}`);
+            if (specificRes.ok) {
+                const specificDebate = await specificRes.json();
+                initialDebates = [
+                    specificDebate,
+                    ...initialDebates.filter((debate) => debate._id !== specificDebate._id),
+                ];
+            }
+        } catch (error) {
+            console.error('Error fetching specific debate:', error);
+        }
     }
 
     return {
