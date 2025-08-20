@@ -4,13 +4,17 @@ import mongoose from 'mongoose';
 const DeliberateSchema = new mongoose.Schema({
     instigateText: {
         type: String,
-        required: true,
         maxlength: 200,
+    },
+    instigateAudioUrl: {
+        type: String,
     },
     debateText: {
         type: String,
-        required: true,
         maxlength: 200,
+    },
+    debateAudioUrl: {
+        type: String,
     },
     createdBy: {
         type: String,

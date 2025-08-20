@@ -265,20 +265,24 @@ export default function DeliberatePage({ initialDebates }) {
                     }}
                     
                 >
-                    <p
-                        className="heading-3"
-                        style={{
-                            textAlign: 'center',
-                            margin: 0,
-                            whiteSpace: 'normal',
-                            wordBreak: 'break-word',
-                            overflowWrap: 'break-word',
-                            maxWidth: '80%',
-                            padding: '0 10px',
-                        }}
-                    >
-                        {currentDebate.instigateText || 'Unknown Instigate'}
-                    </p>
+                    {currentDebate.instigateAudioUrl ? (
+                        <audio controls src={currentDebate.instigateAudioUrl} style={{ width: '80%' }} />
+                    ) : (
+                        <p
+                            className="heading-3"
+                            style={{
+                                textAlign: 'center',
+                                margin: 0,
+                                whiteSpace: 'normal',
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                                maxWidth: '80%',
+                                padding: '0 10px',
+                            }}
+                        >
+                            {currentDebate.instigateText || 'Unknown Instigate'}
+                        </p>
+                    )}
                     {currentDebate.instigator && (
                         <Link
                             href={`/user/${encodeURIComponent(currentDebate.instigator.username)}`}
@@ -329,20 +333,24 @@ export default function DeliberatePage({ initialDebates }) {
                     }}
                     
                 >
-                    <p
-                        className="heading-3"
-                        style={{
-                            textAlign: 'center',
-                            margin: 0,
-                            whiteSpace: 'normal',
-                            wordBreak: 'break-word',
-                            overflowWrap: 'break-word',
-                            maxWidth: '80%',
-                            padding: '0 10px',
-                        }}
-                    >
-                        {currentDebate.debateText || 'Unknown Debate'}
-                    </p>
+                    {currentDebate.debateAudioUrl ? (
+                        <audio controls src={currentDebate.debateAudioUrl} style={{ width: '80%' }} />
+                    ) : (
+                        <p
+                            className="heading-3"
+                            style={{
+                                textAlign: 'center',
+                                margin: 0,
+                                whiteSpace: 'normal',
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                                maxWidth: '80%',
+                                padding: '0 10px',
+                            }}
+                        >
+                            {currentDebate.debateText || 'Unknown Debate'}
+                        </p>
+                    )}
                     {currentDebate.creator && (
                         <Link
                             href={`/user/${encodeURIComponent(currentDebate.creator.username)}`}

@@ -1,6 +1,7 @@
 // pages/debate.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NextSeo } from 'next-seo';
+import { useSession } from 'next-auth/react';
 
 export default function DebatePage({ initialDebates }) {
     const [instigates, setInstigates] = useState(initialDebates || []);
@@ -8,6 +9,11 @@ export default function DebatePage({ initialDebates }) {
     const [debateText, setDebateText] = useState('');
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
+    const { data: session } = useSession();
+    const mediaRecorderRef = useRef(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const [audioBlob, setAudioBlob] = useState(null);
+    const [audioUrl, setAudioUrl] = useState('');
     // Search-related state
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -108,24 +114,59 @@ export default function DebatePage({ initialDebates }) {
         setShowSearchResults(false);
     };
 
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            const chunks = [];
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                setAudioBlob(blob);
+                setAudioUrl(URL.createObjectURL(blob));
+                stream.getTracks().forEach((track) => track.stop());
+            };
+            mediaRecorder.start();
+            setIsRecording(true);
+            setTimeout(() => {
+                if (mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    setIsRecording(false);
+                }
+            }, 20000);
+        } catch (err) {
+            console.error('Error accessing microphone:', err);
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
     const submitDebate = async () => {
         const selectedInstigate = instigates[currentInstigateIndex];
         if (!selectedInstigate) {
             alert('No instigate selected.');
             return;
         }
-        if (!debateText.trim()) {
-            alert('Please enter your debate text.');
+        if (!debateText.trim() && !audioBlob) {
+            alert('Please enter your debate text or record a voice note.');
             return;
         }
         try {
+            const formData = new FormData();
+            formData.append('instigateId', selectedInstigate._id);
+            if (debateText) formData.append('debateText', debateText.trim());
+            if (audioBlob) formData.append('audio', audioBlob, 'debate.webm');
             const response = await fetch('/api/debate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    instigateId: selectedInstigate._id, 
-                    debateText: debateText.trim(),
-                }),
+                body: formData,
             });
             const data = await response.json();
             if (!response.ok) {
@@ -140,6 +181,8 @@ export default function DebatePage({ initialDebates }) {
                     updatedInstigates.length > 0 ? 0 : currentInstigateIndex
                 );
                 setDebateText('');
+                setAudioBlob(null);
+                setAudioUrl('');
             }
         } catch (error) {
             console.error('Error submitting debate:', error);
@@ -366,8 +409,25 @@ export default function DebatePage({ initialDebates }) {
                             overflowWrap: 'break-word',
                         }}
                     >
-                        {currentInstigate ? currentInstigate.text : 'No topics available'}
-                    </p>
+                        {currentInstigate?.audioUrl ? (
+                            <audio controls src={currentInstigate.audioUrl} style={{ width: '100%' }} />
+                        ) : (
+                            <p
+                                className="heading-3"
+                                style={{
+                                    textAlign: 'center',
+                                    fontSize: isMobile ? '24px' : '40px',
+                                    margin: '0 10px',
+                                    maxWidth: '400px',
+                                    whiteSpace: 'normal',
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                }}
+                            >
+                                {currentInstigate ? currentInstigate.text : 'No topics available'}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -441,6 +501,29 @@ export default function DebatePage({ initialDebates }) {
                             {debateText.length}/200
                         </div>
                     </div>
+                    {session && (
+                        <div style={{ marginTop: '10px' }}>
+                            <button
+                                onClick={isRecording ? stopRecording : startRecording}
+                                style={{
+                                    padding: '10px',
+                                    backgroundColor: isRecording ? '#dc3545' : '#28a745',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    marginBottom: '10px'
+                                }}
+                            >
+                                {isRecording ? 'Stop Recording' : 'Record Voice Note'}
+                            </button>
+                            {audioUrl && (
+                                <div style={{ marginTop: '10px' }}>
+                                    <audio controls src={audioUrl} style={{ width: '100%' }} />
+                                </div>
+                            )}
+                        </div>
+                    )}
                     <button
                         onClick={submitDebate}
                         style={{
