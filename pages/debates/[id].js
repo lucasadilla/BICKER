@@ -30,7 +30,7 @@ export default function DebateDetail({ debate }) {
       <h1 className="heading-1" style={{ textAlign: 'center' }}>{debate.instigateText}</h1>
       <p className="text-base" style={{ maxWidth: '600px', margin: '20px auto' }}>{debate.debateText}</p>
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
-        <Link href={`/deliberates/${debate._id}`}>Vote on this debate</Link>
+        <Link href={`/deliberate?id=${debate._id}`}>Vote on this debate</Link>
       </div>
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <button
