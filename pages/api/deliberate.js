@@ -12,8 +12,33 @@ export default async function handler(req, res) {
         await dbConnect();
 
         if (req.method === 'GET') {
-            const deliberations = await Deliberate.find({});
-            res.status(200).json(deliberations);
+            const deliberations = await Deliberate.find({}).lean();
+
+            const userEmails = Array.from(
+                new Set(
+                    deliberations
+                        .flatMap(d => [d.createdBy, d.instigatedBy])
+                        .filter(email => email && email !== 'anonymous')
+                )
+            );
+
+            const users = await User.find({ email: { $in: userEmails } }).lean();
+            const userMap = users.reduce((acc, u) => {
+                acc[u.email] = {
+                    username: u.username || u.email,
+                    profilePicture: u.profilePicture || ''
+                };
+                return acc;
+            }, {});
+
+            const deliberationsWithUsers = deliberations.map(d => ({
+                ...d,
+                _id: d._id.toString(),
+                creator: userMap[d.createdBy] || null,
+                instigator: userMap[d.instigatedBy] || null,
+            }));
+
+            res.status(200).json(deliberationsWithUsers);
         } else if (req.method === 'POST') {
             // Handle reset request
             if (req.body.reset) {
