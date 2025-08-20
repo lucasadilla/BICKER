@@ -13,8 +13,9 @@ export default async function handler(req, res) {
     const userId = session.user.email;
 
     if (req.method === 'GET') {
-        const notifications = await Notification.find({ userId, read: false }).sort({ createdAt: -1 });
-        return res.status(200).json(notifications);
+        const notifications = await Notification.find({ userId }).sort({ createdAt: -1 }).limit(3);
+        const unreadCount = await Notification.countDocuments({ userId, read: false });
+        return res.status(200).json({ notifications, unreadCount });
     } else if (req.method === 'POST') {
         const { ids } = req.body;
         if (!ids || !Array.isArray(ids)) {

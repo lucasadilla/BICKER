@@ -8,6 +8,7 @@ export default function NavBar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [profilePicture, setProfilePicture] = useState('');
@@ -51,7 +52,10 @@ export default function NavBar() {
         if (session) {
             fetch('/api/notifications')
                 .then(res => res.json())
-                .then(data => setNotifications(data))
+                .then(data => {
+                    setNotifications(data.notifications);
+                    setUnreadCount(data.unreadCount);
+                })
                 .catch(() => {});
             fetch('/api/profile')
                 .then(res => res.json())
@@ -63,14 +67,15 @@ export default function NavBar() {
     const handleBellClick = async () => {
         const newState = !showNotifications;
         setShowNotifications(newState);
-        if (!showNotifications && notifications.length > 0) {
-            const ids = notifications.map(n => n._id);
+        if (!showNotifications && unreadCount > 0) {
+            const ids = notifications.filter(n => !n.read).map(n => n._id);
             await fetch('/api/notifications', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ids })
             });
-            setNotifications([]);
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setUnreadCount(prev => Math.max(0, prev - ids.length));
         }
     };
 
@@ -268,7 +273,7 @@ export default function NavBar() {
                             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                         </svg>
-                        {notifications.length > 0 && (
+                        {unreadCount > 0 && (
                             <span
                                 style={{
                                     position: 'absolute',
@@ -281,7 +286,7 @@ export default function NavBar() {
                                     fontSize: '12px'
                                 }}
                             >
-                                {notifications.length}
+                                {unreadCount}
                             </span>
                         )}
                     </button>
@@ -299,7 +304,7 @@ export default function NavBar() {
                             }}
                         >
                             {notifications.length === 0 ? (
-                                <div style={{ padding: '10px' }}>No new notifications</div>
+                                <div style={{ padding: '10px' }}>No notifications</div>
                             ) : (
                                 notifications.map((n) => (
                                     <div
