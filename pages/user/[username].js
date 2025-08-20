@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import dbConnect from '../../lib/dbConnect';
 import User from '../../models/User';
 import Deliberate from '../../models/Deliberate';
+import { Badge } from '../../components/ui/badge';
 
 export default function UserProfile({ user, debates }) {
   const [isMobile, setIsMobile] = useState(false);
@@ -20,96 +21,92 @@ export default function UserProfile({ user, debates }) {
   }
 
   return (
-    <div
-      style={{
-        padding: '20px',
-        paddingTop: '80px',
-        maxWidth: '800px',
-        margin: '0 auto',
-        minHeight: '100vh',
-        backgroundColor: '#4D94FF',
-        color: 'white'
-      }}
-    >
-      {user.profilePicture && (
-        <img
-          src={user.profilePicture}
-          alt={`${user.username} profile picture`}
-          style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '50%' }}
-        />
-      )}
-      <h1>{user.username}</h1>
-      {user.bio && <p>{user.bio}</p>}
-      {user.badges && user.badges.length > 0 && (
-        <div>
-          <h2>Badges</h2>
-          <ul>
-            {user.badges.map((badge) => (
-              <li key={badge}>{badge}</li>
+    <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', color: 'white', paddingTop: '80px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
+          {user.profilePicture && (
+            <img
+              src={user.profilePicture}
+              alt={`${user.username} profile picture`}
+              style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '50%' }}
+            />
+          )}
+          <div>
+            <h1 style={{ margin: 0 }}>{user.username}</h1>
+            {user.bio && <p style={{ marginTop: '8px' }}>{user.bio}</p>}
+            {user.badges && user.badges.length > 0 && (
+              <div className="text-base" style={{ marginTop: '8px' }}>
+                Badges:
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                  {user.badges.map((badge) => (
+                    <Badge key={badge} variant="secondary">{badge}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <h2 style={{ marginTop: '20px' }}>Debates Participated</h2>
+        {debates.length === 0 ? (
+          <p>No debates found.</p>
+        ) : (
+          <div>
+            {debates.map((d) => (
+              <div
+                key={d._id}
+                style={{
+                  backgroundColor: 'white',
+                  color: '#333',
+                  padding: '15px',
+                  borderRadius: '8px',
+                  marginBottom: '25px'
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div
+                    style={{
+                      alignSelf: 'flex-start',
+                      maxWidth: isMobile ? '80%' : '60%',
+                      backgroundColor: '#FF4D4D',
+                      color: 'white',
+                      padding: '12px 16px',
+                      borderRadius: '16px',
+                      borderTopLeftRadius: '4px',
+                      marginLeft: 0,
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
+                      {d.instigateText}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      alignSelf: 'flex-end',
+                      maxWidth: isMobile ? '80%' : '60%',
+                      backgroundColor: '#4D94FF',
+                      color: 'white',
+                      padding: '12px 16px',
+                      borderRadius: '16px',
+                      borderTopRightRadius: '4px',
+                      marginRight: 0,
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
+                      {d.debateText}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+                  <span style={{ color: '#FF4D4D' }}>Red Votes: {d.votesRed || 0}</span>
+                  <span style={{ color: '#4D94FF' }}>Blue Votes: {d.votesBlue || 0}</span>
+                </div>
+              </div>
             ))}
-          </ul>
-        </div>
-      )}
-      <h2 style={{ marginTop: '20px' }}>Debates Participated</h2>
-      {debates.length === 0 ? (
-        <p>No debates found.</p>
-      ) : (
-        <div>
-          {debates.map((d) => (
-            <div
-              key={d._id}
-              style={{
-                backgroundColor: 'white',
-                color: '#333',
-                padding: '15px',
-                borderRadius: '8px',
-                marginBottom: '25px'
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div
-                  style={{
-                    alignSelf: 'flex-start',
-                    maxWidth: isMobile ? '80%' : '60%',
-                    backgroundColor: '#FF4D4D',
-                    color: 'white',
-                    padding: '12px 16px',
-                    borderRadius: '16px',
-                    borderTopLeftRadius: '4px',
-                    marginLeft: 0,
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
-                    {d.instigateText}
-                  </p>
-                </div>
-                <div
-                  style={{
-                    alignSelf: 'flex-end',
-                    maxWidth: isMobile ? '80%' : '60%',
-                    backgroundColor: '#4D94FF',
-                    color: 'white',
-                    padding: '12px 16px',
-                    borderRadius: '16px',
-                    borderTopRightRadius: '4px',
-                    marginRight: 0,
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
-                    {d.debateText}
-                  </p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span style={{ color: '#FF4D4D' }}>Red Votes: {d.votesRed || 0}</span>
-                <span style={{ color: '#4D94FF' }}>Blue Votes: {d.votesBlue || 0}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
