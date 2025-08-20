@@ -20,9 +20,9 @@ export default function DeliberateDetail({ deliberate }) {
       <NextSeo
         title={`Deliberation: ${deliberate.instigateText}`}
         description={deliberate.debateText}
-        canonical={`https://bicker.ca/deliberates/${deliberate._id}`}
+        canonical={`https://bicker.ca/deliberate?id=${deliberate._id}`}
         openGraph={{
-          url: `https://bicker.ca/deliberates/${deliberate._id}`,
+          url: `https://bicker.ca/deliberate?id=${deliberate._id}`,
           title: `Deliberation: ${deliberate.instigateText}`,
           description: deliberate.debateText,
         }}
