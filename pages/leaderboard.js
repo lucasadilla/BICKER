@@ -167,48 +167,59 @@ export default function Leaderboard() {
           </Select>
         </div>
         {debates.map((debate) => (
-          <div key={debate._id} style={{ backgroundColor: 'white', color: '#333', padding: '15px', borderRadius: '8px', marginBottom: '25px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div
-                style={{
-                  alignSelf: 'flex-start',
-                  maxWidth: isMobile ? '80%' : '60%',
-                  backgroundColor: '#FF4D4D',
-                  color: 'white',
-                  padding: '12px 16px',
-                  borderRadius: '16px',
-                  borderTopLeftRadius: '4px',
-                  marginLeft: 0,
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                }}
-              >
-                <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
-                  {debate.instigateText}
-                </p>
+          <Link key={debate._id} href={`/deliberates/${debate._id}`}>
+            <div
+              style={{
+                backgroundColor: 'white',
+                color: '#333',
+                padding: '15px',
+                borderRadius: '8px',
+                marginBottom: '25px',
+                cursor: 'pointer'
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div
+                  style={{
+                    alignSelf: 'flex-start',
+                    maxWidth: isMobile ? '80%' : '60%',
+                    backgroundColor: '#FF4D4D',
+                    color: 'white',
+                    padding: '12px 16px',
+                    borderRadius: '16px',
+                    borderTopLeftRadius: '4px',
+                    marginLeft: 0,
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
+                    {debate.instigateText}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    alignSelf: 'flex-end',
+                    maxWidth: isMobile ? '80%' : '60%',
+                    backgroundColor: '#4D94FF',
+                    color: 'white',
+                    padding: '12px 16px',
+                    borderRadius: '16px',
+                    borderTopRightRadius: '4px',
+                    marginRight: 0,
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
+                    {debate.debateText}
+                  </p>
+                </div>
               </div>
-              <div
-                style={{
-                  alignSelf: 'flex-end',
-                  maxWidth: isMobile ? '80%' : '60%',
-                  backgroundColor: '#4D94FF',
-                  color: 'white',
-                  padding: '12px 16px',
-                  borderRadius: '16px',
-                  borderTopRightRadius: '4px',
-                  marginRight: 0,
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                }}
-              >
-                <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
-                  {debate.debateText}
-                </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+                <span style={{ color: '#FF4D4D' }}>Red Votes: {debate.votesRed || 0}</span>
+                <span style={{ color: '#4D94FF' }}>Blue Votes: {debate.votesBlue || 0}</span>
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-              <span style={{ color: '#FF4D4D' }}>Red Votes: {debate.votesRed || 0}</span>
-              <span style={{ color: '#4D94FF' }}>Blue Votes: {debate.votesBlue || 0}</span>
-            </div>
-          </div>
+          </Link>
         ))}
         <Pagination>
           <PaginationContent>
