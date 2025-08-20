@@ -20,7 +20,17 @@ export default function UserProfile({ user, debates }) {
   }
 
   return (
-    <div style={{ padding: '20px', paddingTop: '80px', maxWidth: '800px', margin: '0 auto', minHeight: '100vh', backgroundColor: 'red', color: 'white' }}>
+    <div
+      style={{
+        padding: '20px',
+        paddingTop: '80px',
+        maxWidth: '800px',
+        margin: '0 auto',
+        minHeight: '100vh',
+        backgroundColor: '#4D94FF',
+        color: 'white'
+      }}
+    >
       {user.profilePicture && (
         <img
           src={user.profilePicture}
@@ -30,7 +40,16 @@ export default function UserProfile({ user, debates }) {
       )}
       <h1>{user.username}</h1>
       {user.bio && <p>{user.bio}</p>}
-      {user.selectedBadge && <p>Badge: {user.selectedBadge}</p>}
+      {user.badges && user.badges.length > 0 && (
+        <div>
+          <h2>Badges</h2>
+          <ul>
+            {user.badges.map((badge) => (
+              <li key={badge}>{badge}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <h2 style={{ marginTop: '20px' }}>Debates Participated</h2>
       {debates.length === 0 ? (
         <p>No debates found.</p>
@@ -122,6 +141,7 @@ export async function getServerSideProps({ params }) {
         username: user.username || user.email,
         profilePicture: user.profilePicture || '',
         bio: user.bio || '',
+        badges: user.badges || [],
         selectedBadge: user.selectedBadge || '',
       },
       debates,
