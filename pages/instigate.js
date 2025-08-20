@@ -1,9 +1,15 @@
 // pages/instigate/index.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 
 export default function InstigatePage() {
     const [instigates, setInstigates] = useState([]);
     const [newInstigate, setNewInstigate] = useState('');
+    const { data: session } = useSession();
+    const mediaRecorderRef = useRef(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const [audioBlob, setAudioBlob] = useState(null);
+    const [audioUrl, setAudioUrl] = useState('');
 
     // Disable scrolling on mount
     useEffect(() => {
@@ -32,15 +38,53 @@ export default function InstigatePage() {
         }
     };
 
-    const submitInstigate = async () => {
-
+    const startRecording = async () => {
         try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            const chunks = [];
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                setAudioBlob(blob);
+                setAudioUrl(URL.createObjectURL(blob));
+                stream.getTracks().forEach((track) => track.stop());
+            };
+            mediaRecorder.start();
+            setIsRecording(true);
+            setTimeout(() => {
+                if (mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    setIsRecording(false);
+                }
+            }, 20000);
+        } catch (err) {
+            console.error('Error accessing microphone:', err);
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    const submitInstigate = async () => {
+        try {
+            const formData = new FormData();
+            if (newInstigate) formData.append('text', newInstigate);
+            if (audioBlob) formData.append('audio', audioBlob, 'instigate.webm');
             await fetch('/api/instigate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: newInstigate }),
+                body: formData,
             });
             setNewInstigate('');
+            setAudioBlob(null);
+            setAudioUrl('');
             fetchInstigates();
         } catch (error) {
             console.error('Error submitting instigate:', error);
@@ -103,6 +147,29 @@ export default function InstigatePage() {
                         {newInstigate.length}/200
                     </div>
                 </div>
+                {session && (
+                    <div style={{ marginTop: '10px' }}>
+                        <button
+                            onClick={isRecording ? stopRecording : startRecording}
+                            style={{
+                                padding: '10px',
+                                backgroundColor: isRecording ? '#dc3545' : '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginBottom: '10px'
+                            }}
+                        >
+                            {isRecording ? 'Stop Recording' : 'Record Voice Note'}
+                        </button>
+                        {audioUrl && (
+                            <div style={{ marginTop: '10px' }}>
+                                <audio controls src={audioUrl} style={{ width: '100%' }} />
+                            </div>
+                        )}
+                    </div>
+                )}
                 <button
                     className="submit-topic-button"
                     onClick={submitInstigate}
