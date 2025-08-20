@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 
 import { NextSeo } from 'next-seo';
+import Link from 'next/link';
 
 // Helper function to shuffle array
 const shuffleArray = (array) => {
@@ -278,6 +279,29 @@ export default function DeliberatePage({ initialDebates }) {
                     >
                         {currentDebate.instigateText || 'Unknown Instigate'}
                     </p>
+                    {currentDebate.instigator && (
+                        <Link
+                            href={`/user/${encodeURIComponent(currentDebate.instigator.username)}`}
+                            style={{
+                                marginTop: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                color: 'white',
+                                textDecoration: 'none',
+                                fontSize: '0.875rem'
+                            }}
+                        >
+                            {currentDebate.instigator.profilePicture && (
+                                <img
+                                    src={currentDebate.instigator.profilePicture}
+                                    alt={`${currentDebate.instigator.username} profile picture`}
+                                    style={{ width: '24px', height: '24px', borderRadius: '50%' }}
+                                />
+                            )}
+                            <span>{currentDebate.instigator.username}</span>
+                        </Link>
+                    )}
                     {showVotes && (
                         <p className="text-lg" style={{ marginTop: '20px' }}>
                             Votes: {currentDebate.votesRed || 0}
@@ -318,6 +342,29 @@ export default function DeliberatePage({ initialDebates }) {
                     >
                         {currentDebate.debateText || 'Unknown Debate'}
                     </p>
+                    {currentDebate.creator && (
+                        <Link
+                            href={`/user/${encodeURIComponent(currentDebate.creator.username)}`}
+                            style={{
+                                marginTop: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                color: 'white',
+                                textDecoration: 'none',
+                                fontSize: '0.875rem'
+                            }}
+                        >
+                            {currentDebate.creator.profilePicture && (
+                                <img
+                                    src={currentDebate.creator.profilePicture}
+                                    alt={`${currentDebate.creator.username} profile picture`}
+                                    style={{ width: '24px', height: '24px', borderRadius: '50%' }}
+                                />
+                            )}
+                            <span>{currentDebate.creator.username}</span>
+                        </Link>
+                    )}
                     {showVotes && (
                         <p className="text-lg" style={{ marginTop: '20px' }}>
                             Votes: {currentDebate.votesBlue || 0}
