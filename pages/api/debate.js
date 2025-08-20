@@ -75,8 +75,9 @@ export default async function handler(req, res) {
                 message: 'Your debate has been created.'
             });
 
-            // 3) Create a Deliberate doc with the same text
+            // 3) Create a Deliberate doc with the same text and reuse the debate's _id
             await Deliberate.create({
+                _id: newDebate._id, // ensure deliberation uses the same id as the debate
                 instigateText: instigate.text,
                 debateText: debateText.trim(),
                 createdBy: creator,
