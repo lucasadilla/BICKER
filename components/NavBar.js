@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Avatar from './Avatar';
 
@@ -11,6 +11,30 @@ export default function NavBar() {
     const [showNotifications, setShowNotifications] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [profilePicture, setProfilePicture] = useState('');
+    const userMenuRef = useRef(null);
+    const notificationRef = useRef(null);
+    const mobileMenuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setShowUserMenu(false);
+            }
+            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+            if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target) && !event.target.closest('.hamburger-button')) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -140,6 +164,7 @@ export default function NavBar() {
             {/* User profile picture */}
             {session && (
                 <div
+                    ref={userMenuRef}
                     style={{
                         position: 'absolute',
                         right: isMobile ? '80px' : '20px',
@@ -147,8 +172,6 @@ export default function NavBar() {
                         flexDirection: 'column',
                         alignItems: 'flex-end'
                     }}
-                    onMouseEnter={() => setShowUserMenu(true)}
-                    onMouseLeave={() => setShowUserMenu(false)}
                 >
                     <div
                         style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
@@ -208,6 +231,7 @@ export default function NavBar() {
             {/* Notification bell */}
             {session && (
                 <div
+                    ref={notificationRef}
                     style={{
                         position: 'absolute',
                         right: isMobile ? '140px' : '80px'
@@ -341,6 +365,7 @@ export default function NavBar() {
             {/* Mobile menu */}
             {isMobile && isMobileMenuOpen && (
                 <div
+                    ref={mobileMenuRef}
                     style={{
                         position: 'fixed',
                         top: '74px',
