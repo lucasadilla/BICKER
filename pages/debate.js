@@ -346,28 +346,45 @@ export default function DebatePage({ initialDebates }) {
                 {/* Topic Display */}
                 <div
                     style={{
-                    display: 'flex', 
-                    alignItems: 'center', 
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     width: '100%',
                     height: '100%',
                         overflow: 'hidden',
                     }}
                 >
-                    <p
-                        className="heading-1"
-                        style={{
-                            textAlign: 'center',
-                            fontSize: isMobile ? '24px' : '40px',
-                            margin: '0 10px',
-                            maxWidth: '400px',
-                            whiteSpace: 'normal',
-                            wordBreak: 'break-word',
-                            overflowWrap: 'break-word',
-                        }}
-                    >
-                        {currentInstigate ? currentInstigate.text : 'No topics available'}
-                    </p>
+                    {currentInstigate ? (
+                        <p
+                            className="heading-1"
+                            style={{
+                                textAlign: 'center',
+                                fontSize: isMobile ? '24px' : '40px',
+                                margin: '0 10px',
+                                maxWidth: '400px',
+                                whiteSpace: 'normal',
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                            }}
+                        >
+                            {currentInstigate.text}
+                        </p>
+                    ) : (
+                        <p
+                            className="heading-1"
+                            style={{
+                                textAlign: 'center',
+                                fontSize: isMobile ? '24px' : '40px',
+                                margin: '0 10px',
+                                maxWidth: '400px',
+                                whiteSpace: 'normal',
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                            }}
+                        >
+                            No topics available
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -471,6 +488,36 @@ export default function DebatePage({ initialDebates }) {
                     </button>
                 </div>
             </div>
+                <style jsx>{`
+                    .search-bar-container {
+                        position: fixed;
+                        top: 80px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        z-index: 1000;
+                        padding: 0 20px;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        will-change: width, transform;
+                        display: flex;
+                        justify-content: center;
+                    }
+
+                    @media (min-width: 769px) {
+                        .search-bar-container {
+                            width: 600px;
+                            max-width: 100%;
+                        }
+                    }
+
+                    @media (max-width: 768px) {
+                        .search-bar-container {
+                            width: 80%;
+                            max-width: 600px;
+                            left: 20%;
+                            transform: translateX(0);
+                        }
+                    }
+                `}</style>
         </div>
     );
 }
@@ -486,34 +533,3 @@ export async function getServerSideProps() {
         return { props: { initialDebates: [] } };
     }
 }
-
-<style jsx>{`
-    .search-bar-container {
-        position: fixed;
-        top: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-        padding: 0 20px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        will-change: width, transform;
-        display: flex;
-        justify-content: center;
-    }
-
-    @media (min-width: 769px) {
-        .search-bar-container {
-            width: 600px;
-            max-width: 100%;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .search-bar-container {
-            width: 80%;
-            max-width: 600px;
-            left: 20%;
-            transform: translateX(0);
-        }
-    }
-`}</style>
