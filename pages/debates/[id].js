@@ -28,7 +28,17 @@ export default function DebateDetail({ debate }) {
         }}
       />
       <h1 className="heading-1" style={{ textAlign: 'center' }}>{debate.instigateText}</h1>
+      {debate.instigateVoiceNote && (
+        <div style={{ textAlign: 'center', marginTop: '10px' }}>
+          <audio controls src={`data:audio/webm;base64,${debate.instigateVoiceNote}`} />
+        </div>
+      )}
       <p className="text-base" style={{ maxWidth: '600px', margin: '20px auto' }}>{debate.debateText}</p>
+      {debate.debateVoiceNote && (
+        <div style={{ textAlign: 'center', marginTop: '10px' }}>
+          <audio controls src={`data:audio/webm;base64,${debate.debateVoiceNote}`} />
+        </div>
+      )}
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
         <Link href={`/deliberate?id=${debate._id}`}>Vote on this debate</Link>
       </div>

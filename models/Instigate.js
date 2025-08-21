@@ -5,8 +5,10 @@ const InstigateSchema = new mongoose.Schema(
     {
         text: {
             type: String,
-            required: true,
             maxlength: 200,
+        },
+        voiceNote: {
+            type: String,
         },
         createdBy: {
             type: String,

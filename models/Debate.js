@@ -4,13 +4,17 @@ import mongoose from 'mongoose';
 const DebateSchema = new mongoose.Schema({
     instigateText: {
         type: String,
-        required: true,
         maxlength: 200,
+    },
+    instigateVoiceNote: {
+        type: String,
     },
     debateText: {
         type: String,
-        required: true,
         maxlength: 200,
+    },
+    debateVoiceNote: {
+        type: String,
     },
     createdBy: {
         type: String,

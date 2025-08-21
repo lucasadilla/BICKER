@@ -1,11 +1,15 @@
 // pages/debate.js
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import VoiceRecorder from '../components/VoiceRecorder';
 import { NextSeo } from 'next-seo';
 
 export default function DebatePage({ initialDebates }) {
     const [instigates, setInstigates] = useState(initialDebates || []);
     const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0);
     const [debateText, setDebateText] = useState('');
+    const [voiceNote, setVoiceNote] = useState('');
+    const { data: session } = useSession();
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
     // Search-related state
@@ -114,17 +118,18 @@ export default function DebatePage({ initialDebates }) {
             alert('No instigate selected.');
             return;
         }
-        if (!debateText.trim()) {
-            alert('Please enter your debate text.');
+        if (!debateText.trim() && !voiceNote) {
+            alert('Please enter your debate text or record a voice note.');
             return;
         }
         try {
             const response = await fetch('/api/debate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    instigateId: selectedInstigate._id, 
+                body: JSON.stringify({
+                    instigateId: selectedInstigate._id,
                     debateText: debateText.trim(),
+                    voiceNote,
                 }),
             });
             const data = await response.json();
@@ -140,6 +145,7 @@ export default function DebatePage({ initialDebates }) {
                     updatedInstigates.length > 0 ? 0 : currentInstigateIndex
                 );
                 setDebateText('');
+                setVoiceNote('');
             }
         } catch (error) {
             console.error('Error submitting debate:', error);
@@ -355,20 +361,30 @@ export default function DebatePage({ initialDebates }) {
                     }}
                 >
                     {currentInstigate ? (
-                        <p
-                            className="heading-1"
-                            style={{
-                                textAlign: 'center',
-                                fontSize: isMobile ? '24px' : '40px',
-                                margin: '0 10px',
-                                maxWidth: '400px',
-                                whiteSpace: 'normal',
-                                wordBreak: 'break-word',
-                                overflowWrap: 'break-word',
-                            }}
-                        >
-                            {currentInstigate.text}
-                        </p>
+                        <div style={{ textAlign: 'center' }}>
+                            {currentInstigate.text && (
+                                <p
+                                    className="heading-1"
+                                    style={{
+                                        textAlign: 'center',
+                                        fontSize: isMobile ? '24px' : '40px',
+                                        margin: '0 10px',
+                                        maxWidth: '400px',
+                                        whiteSpace: 'normal',
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'break-word',
+                                    }}
+                                >
+                                    {currentInstigate.text}
+                                </p>
+                            )}
+                            {currentInstigate.voiceNote && (
+                                <audio
+                                    controls
+                                    src={`data:audio/webm;base64,${currentInstigate.voiceNote}`}
+                                />
+                            )}
+                        </div>
                     ) : (
                         <p
                             className="heading-1"
@@ -458,6 +474,9 @@ export default function DebatePage({ initialDebates }) {
                             {debateText.length}/200
                         </div>
                     </div>
+                    {session && (
+                        <VoiceRecorder onRecordingComplete={setVoiceNote} />
+                    )}
                     <button
                         onClick={submitDebate}
                         style={{
