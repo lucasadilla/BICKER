@@ -7,9 +7,6 @@ const InstigateSchema = new mongoose.Schema(
             type: String,
             maxlength: 200,
         },
-        voiceNote: {
-            type: String,
-        },
         createdBy: {
             type: String,
             default: 'anonymous',

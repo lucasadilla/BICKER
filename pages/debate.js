@@ -1,15 +1,11 @@
 // pages/debate.js
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import VoiceRecorder from '../components/VoiceRecorder';
 import { NextSeo } from 'next-seo';
 
 export default function DebatePage({ initialDebates }) {
     const [instigates, setInstigates] = useState(initialDebates || []);
     const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0);
     const [debateText, setDebateText] = useState('');
-    const [voiceNote, setVoiceNote] = useState('');
-    const { data: session } = useSession();
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
     // Search-related state
@@ -118,8 +114,8 @@ export default function DebatePage({ initialDebates }) {
             alert('No instigate selected.');
             return;
         }
-        if (!debateText.trim() && !voiceNote) {
-            alert('Please enter your debate text or record a voice note.');
+        if (!debateText.trim()) {
+            alert('Please enter your debate text.');
             return;
         }
         try {
@@ -129,7 +125,6 @@ export default function DebatePage({ initialDebates }) {
                 body: JSON.stringify({
                     instigateId: selectedInstigate._id,
                     debateText: debateText.trim(),
-                    voiceNote,
                 }),
             });
             const data = await response.json();
@@ -145,7 +140,6 @@ export default function DebatePage({ initialDebates }) {
                     updatedInstigates.length > 0 ? 0 : currentInstigateIndex
                 );
                 setDebateText('');
-                setVoiceNote('');
             }
         } catch (error) {
             console.error('Error submitting debate:', error);
@@ -378,12 +372,7 @@ export default function DebatePage({ initialDebates }) {
                                     {currentInstigate.text}
                                 </p>
                             )}
-                            {currentInstigate.voiceNote && (
-                                <audio
-                                    controls
-                                    src={`data:audio/webm;base64,${currentInstigate.voiceNote}`}
-                                />
-                            )}
+                            
                         </div>
                     ) : (
                         <p
@@ -474,9 +463,6 @@ export default function DebatePage({ initialDebates }) {
                             {debateText.length}/200
                         </div>
                     </div>
-                    {session && (
-                        <VoiceRecorder onRecordingComplete={setVoiceNote} />
-                    )}
                     <button
                         onClick={submitDebate}
                         style={{

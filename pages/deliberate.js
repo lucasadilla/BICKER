@@ -279,12 +279,6 @@ export default function DeliberatePage({ initialDebates }) {
                     >
                         {currentDebate.instigateText || 'Unknown Instigate'}
                     </p>
-                    {currentDebate.instigateVoiceNote && (
-                        <audio
-                            controls
-                            src={`data:audio/webm;base64,${currentDebate.instigateVoiceNote}`}
-                        />
-                    )}
                     {currentDebate.instigator && (
                         <Link
                             href={`/user/${encodeURIComponent(currentDebate.instigator.username)}`}
@@ -349,12 +343,6 @@ export default function DeliberatePage({ initialDebates }) {
                     >
                         {currentDebate.debateText || 'Unknown Debate'}
                     </p>
-                    {currentDebate.debateVoiceNote && (
-                        <audio
-                            controls
-                            src={`data:audio/webm;base64,${currentDebate.debateVoiceNote}`}
-                        />
-                    )}
                     {currentDebate.creator && (
                         <Link
                             href={`/user/${encodeURIComponent(currentDebate.creator.username)}`}
