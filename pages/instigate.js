@@ -1,9 +1,13 @@
 // pages/instigate/index.js
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import VoiceRecorder from '../components/VoiceRecorder';
 
 export default function InstigatePage() {
     const [instigates, setInstigates] = useState([]);
     const [newInstigate, setNewInstigate] = useState('');
+    const [voiceNote, setVoiceNote] = useState('');
+    const { data: session } = useSession();
 
     // Disable scrolling on mount
     useEffect(() => {
@@ -34,13 +38,19 @@ export default function InstigatePage() {
 
     const submitInstigate = async () => {
 
+        if (!newInstigate.trim() && !voiceNote) {
+            alert('Please provide text or a voice note.');
+            return;
+        }
+
         try {
             await fetch('/api/instigate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: newInstigate }),
+                body: JSON.stringify({ text: newInstigate.trim(), voiceNote }),
             });
             setNewInstigate('');
+            setVoiceNote('');
             fetchInstigates();
         } catch (error) {
             console.error('Error submitting instigate:', error);
@@ -103,6 +113,9 @@ export default function InstigatePage() {
                         {newInstigate.length}/200
                     </div>
                 </div>
+                {session && (
+                    <VoiceRecorder onRecordingComplete={setVoiceNote} />
+                )}
                 <button
                     className="submit-topic-button"
                     onClick={submitInstigate}

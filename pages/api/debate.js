@@ -31,14 +31,14 @@ export default async function handler(req, res) {
             }
         }
 
-        const { instigateId, debateText } = req.body;
-        
+        const { instigateId, debateText, voiceNote } = req.body;
+
         // Validate input
-        if (!instigateId || !debateText) {
+        if (!instigateId || ((!debateText || debateText.trim().length === 0) && !voiceNote)) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        if (debateText.length > 200) {
+        if (debateText && debateText.length > 200) {
             return res.status(400).json({ error: 'Debate text must be 200 characters or less' });
         }
 
@@ -56,7 +56,9 @@ export default async function handler(req, res) {
             // 2) Create the Debate
             const newDebate = await Debate.create({
                 instigateText: instigate.text,
-                debateText: debateText.trim(),
+                instigateVoiceNote: instigate.voiceNote,
+                debateText: debateText ? debateText.trim() : '',
+                debateVoiceNote: voiceNote,
                 createdBy: creator,
                 instigatedBy: instigator
             });
@@ -79,7 +81,9 @@ export default async function handler(req, res) {
             await Deliberate.create({
                 _id: newDebate._id, // ensure deliberation uses the same id as the debate
                 instigateText: instigate.text,
-                debateText: debateText.trim(),
+                instigateVoiceNote: instigate.voiceNote,
+                debateText: debateText ? debateText.trim() : '',
+                debateVoiceNote: voiceNote,
                 createdBy: creator,
                 instigatedBy: instigator,
                 votesRed: 0,
