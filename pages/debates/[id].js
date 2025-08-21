@@ -15,6 +15,22 @@ export default function DebateDetail({ debate }) {
     }
   }, []);
 
+  const handleReport = async () => {
+    const reason = prompt('Why are you reporting this debate?');
+    if (!reason) return;
+    const res = await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetId: debate._id, targetType: 'debate', reason })
+    });
+    if (res.ok) {
+      alert('Report submitted');
+    } else {
+      const data = await res.json();
+      alert(data.error || 'Failed to submit report');
+    }
+  };
+
   return (
     <div style={{ paddingTop: '70px' }}>
       <NextSeo
@@ -54,6 +70,9 @@ export default function DebateDetail({ debate }) {
         >
           Share on Reddit
         </a>
+      </div>
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+        <button onClick={handleReport}>Report</button>
       </div>
     </div>
   );

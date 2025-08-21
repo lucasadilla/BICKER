@@ -15,6 +15,22 @@ export default function DeliberateDetail({ deliberate }) {
     }
   }, []);
 
+  const handleReport = async () => {
+    const reason = prompt('Why are you reporting this deliberation?');
+    if (!reason) return;
+    const res = await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetId: deliberate._id, targetType: 'deliberate', reason })
+    });
+    if (res.ok) {
+      alert('Report submitted');
+    } else {
+      const data = await res.json();
+      alert(data.error || 'Failed to submit report');
+    }
+  };
+
   return (
     <div style={{ paddingTop: '70px' }}>
       <NextSeo
@@ -54,6 +70,9 @@ export default function DeliberateDetail({ deliberate }) {
         >
           Share on Reddit
         </a>
+      </div>
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+        <button onClick={handleReport}>Report</button>
       </div>
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <p className="text-base">Red: {deliberate.votesRed || 0} | Blue: {deliberate.votesBlue || 0}</p>
