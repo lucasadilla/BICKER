@@ -166,8 +166,8 @@ export default function Leaderboard() {
             </SelectContent>
           </Select>
         </div>
-        {debates.map((debate) => (
-          <Link key={debate._id} href={`/deliberates/${debate._id}`}>
+          {debates.map((debate) => (
+          <Link key={debate._id} href={`/deliberate?id=${debate._id}`}>
             <div
               style={{
                 backgroundColor: 'white',
