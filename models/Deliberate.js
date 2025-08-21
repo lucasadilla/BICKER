@@ -6,15 +6,9 @@ const DeliberateSchema = new mongoose.Schema({
         type: String,
         maxlength: 200,
     },
-    instigateVoiceNote: {
-        type: String,
-    },
     debateText: {
         type: String,
         maxlength: 200,
-    },
-    debateVoiceNote: {
-        type: String,
     },
     createdBy: {
         type: String,

@@ -28,17 +28,7 @@ export default function DeliberateDetail({ deliberate }) {
         }}
       />
       <h1 className="heading-1" style={{ textAlign: 'center' }}>{deliberate.instigateText}</h1>
-      {deliberate.instigateVoiceNote && (
-        <div style={{ textAlign: 'center', marginTop: '10px' }}>
-          <audio controls src={`data:audio/webm;base64,${deliberate.instigateVoiceNote}`} />
-        </div>
-      )}
       <p className="text-base" style={{ maxWidth: '600px', margin: '20px auto' }}>{deliberate.debateText}</p>
-      {deliberate.debateVoiceNote && (
-        <div style={{ textAlign: 'center', marginTop: '10px' }}>
-          <audio controls src={`data:audio/webm;base64,${deliberate.debateVoiceNote}`} />
-        </div>
-      )}
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
         <Link href={`/deliberate?id=${deliberate._id}`}>Vote on this debate</Link>
       </div>

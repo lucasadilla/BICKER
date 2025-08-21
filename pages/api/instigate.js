@@ -8,13 +8,13 @@ export default async function handler(req, res) {
     await dbConnect();
 
     if (req.method === 'POST') {
-        const { text, voiceNote } = req.body;
+        const { text } = req.body;
         const session = await getServerSession(req, res, authOptions);
         const creator = session?.user?.email || 'anonymous';
-        if ((!text || text.trim().length === 0) && !voiceNote) {
+        if (!text || text.trim().length === 0) {
             return res
                 .status(400)
-                .json({ error: 'Text or voice note is required.' });
+                .json({ error: 'Text is required.' });
         }
         if (text && text.length > 200) {
             return res
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
                 .json({ error: 'Text must be under 200 characters.' });
         }
         try {
-            const newInstigate = await Instigate.create({ text, voiceNote, createdBy: creator });
+            const newInstigate = await Instigate.create({ text, createdBy: creator });
             await updateBadges(creator);
             return res.status(201).json(newInstigate);
         } catch (error) {
