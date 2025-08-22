@@ -134,7 +134,7 @@ export default function DeliberatePage({ initialDebates }) {
     const currentDebate = debates[currentDebateIndex];
 
     const handleShare = () => {
-        const url = `${window.location.origin}/deliberates/${currentDebate._id}`;
+        const url = `${window.location.origin}/deliberate?id=${currentDebate._id}`;
         if (navigator.share) {
             navigator.share({ title: 'Deliberation', url });
         } else {
