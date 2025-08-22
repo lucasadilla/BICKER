@@ -11,19 +11,36 @@ function ThemeProvider({ children }) {
     const { status } = useSession();
     const [colorScheme, setColorScheme] = useState('light');
 
+    // On initial load, try to use the user's last chosen scheme
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('colorScheme');
+            if (stored) {
+                setColorScheme(stored);
+            }
+        }
+    }, []);
+
     useEffect(() => {
         document.body.classList.remove('light', 'dark', 'blue');
         document.body.classList.add(colorScheme || 'light');
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('colorScheme', colorScheme || 'light');
+        }
     }, [colorScheme]);
 
     useEffect(() => {
         if (status === 'authenticated') {
             fetch('/api/profile')
                 .then(res => res.json())
-                .then(data => setColorScheme(data.colorScheme || 'light'))
-                .catch(() => setColorScheme('light'));
+                .then(data => setColorScheme(data.colorScheme || localStorage.getItem('colorScheme') || 'light'))
+                .catch(() => {
+                    const stored = typeof window !== 'undefined' ? localStorage.getItem('colorScheme') : null;
+                    setColorScheme(stored || 'light');
+                });
         } else {
-            setColorScheme('light');
+            const stored = typeof window !== 'undefined' ? localStorage.getItem('colorScheme') : null;
+            setColorScheme(stored || 'light');
         }
     }, [status]);
 
