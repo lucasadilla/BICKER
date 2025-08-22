@@ -46,7 +46,9 @@ export default function DeliberateDetail({ deliberate }) {
       <h1 className="heading-1" style={{ textAlign: 'center' }}>{deliberate.instigateText}</h1>
       <p className="text-base" style={{ maxWidth: '600px', margin: '20px auto' }}>{deliberate.debateText}</p>
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
-        <Link href={`/deliberate?id=${deliberate._id}`}>Vote on this debate</Link>
+        <Link href={{ pathname: '/deliberate', query: { id: deliberate._id } }}>
+          Vote on this debate
+        </Link>
       </div>
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <button
