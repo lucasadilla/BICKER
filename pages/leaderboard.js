@@ -189,7 +189,7 @@ export default function Leaderboard() {
         {debates.map((debate) => (
           <Link
             key={debate._id}
-            href={`/deliberate?id=${debate._id}`}
+            href={{ pathname: '/deliberate', query: { id: debate._id } }}
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <div
