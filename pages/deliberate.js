@@ -133,6 +133,16 @@ export default function DeliberatePage({ initialDebates }) {
 
     const currentDebate = debates[currentDebateIndex];
 
+    const handleShare = () => {
+        const url = `${window.location.origin}/deliberates/${currentDebate._id}`;
+        if (navigator.share) {
+            navigator.share({ title: 'Deliberation', url });
+        } else {
+            navigator.clipboard.writeText(url);
+            alert('Link copied to clipboard');
+        }
+    };
+
     const resetCollection = async () => {
         try {
             const response = await fetch('/api/deliberate', {
@@ -220,24 +230,43 @@ export default function DeliberatePage({ initialDebates }) {
                 title="Deliberate - Bicker"
                 description="Vote on debates and see how others feel."/>
 
-            <button
-                onClick={nextDebate}
-                style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: window.innerWidth <= 768 ? '50%' : redWidth,
-                    transform: 'translate(-50%, -50%)',
-                    padding: '10px 20px',
-                    backgroundColor: '#f0f0f0',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    zIndex: 1000,
-                    transition: 'left 1s ease'
-                }}
-            >
-                Skip
-            </button>
+              <button
+                  onClick={nextDebate}
+                  style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: window.innerWidth <= 768 ? '50%' : redWidth,
+                      transform: 'translate(-50%, -50%)',
+                      padding: '10px 20px',
+                      backgroundColor: '#f0f0f0',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      zIndex: 1000,
+                      transition: 'left 1s ease'
+                  }}
+              >
+                  Skip
+              </button>
+
+              <button
+                  onClick={handleShare}
+                  style={{
+                      position: 'absolute',
+                      top: '75%',
+                      left: window.innerWidth <= 768 ? '50%' : redWidth,
+                      transform: 'translate(-50%, -50%)',
+                      padding: '10px 20px',
+                      backgroundColor: '#f0f0f0',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      zIndex: 1000,
+                      transition: 'left 1s ease'
+                  }}
+              >
+                  Share
+              </button>
 
             {/* Fullscreen Debate Section */}
             <div style={{ 
