@@ -3,6 +3,7 @@ import dbConnect from '../../lib/dbConnect';
 import User from '../../models/User';
 import Deliberate from '../../models/Deliberate';
 import { Badge } from '../../components/ui/badge';
+import badgeImages from '../../lib/badgeImages';
 import {
   Select,
   SelectContent,
@@ -65,9 +66,14 @@ export default function UserProfile({ user, debates }) {
               <div className="text-base" style={{ marginTop: '8px' }}>
                 Badges:
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
-                  {user.badges.map((badge) => (
-                    <Badge key={badge} variant="secondary">{badge}</Badge>
-                  ))}
+                  {user.badges.map((badge) => {
+                    const image = badgeImages[badge];
+                    return (
+                      <Badge key={badge} variant="secondary" style={image ? { padding: '2px' } : {}}>
+                        {image ? <img src={image} alt={badge} style={{ width: '16px', height: '16px' }} /> : badge}
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
             )}
