@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { Badge } from '../components/ui/badge';
+import badgeImages from '../lib/badgeImages';
 import {
   Select,
   SelectContent,
@@ -106,9 +107,14 @@ export default function MyStats() {
             Badges:
             {badges.length ? (
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px', justifyContent: 'center' }}>
-                {badges.map((badge) => (
-                  <Badge key={badge} variant="secondary">{badge}</Badge>
-                ))}
+                {badges.map((badge) => {
+                  const image = badgeImages[badge];
+                  return (
+                    <Badge key={badge} variant="secondary" style={image ? { padding: '2px' } : {}}>
+                      {image ? <img src={image} alt={badge} style={{ width: '16px', height: '16px' }} /> : badge}
+                    </Badge>
+                  );
+                })}
               </div>
             ) : (
               ' None'
