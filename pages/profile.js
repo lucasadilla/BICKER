@@ -1,5 +1,6 @@
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 import { useRouter } from 'next/router';
 
 export default function Profile() {
@@ -7,6 +8,7 @@ export default function Profile() {
   const router = useRouter();
   const [form, setForm] = useState({ profilePicture: '', username: '', bio: '', selectedBadge: '', colorScheme: 'light' });
   const [badges, setBadges] = useState([]);
+  const { setColorScheme } = useColorScheme();
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -28,6 +30,9 @@ export default function Profile() {
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+    if (name === 'colorScheme') {
+      setColorScheme(value);
+    }
   };
 
   const handleFileChange = e => {

@@ -1,28 +1,37 @@
 import '../styles/globals.css';
 import { SessionProvider, useSession } from 'next-auth/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import NavBar from '../components/NavBar';
 import { DefaultSeo } from 'next-seo';
 import SEO from '../next-seo.config';
 import { Analytics } from "@vercel/analytics/react";
+import { ColorSchemeContext } from '../lib/ColorSchemeContext';
 
 function ThemeProvider({ children }) {
     const { status } = useSession();
+    const [colorScheme, setColorScheme] = useState('light');
+
     useEffect(() => {
-        const applyScheme = scheme => {
-            document.body.classList.remove('light', 'dark', 'blue');
-            document.body.classList.add(scheme || 'light');
-        };
+        document.body.classList.remove('light', 'dark', 'blue');
+        document.body.classList.add(colorScheme || 'light');
+    }, [colorScheme]);
+
+    useEffect(() => {
         if (status === 'authenticated') {
             fetch('/api/profile')
                 .then(res => res.json())
-                .then(data => applyScheme(data.colorScheme))
-                .catch(() => applyScheme('light'));
+                .then(data => setColorScheme(data.colorScheme || 'light'))
+                .catch(() => setColorScheme('light'));
         } else {
-            applyScheme('light');
+            setColorScheme('light');
         }
     }, [status]);
-    return children;
+
+    return (
+        <ColorSchemeContext.Provider value={{ colorScheme, setColorScheme }}>
+            {children}
+        </ColorSchemeContext.Provider>
+    );
 }
 
 export default function MyApp({ Component, pageProps: { session, ...pageProps } }) {
