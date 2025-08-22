@@ -236,7 +236,7 @@ export default function DeliberatePage({ initialDebates }) {
                   style={{
                       position: 'absolute',
                       top: '50%',
-                      left: isMobile ? '50%' : redWidth,
+                      left: isMobile ? '33%' : redWidth,
                       transform: 'translate(-50%, -50%)',
                       padding: '10px 20px',
                       backgroundColor: '#f0f0f0',
@@ -255,7 +255,7 @@ export default function DeliberatePage({ initialDebates }) {
                   style={{
                       position: 'absolute',
                       top: '75%',
-                      left: isMobile ? '50%' : redWidth,
+                      left: isMobile ? '66%' : redWidth,
                       transform: 'translate(-50%, -50%)',
                       padding: '10px 20px',
                       backgroundColor: '#f0f0f0',
