@@ -19,6 +19,7 @@ export default function DeliberatePage({ initialDebates }) {
     const [currentDebateIndex, setCurrentDebateIndex] = useState(0);
     const [showVotes, setShowVotes] = useState(false);
     const [hoveringSide, setHoveringSide] = useState('');
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
     // Subscribe to live vote updates
     useEffect(() => {
@@ -235,7 +236,7 @@ export default function DeliberatePage({ initialDebates }) {
                   style={{
                       position: 'absolute',
                       top: '50%',
-                      left: window.innerWidth <= 768 ? '50%' : redWidth,
+                      left: isMobile ? '50%' : redWidth,
                       transform: 'translate(-50%, -50%)',
                       padding: '10px 20px',
                       backgroundColor: '#f0f0f0',
@@ -254,7 +255,7 @@ export default function DeliberatePage({ initialDebates }) {
                   style={{
                       position: 'absolute',
                       top: '75%',
-                      left: window.innerWidth <= 768 ? '50%' : redWidth,
+                      left: isMobile ? '50%' : redWidth,
                       transform: 'translate(-50%, -50%)',
                       padding: '10px 20px',
                       backgroundColor: '#f0f0f0',
@@ -271,7 +272,7 @@ export default function DeliberatePage({ initialDebates }) {
             {/* Fullscreen Debate Section */}
             <div style={{ 
                 display: 'flex', 
-                flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
+                flexDirection: isMobile ? 'column' : 'row',
                 height: '100%', 
                 width: '100%' 
             }}>
@@ -281,8 +282,8 @@ export default function DeliberatePage({ initialDebates }) {
                     onMouseEnter={() => setHoveringSide('red')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
-                        width: window.innerWidth <= 768 ? '100%' : redWidth,
-                        height: window.innerWidth <= 768 ? '50%' : '100%',
+                        width: isMobile ? '100%' : redWidth,
+                        height: isMobile ? '50%' : '100%',
                         backgroundColor: hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D',
                         color: 'white',
                         display: 'flex',
@@ -345,8 +346,8 @@ export default function DeliberatePage({ initialDebates }) {
                     onMouseEnter={() => setHoveringSide('blue')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
-                        width: window.innerWidth <= 768 ? '100%' : blueWidth,
-                        height: window.innerWidth <= 768 ? '50%' : '100%',
+                        width: isMobile ? '100%' : blueWidth,
+                        height: isMobile ? '50%' : '100%',
                         backgroundColor: hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF',
                         color: 'white',
                         display: 'flex',
