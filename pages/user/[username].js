@@ -3,9 +3,29 @@ import dbConnect from '../../lib/dbConnect';
 import User from '../../models/User';
 import Deliberate from '../../models/Deliberate';
 import { Badge } from '../../components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from '../../components/ui/pagination';
+import { sortDeliberates } from '../../lib/sortDeliberates';
 
 export default function UserProfile({ user, debates }) {
   const [isMobile, setIsMobile] = useState(false);
+  const [sort, setSort] = useState('newest');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [displayedDebates, setDisplayedDebates] = useState([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -15,6 +35,13 @@ export default function UserProfile({ user, debates }) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    const sorted = sortDeliberates([...debates], sort);
+    const start = (page - 1) * 25;
+    setDisplayedDebates(sorted.slice(start, start + 25));
+    setTotalPages(Math.ceil(sorted.length / 25) || 1);
+  }, [debates, sort, page]);
 
   if (!user) {
     return <div style={{ padding: '20px', maxWidth: '800px', margin: '80px auto' }}>User not found.</div>;
@@ -51,7 +78,21 @@ export default function UserProfile({ user, debates }) {
           <p>No debates found.</p>
         ) : (
           <div>
-            {debates.map((d) => (
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="mostPopular">Most Popular</SelectItem>
+                  <SelectItem value="mostDivisive">Most Divisive</SelectItem>
+                  <SelectItem value="mostDecisive">Most Decisive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {displayedDebates.map((d) => (
               <div
                 key={d._id}
                 style={{
@@ -104,6 +145,44 @@ export default function UserProfile({ user, debates }) {
                 </div>
               </div>
             ))}
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage((p) => Math.max(1, p - 1));
+                    }}
+                    disabled={page === 1}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      href="#"
+                      isActive={page === i + 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(i + 1);
+                      }}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage((p) => Math.min(totalPages, p + 1));
+                    }}
+                    disabled={page === totalPages}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         )}
       </div>
@@ -131,6 +210,7 @@ export async function getServerSideProps({ params }) {
     debateText: d.debateText,
     votesRed: d.votesRed || 0,
     votesBlue: d.votesBlue || 0,
+    createdAt: d.createdAt ? d.createdAt.toISOString() : null,
   }));
   return {
     props: {
