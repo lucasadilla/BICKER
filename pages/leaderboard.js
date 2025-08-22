@@ -114,7 +114,12 @@ export default function Leaderboard() {
                 <ol>
                   {playerStats.highestWinRate.map((p, i) => (
                     <li key={p.username || i}>
-                      <Link href={`/user/${encodeURIComponent(p.username)}`}>{p.username}</Link>: {(p.winRate * 100).toFixed(0)}%
+                      <Link
+                        href={`/user/${encodeURIComponent(p.username)}`}
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {p.username}
+                      </Link>: {(p.winRate * 100).toFixed(0)}%
                     </li>
                   ))}
                 </ol>
@@ -124,7 +129,12 @@ export default function Leaderboard() {
                 <ol>
                   {playerStats.mostVotes.map((p, i) => (
                     <li key={p.username || i}>
-                      <Link href={`/user/${encodeURIComponent(p.username)}`}>{p.username}</Link>: {p.votes}
+                      <Link
+                        href={`/user/${encodeURIComponent(p.username)}`}
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {p.username}
+                      </Link>: {p.votes}
                     </li>
                   ))}
                 </ol>
@@ -134,7 +144,12 @@ export default function Leaderboard() {
                 <ol>
                   {playerStats.mostDebates.map((p, i) => (
                     <li key={p.username || i}>
-                      <Link href={`/user/${encodeURIComponent(p.username)}`}>{p.username}</Link>: {p.debates}
+                      <Link
+                        href={`/user/${encodeURIComponent(p.username)}`}
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {p.username}
+                      </Link>: {p.debates}
                     </li>
                   ))}
                 </ol>
@@ -144,7 +159,12 @@ export default function Leaderboard() {
                 <ol>
                   {playerStats.lowestWinRate.map((p, i) => (
                     <li key={p.username || i}>
-                      <Link href={`/user/${encodeURIComponent(p.username)}`}>{p.username}</Link>: {(p.winRate * 100).toFixed(0)}%
+                      <Link
+                        href={`/user/${encodeURIComponent(p.username)}`}
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {p.username}
+                      </Link>: {(p.winRate * 100).toFixed(0)}%
                     </li>
                   ))}
                 </ol>
@@ -166,8 +186,12 @@ export default function Leaderboard() {
             </SelectContent>
           </Select>
         </div>
-          {debates.map((debate) => (
-          <Link key={debate._id} href={`/deliberate?id=${debate._id}`}>
+        {debates.map((debate) => (
+          <Link
+            key={debate._id}
+            href={`/deliberate?id=${debate._id}`}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <div
               style={{
                 backgroundColor: 'white',
