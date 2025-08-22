@@ -19,7 +19,7 @@ function generateSiteMap(baseUrl, debates, deliberates) {
   const deliberateEntries = deliberates
     .map(
       (deliberate) =>
-        `\n  <url>\n    <loc>${baseUrl}/deliberate?id=${deliberate._id}</loc>\n    <lastmod>${deliberate.updatedAt.toISOString()}</lastmod>\n  </url>`
+        `\n  <url>\n    <loc>${baseUrl}/deliberates/${deliberate._id}</loc>\n    <lastmod>${deliberate.updatedAt.toISOString()}</lastmod>\n  </url>`
     )
     .join('');
 
