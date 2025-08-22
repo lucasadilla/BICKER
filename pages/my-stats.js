@@ -110,8 +110,8 @@ export default function MyStats() {
                 {badges.map((badge) => {
                   const image = badgeImages[badge];
                   return (
-                    <Badge key={badge} variant="secondary" style={image ? { padding: '2px' } : {}}>
-                      {image ? <img src={image} alt={badge} style={{ width: '16px', height: '16px' }} /> : badge}
+                    <Badge key={badge} variant="secondary" style={image ? { padding: '4px' } : {}}>
+                      {image ? <img src={image} alt={badge} style={{ width: '24px', height: '24px' }} /> : badge}
                     </Badge>
                   );
                 })}

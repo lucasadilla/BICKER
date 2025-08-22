@@ -5,7 +5,6 @@
       <stop offset="100%" stop-color="#000000"/>
     </radialGradient>
   </defs>
-  <rect width="512" height="512" fill="#000000"/>
   <circle cx="256" cy="256" r="220" fill="url(#glow)"/>
   <circle cx="256" cy="256" r="170" fill="#FFE5AD"/>
   <circle cx="206" cy="240" r="30" fill="#333333"/>
