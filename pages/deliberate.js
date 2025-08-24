@@ -240,43 +240,43 @@ export default function DeliberatePage({ initialDebates }) {
                 title="Deliberate - Bicker"
                 description="Vote on debates and see how others feel."/>
 
-              <button
-                  onClick={nextDebate}
-                  style={{
-                      position: 'absolute',
-                      top: isMobile ? redSize : '50%',
-                      left: isMobile ? '50%' : redSize,
-                      transform: 'translate(-50%, -50%)',
-                      padding: '10px 20px',
-                      backgroundColor: '#f0f0f0',
-                      border: 'none',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      zIndex: 1000,
-                      transition: 'left 1s ease, top 1s ease'
-                  }}
-              >
-                  Skip
-              </button>
+                <button
+                    onClick={nextDebate}
+                    style={{
+                        position: 'absolute',
+                        top: isMobile ? redSize : '50%',
+                        left: isMobile ? 'calc(50% - 80px)' : redSize,
+                        transform: 'translate(-50%, -50%)',
+                        padding: '10px 20px',
+                        backgroundColor: '#f0f0f0',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        zIndex: 1000,
+                        transition: 'left 1s ease, top 1s ease'
+                    }}
+                >
+                    Skip
+                </button>
 
-              <button
-                  onClick={handleShare}
-                  style={{
-                      position: 'absolute',
-                      top: isMobile ? `calc(${redSize} + 25%)` : '75%',
-                      left: isMobile ? '50%' : redSize,
-                      transform: 'translate(-50%, -50%)',
-                      padding: '10px 20px',
-                      backgroundColor: '#f0f0f0',
-                      border: 'none',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      zIndex: 1000,
-                      transition: 'left 1s ease, top 1s ease'
-                  }}
-              >
-                  Share
-              </button>
+                <button
+                    onClick={handleShare}
+                    style={{
+                        position: 'absolute',
+                        top: isMobile ? redSize : '75%',
+                        left: isMobile ? 'calc(50% + 80px)' : redSize,
+                        transform: 'translate(-50%, -50%)',
+                        padding: '10px 20px',
+                        backgroundColor: '#f0f0f0',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        zIndex: 1000,
+                        transition: 'left 1s ease, top 1s ease'
+                    }}
+                >
+                    Share
+                </button>
 
             {/* Fullscreen Debate Section */}
             <div style={{ 
