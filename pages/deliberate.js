@@ -19,7 +19,16 @@ export default function DeliberatePage({ initialDebates }) {
     const [currentDebateIndex, setCurrentDebateIndex] = useState(0);
     const [showVotes, setShowVotes] = useState(false);
     const [hoveringSide, setHoveringSide] = useState('');
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        if (typeof window !== 'undefined') {
+            handleResize();
+            window.addEventListener('resize', handleResize);
+            return () => window.removeEventListener('resize', handleResize);
+        }
+    }, []);
 
     // Subscribe to live vote updates
     useEffect(() => {
@@ -214,8 +223,8 @@ export default function DeliberatePage({ initialDebates }) {
         redPercent = ((currentDebate.votesRed || 0) / totalVotes) * 100;
         bluePercent = 100 - redPercent;
     }
-    const redWidth = showVotes ? `${redPercent}%` : '50%';
-    const blueWidth = showVotes ? `${bluePercent}%` : '50%';
+    const redSize = showVotes ? `${redPercent}%` : '50%';
+    const blueSize = showVotes ? `${bluePercent}%` : '50%';
 
     return (
         <div
@@ -235,8 +244,8 @@ export default function DeliberatePage({ initialDebates }) {
                   onClick={nextDebate}
                   style={{
                       position: 'absolute',
-                      top: '50%',
-                      left: isMobile ? '33%' : redWidth,
+                      top: isMobile ? redSize : '50%',
+                      left: isMobile ? '50%' : redSize,
                       transform: 'translate(-50%, -50%)',
                       padding: '10px 20px',
                       backgroundColor: '#f0f0f0',
@@ -244,7 +253,7 @@ export default function DeliberatePage({ initialDebates }) {
                       borderRadius: '5px',
                       cursor: 'pointer',
                       zIndex: 1000,
-                      transition: 'left 1s ease'
+                      transition: 'left 1s ease, top 1s ease'
                   }}
               >
                   Skip
@@ -254,8 +263,8 @@ export default function DeliberatePage({ initialDebates }) {
                   onClick={handleShare}
                   style={{
                       position: 'absolute',
-                      top: '75%',
-                      left: isMobile ? '66%' : redWidth,
+                      top: isMobile ? `calc(${redSize} + 25%)` : '75%',
+                      left: isMobile ? '50%' : redSize,
                       transform: 'translate(-50%, -50%)',
                       padding: '10px 20px',
                       backgroundColor: '#f0f0f0',
@@ -263,7 +272,7 @@ export default function DeliberatePage({ initialDebates }) {
                       borderRadius: '5px',
                       cursor: 'pointer',
                       zIndex: 1000,
-                      transition: 'left 1s ease'
+                      transition: 'left 1s ease, top 1s ease'
                   }}
               >
                   Share
@@ -282,8 +291,8 @@ export default function DeliberatePage({ initialDebates }) {
                     onMouseEnter={() => setHoveringSide('red')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
-                        width: isMobile ? '100%' : redWidth,
-                        height: isMobile ? '50%' : '100%',
+                        width: isMobile ? '100%' : redSize,
+                        height: isMobile ? redSize : '100%',
                         backgroundColor: hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D',
                         color: 'white',
                         display: 'flex',
@@ -346,8 +355,8 @@ export default function DeliberatePage({ initialDebates }) {
                     onMouseEnter={() => setHoveringSide('blue')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
-                        width: isMobile ? '100%' : blueWidth,
-                        height: isMobile ? '50%' : '100%',
+                        width: isMobile ? '100%' : blueSize,
+                        height: isMobile ? blueSize : '100%',
                         backgroundColor: hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF',
                         color: 'white',
                         display: 'flex',
