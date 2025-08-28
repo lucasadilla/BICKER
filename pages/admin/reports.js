@@ -1,11 +1,38 @@
-import { useState } from 'react';
-import dbConnect from '../../lib/dbConnect';
-import Report from '../../models/Report';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../api/auth/[...nextauth]';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 
-export default function ReportsAdmin({ reports: initialReports }) {
-  const [reports, setReports] = useState(initialReports);
+export default function ReportsAdmin() {
+  const [reports, setReports] = useState([]);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    const admins = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+      .split(',')
+      .map(a => a.trim());
+
+    if (!session || !admins.includes(session.user?.email)) {
+      router.replace('/');
+      return;
+    }
+
+    const fetchReports = async () => {
+      try {
+        const res = await fetch('/api/report');
+        if (res.ok) {
+          const data = await res.json();
+          setReports(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch reports:', error);
+      }
+    };
+
+    fetchReports();
+  }, [session, status, router]);
 
   const resolveReport = async (id) => {
     const res = await fetch('/api/report', {
@@ -41,31 +68,4 @@ export default function ReportsAdmin({ reports: initialReports }) {
       )}
     </div>
   );
-}
-
-export async function getServerSideProps(context) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-  const admins = (process.env.ADMIN_EMAILS || '').split(',').map(a => a.trim());
-  if (!session || !admins.includes(session.user.email)) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-  await dbConnect();
-  const reports = await Report.find({}).sort({ createdAt: -1 }).lean();
-  return {
-    props: {
-      reports: reports.map(r => ({
-        _id: r._id.toString(),
-        targetId: r.targetId,
-        targetType: r.targetType,
-        reporter: r.reporter,
-        reason: r.reason,
-        status: r.status,
-      })),
-    },
-  };
 }

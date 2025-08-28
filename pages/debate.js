@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { NextSeo } from 'next-seo';
 
-export default function DebatePage({ initialDebates }) {
-    const [instigates, setInstigates] = useState(initialDebates || []);
+export default function DebatePage() {
+    const [instigates, setInstigates] = useState([]);
     const [currentInstigateIndex, setCurrentInstigateIndex] = useState(0);
     const [debateText, setDebateText] = useState('');
     const [hoveringSide, setHoveringSide] = useState('');
@@ -36,10 +36,8 @@ export default function DebatePage({ initialDebates }) {
     }, [searchTerm]);
 
     useEffect(() => {
-        if (!initialDebates || initialDebates.length === 0) {
-            fetchInstigates();
-        }
-    }, [initialDebates]);
+        fetchInstigates();
+    }, []);
 
     const fetchInstigates = async (search = '') => {
         try {
@@ -527,14 +525,3 @@ export default function DebatePage({ initialDebates }) {
     );
 }
 
-export async function getServerSideProps() {
-    try {
-        const res = await fetch('http://localhost:3000/api/instigate');
-        const initialInstigates = await res.json();
-        const shuffled = initialInstigates.sort(() => Math.random() - 0.5);
-        return { props: { initialDebates: shuffled } };
-    } catch (error) {
-        console.error('Error prefetching instigates:', error);
-        return { props: { initialDebates: [] } };
-    }
-}

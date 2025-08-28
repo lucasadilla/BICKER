@@ -1,19 +1,46 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { NextSeo } from 'next-seo';
 
-export default function DeliberateDetail({ deliberate }) {
-  if (!deliberate) {
-    return <div>Deliberation not found</div>;
-  }
-
+export default function DeliberateDetail() {
+  const router = useRouter();
+  const { id } = router.query;
+  const [deliberate, setDeliberate] = useState(null);
   const [shareUrl, setShareUrl] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
+    const fetchDeliberate = async () => {
+      try {
+        const res = await fetch(`/api/deliberate/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDeliberate(data);
+        } else {
+          setDeliberate(null);
+        }
+      } catch (error) {
+        console.error('Failed to load deliberation:', error);
+        setDeliberate(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDeliberate();
     if (typeof window !== 'undefined') {
       setShareUrl(window.location.href);
     }
-  }, []);
+  }, [id]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!deliberate) {
+    return <div>Deliberation not found</div>;
+  }
 
   const handleReport = async () => {
     const reason = prompt('Why are you reporting this deliberation?');
@@ -81,20 +108,4 @@ export default function DeliberateDetail({ deliberate }) {
       </div>
     </div>
   );
-}
-
-export async function getServerSideProps({ params, req }) {
-  const protocol = req.headers["x-forwarded-proto"] || "http";
-  const baseUrl = `${protocol}://${req.headers.host}`;
-  try {
-    const res = await fetch(`${baseUrl}/api/deliberate/${params.id}`);
-    if (!res.ok) {
-      return { notFound: true };
-    }
-    const deliberate = await res.json();
-    return { props: { deliberate } };
-  } catch (error) {
-    console.error('Failed to load deliberation:', error);
-    return { props: { deliberate: null } };
-  }
 }

@@ -14,8 +14,8 @@ const shuffleArray = (array) => {
     return newArray;
 };
 
-export default function DeliberatePage({ initialDebates }) {
-    const [debates, setDebates] = useState(initialDebates || []);
+export default function DeliberatePage() {
+    const [debates, setDebates] = useState([]);
     const [currentDebateIndex, setCurrentDebateIndex] = useState(0);
     const [showVotes, setShowVotes] = useState(false);
     const [hoveringSide, setHoveringSide] = useState('');
@@ -55,12 +55,9 @@ export default function DeliberatePage({ initialDebates }) {
     }, []);
 
 
-    // If there were no initialDebates, fetch them client-side
     useEffect(() => {
-        if (!initialDebates || initialDebates.length === 0) {
-            fetchDeliberations();
-        }
-    }, [initialDebates]);
+        fetchDeliberations();
+    }, []);
 
     // After voting, show results for 4 seconds before moving on
     useEffect(() => {
@@ -418,49 +415,3 @@ export default function DeliberatePage({ initialDebates }) {
 }
 
 // Server-side props with randomized debates
-export async function getServerSideProps(context) {
-    const protocol = context.req.headers["x-forwarded-proto"] || "http";
-    const host = context.req.headers["host"];
-    const baseUrl = `${protocol}://${host}`;
-    const res = await fetch(`${baseUrl}/api/deliberate`);
-    let initialDebates = [];
-    try {
-        initialDebates = await res.json();
-
-        // Better randomization using Fisher-Yates shuffle
-        for (let i = initialDebates.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [initialDebates[i], initialDebates[j]] = [initialDebates[j], initialDebates[i]];
-        }
-
-        // Add a random starting index
-        const randomStartIndex = Math.floor(Math.random() * initialDebates.length);
-        initialDebates = [
-            ...initialDebates.slice(randomStartIndex),
-            ...initialDebates.slice(0, randomStartIndex),
-        ];
-    } catch (error) {
-        console.error('Error parsing JSON:', error);
-    }
-
-    // If a specific debate ID is provided, fetch it and place it first
-    const { id } = context.query;
-    if (id) {
-        try {
-            const specificRes = await fetch(`${baseUrl}/api/deliberate/${id}`);
-            if (specificRes.ok) {
-                const specificDebate = await specificRes.json();
-                initialDebates = [
-                    specificDebate,
-                    ...initialDebates.filter((debate) => debate._id !== specificDebate._id),
-                ];
-            }
-        } catch (error) {
-            console.error('Error fetching specific debate:', error);
-        }
-    }
-
-    return {
-        props: { initialDebates },
-    };
-}

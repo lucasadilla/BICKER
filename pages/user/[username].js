@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import dbConnect from '../../lib/dbConnect';
-import User from '../../models/User';
-import Deliberate from '../../models/Deliberate';
+import { useRouter } from 'next/router';
 import { Badge } from '../../components/ui/badge';
 import badgeImages from '../../lib/badgeImages';
 import {
@@ -22,7 +20,11 @@ import {
 } from '../../components/ui/pagination';
 import { sortDeliberates } from '../../lib/sortDeliberates';
 
-export default function UserProfile({ user, debates }) {
+export default function UserProfile() {
+  const router = useRouter();
+  const { username } = router.query;
+  const [user, setUser] = useState(null);
+  const [debates, setDebates] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [sort, setSort] = useState('newest');
   const [page, setPage] = useState(1);
@@ -44,6 +46,26 @@ export default function UserProfile({ user, debates }) {
     setDisplayedDebates(sorted.slice(start, start + 25));
     setTotalPages(Math.ceil(sorted.length / 25) || 1);
   }, [debates, sort, page]);
+
+  useEffect(() => {
+    if (!username) return;
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`/api/user/${encodeURIComponent(username)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+          setDebates(data.debates || []);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Failed to load user:', error);
+        setUser(null);
+      }
+    };
+    fetchData();
+  }, [username]);
 
   if (!user) {
     return <div style={{ padding: '20px', maxWidth: '800px', margin: '80px auto' }}>User not found.</div>;
@@ -201,40 +223,4 @@ export default function UserProfile({ user, debates }) {
       </div>
     </div>
   );
-}
-
-export async function getServerSideProps({ params }) {
-  await dbConnect();
-  const { username } = params;
-  const identifier = decodeURIComponent(username);
-  const user = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] }).lean();
-  if (!user) {
-    return { props: { user: null, debates: [] } };
-  }
-  const debatesDocs = await Deliberate.find({
-    $or: [
-      { createdBy: user.email },
-      { instigatedBy: user.email }
-    ]
-  }).sort({ createdAt: -1 }).lean();
-  const debates = debatesDocs.map((d) => ({
-    _id: d._id.toString(),
-    instigateText: d.instigateText,
-    debateText: d.debateText,
-    votesRed: d.votesRed || 0,
-    votesBlue: d.votesBlue || 0,
-    createdAt: d.createdAt ? d.createdAt.toISOString() : null,
-  }));
-  return {
-    props: {
-      user: {
-        username: user.username || user.email,
-        profilePicture: user.profilePicture || '',
-        bio: user.bio || '',
-        badges: user.badges || [],
-        selectedBadge: user.selectedBadge || '',
-      },
-      debates,
-    },
-  };
 }
