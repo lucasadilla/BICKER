@@ -22,6 +22,16 @@ export default async function handler(req, res) {
                 .json({ error: 'Text must be under 200 characters.' });
         }
         try {
+            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+            const recentCount = await Instigate.countDocuments({
+                createdBy: creator,
+                createdAt: { $gte: oneHourAgo },
+            });
+            if (recentCount >= 10) {
+                return res
+                    .status(429)
+                    .json({ error: 'You can only submit 10 instigates per hour.' });
+            }
             const newInstigate = await Instigate.create({ text, createdBy: creator });
             await updateBadges(creator);
             return res.status(201).json(newInstigate);

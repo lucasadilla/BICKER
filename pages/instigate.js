@@ -40,11 +40,16 @@ export default function InstigatePage() {
         }
 
         try {
-            await fetch('/api/instigate', {
+            const res = await fetch('/api/instigate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: newInstigate.trim() }),
             });
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || 'Failed to submit instigate.');
+                return;
+            }
             setNewInstigate('');
             fetchInstigates();
         } catch (error) {
