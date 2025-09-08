@@ -1,7 +1,9 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+import dbConnect from '../lib/dbConnect';
+import Banner from '../models/Banner';
 
-export default function Home() {
+export default function Home({ bannerUrl }) {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
 
@@ -20,15 +22,21 @@ export default function Home() {
             style={{
                 display: 'flex',
                 flexDirection: 'column',
-                height: '100vh',
-                overflow: 'hidden',
+                minHeight: '100vh',
             }}
         >
+            {bannerUrl && (
+                <img
+                    src={bannerUrl}
+                    alt="Banner"
+                    style={{ width: '100%', height: 'auto', flexShrink: 0 }}
+                />
+            )}
             {/* Split Screen */}
             <div
                 style={{
                     display: 'flex',
-                    height: '100%',
+                    flex: 1,
                     flexDirection: isMobile ? 'column' : 'row',
                 }}
             >
@@ -98,4 +106,14 @@ export default function Home() {
             </div>
         </div>
     );
+}
+
+export async function getServerSideProps() {
+    await dbConnect();
+    const banner = await Banner.findOne({}).lean();
+    return {
+        props: {
+            bannerUrl: banner ? banner.imageUrl : '',
+        },
+    };
 }
