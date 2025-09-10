@@ -25,6 +25,26 @@ export default function DebatePage({ initialDebates }) {
     }, []);
 
     useEffect(() => {
+        const gradient =
+            hoveringSide === 'red'
+                ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
+                : hoveringSide === 'blue'
+                ? 'linear-gradient(to right, #FF4D4D 50%, #76ACFF 50%)'
+                : 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)';
+        if (typeof document !== 'undefined') {
+            document.documentElement.style.setProperty('--nav-gradient', gradient);
+        }
+    }, [hoveringSide]);
+
+    useEffect(() => {
+        return () => {
+            if (typeof document !== 'undefined') {
+                document.documentElement.style.removeProperty('--nav-gradient');
+            }
+        };
+    }, []);
+
+    useEffect(() => {
         const handleClickOutside = (event) => {
             const searchBar = document.querySelector('.search-bar-container');
             if (searchBar && !searchBar.contains(event.target) && !searchTerm) {
@@ -395,9 +415,11 @@ export default function DebatePage({ initialDebates }) {
 
             {/* Right Side (Blue) */}
             <div
+                onMouseEnter={() => setHoveringSide('blue')}
+                onMouseLeave={() => setHoveringSide('')}
                 style={{
                     flex: 1,
-                    backgroundColor: '#4D94FF',
+                    backgroundColor: hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF',
                     padding: '20px',
                     boxSizing: 'border-box',
                     color: 'white',
