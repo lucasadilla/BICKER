@@ -22,6 +22,26 @@ export default function DeliberatePage({ initialDebates }) {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
+        const gradient =
+            hoveringSide === 'red'
+                ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
+                : hoveringSide === 'blue'
+                    ? 'linear-gradient(to right, #FF4D4D 50%, #76ACFF 50%)'
+                    : 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)';
+        if (typeof document !== 'undefined') {
+            document.documentElement.style.setProperty('--nav-gradient', gradient);
+        }
+    }, [hoveringSide]);
+
+    useEffect(() => {
+        return () => {
+            if (typeof document !== 'undefined') {
+                document.documentElement.style.removeProperty('--nav-gradient');
+            }
+        };
+    }, []);
+
+    useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth <= 768);
         if (typeof window !== 'undefined') {
             handleResize();
