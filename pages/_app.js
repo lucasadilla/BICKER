@@ -1,6 +1,7 @@
 import '../styles/globals.css';
 import { SessionProvider, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import NavBar from '../components/NavBar';
 import { DefaultSeo } from 'next-seo';
 import SEO from '../next-seo.config';
@@ -52,11 +53,14 @@ function ThemeProvider({ children }) {
 }
 
 export default function MyApp({ Component, pageProps: { session, ...pageProps } }) {
+    const router = useRouter();
+    const showNavBar = router.pathname !== '/';
+
     return (
         <SessionProvider session={session}>
             <ThemeProvider>
                 <DefaultSeo {...SEO} />
-                <NavBar />
+                {showNavBar && <NavBar />}
                 <Component {...pageProps} />
                 <Analytics/>
             </ThemeProvider>
