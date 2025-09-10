@@ -25,6 +25,7 @@ export default function Home({ bannerUrl }) {
                 height: '100vh',
                 paddingTop: '74px',
                 boxSizing: 'border-box',
+                background: 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)',
             }}
         >
             {bannerUrl && (
