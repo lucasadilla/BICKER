@@ -22,7 +22,9 @@ export default function Home({ bannerUrl }) {
             style={{
                 display: 'flex',
                 flexDirection: 'column',
-                minHeight: '100vh',
+                height: '100vh',
+                paddingTop: '74px',
+                boxSizing: 'border-box',
             }}
         >
             {bannerUrl && (
