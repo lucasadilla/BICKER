@@ -6,6 +6,7 @@ import Banner from '../models/Banner';
 export default function Home({ bannerUrl }) {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
+    const [hoveredSide, setHoveredSide] = useState(null);
 
     useEffect(() => {
         const handleResize = () => {
@@ -25,7 +26,12 @@ export default function Home({ bannerUrl }) {
                 height: '100vh',
                 paddingTop: '74px',
                 boxSizing: 'border-box',
-                background: 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)',
+                background:
+                    hoveredSide === 'left'
+                        ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
+                        : hoveredSide === 'right'
+                        ? 'linear-gradient(to right, #FF4D4D 50%, #76ACFF 50%)'
+                        : 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)',
             }}
         >
             {bannerUrl && (
@@ -48,7 +54,8 @@ export default function Home({ bannerUrl }) {
                     onClick={() => router.push('/instigate')}
                     style={{
                         flex: 1,
-                        backgroundColor: '#FF4D4D',
+                        backgroundColor:
+                            hoveredSide === 'left' ? '#FF6A6A' : '#FF4D4D',
                         color: 'white',
                         display: 'flex',
                         justifyContent: 'center',
@@ -58,8 +65,8 @@ export default function Home({ bannerUrl }) {
                         width: isMobile ? '100%' : '50%',
                         height: isMobile ? '50%' : '100%',
                     }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = '#FF6A6A')}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = '#FF4D4D')}
+                    onMouseEnter={() => setHoveredSide('left')}
+                    onMouseLeave={() => setHoveredSide(null)}
                 >
                     <h1
                         className="heading-1"
@@ -80,7 +87,8 @@ export default function Home({ bannerUrl }) {
                     onClick={() => router.push('/debate')}
                     style={{
                         flex: 1,
-                        backgroundColor: '#4D94FF',
+                        backgroundColor:
+                            hoveredSide === 'right' ? '#76ACFF' : '#4D94FF',
                         color: 'white',
                         display: 'flex',
                         justifyContent: 'center',
@@ -90,8 +98,8 @@ export default function Home({ bannerUrl }) {
                         width: isMobile ? '100%' : '50%',
                         height: isMobile ? '50%' : '100%',
                     }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = '#76ACFF')}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = '#4D94FF')}
+                    onMouseEnter={() => setHoveredSide('right')}
+                    onMouseLeave={() => setHoveredSide(null)}
                 >
                     <h1
                         className="heading-1"
