@@ -17,6 +17,26 @@ export default function Home({ bannerUrl }) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    useEffect(() => {
+        const gradient =
+            hoveredSide === 'left'
+                ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
+                : hoveredSide === 'right'
+                ? 'linear-gradient(to right, #FF4D4D 50%, #76ACFF 50%)'
+                : 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)';
+        if (typeof document !== 'undefined') {
+            document.documentElement.style.setProperty('--nav-gradient', gradient);
+        }
+    }, [hoveredSide]);
+
+    useEffect(() => {
+        return () => {
+            if (typeof document !== 'undefined') {
+                document.documentElement.style.removeProperty('--nav-gradient');
+            }
+        };
+    }, []);
+
     // Whether user is signed in or not, we show the main content
     return (
         <div
