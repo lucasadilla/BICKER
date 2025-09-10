@@ -121,7 +121,7 @@ export default function NavBar() {
                 justifyContent: 'center',
                 gap: '20px',
                 padding: '10px 0',
-                backgroundColor: 'transparent',
+                background: 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)',
                 position: 'fixed',
                 top: 0,
                 width: '100%',
