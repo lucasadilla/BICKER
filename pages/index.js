@@ -109,11 +109,17 @@ export default function Home({ bannerUrl }) {
 }
 
 export async function getServerSideProps() {
-    await dbConnect();
-    const banner = await Banner.findOne({}).lean();
+    let bannerUrl = '';
+    if (process.env.MONGO_URI) {
+        try {
+            await dbConnect();
+            const banner = await Banner.findOne({}).lean();
+            bannerUrl = banner ? banner.imageUrl : '';
+        } catch (err) {
+            console.error('Failed to load banner:', err);
+        }
+    }
     return {
-        props: {
-            bannerUrl: banner ? banner.imageUrl : '',
-        },
+        props: { bannerUrl },
     };
 }
