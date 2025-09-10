@@ -46,6 +46,7 @@ export default function Home({ bannerUrl }) {
                 height: '100vh',
                 paddingTop: '74px',
                 boxSizing: 'border-box',
+                transition: 'background 0.3s ease',
                 background:
                     hoveredSide === 'left'
                         ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
