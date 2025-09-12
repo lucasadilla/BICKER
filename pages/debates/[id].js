@@ -1,19 +1,46 @@
 import { NextSeo } from 'next-seo';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 
-export default function DebateDetail({ debate }) {
-  if (!debate) {
-    return <div>Debate not found</div>;
-  }
-
+export default function DebateDetail() {
+  const router = useRouter();
+  const { id } = router.query;
+  const [debate, setDebate] = useState(null);
   const [shareUrl, setShareUrl] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
+    const fetchDebate = async () => {
+      try {
+        const res = await fetch(`/api/debate/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDebate(data);
+        } else {
+          setDebate(null);
+        }
+      } catch (error) {
+        console.error('Failed to load debate:', error);
+        setDebate(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDebate();
     if (typeof window !== 'undefined') {
       setShareUrl(window.location.href);
     }
-  }, []);
+  }, [id]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!debate) {
+    return <div>Debate not found</div>;
+  }
 
   const handleReport = async () => {
     const reason = prompt('Why are you reporting this debate?');
@@ -78,20 +105,4 @@ export default function DebateDetail({ debate }) {
       </div>
     </div>
   );
-}
-
-export async function getServerSideProps({ params, req }) {
-  const protocol = req.headers["x-forwarded-proto"] || "http";
-  const baseUrl = `${protocol}://${req.headers.host}`;
-  try {
-    const res = await fetch(`${baseUrl}/api/debate/${params.id}`);
-    if (!res.ok) {
-      return { notFound: true };
-    }
-    const debate = await res.json();
-    return { props: { debate } };
-  } catch (error) {
-    console.error('Failed to load debate:', error);
-    return { props: { debate: null } };
-  }
 }
