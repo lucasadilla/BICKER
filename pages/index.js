@@ -19,17 +19,15 @@ export default function Home({ bannerUrl }) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const leftSideColor = hoveredSide === 'left' ? '#FF6A6A' : '#FF4D4D';
+    const rightSideColor = hoveredSide === 'right' ? '#76ACFF' : '#4D94FF';
+
     useIsomorphicLayoutEffect(() => {
-        const gradient =
-            hoveredSide === 'left'
-                ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
-                : hoveredSide === 'right'
-                ? 'linear-gradient(to right, #FF4D4D 50%, #76ACFF 50%)'
-                : 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)';
+        const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
         if (typeof document !== 'undefined') {
             document.documentElement.style.setProperty('--nav-gradient', gradient);
         }
-    }, [hoveredSide]);
+    }, [leftSideColor, rightSideColor]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -49,12 +47,7 @@ export default function Home({ bannerUrl }) {
                 paddingTop: '74px',
                 boxSizing: 'border-box',
                 transition: 'background 0.3s ease',
-                background:
-                    hoveredSide === 'left'
-                        ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
-                        : hoveredSide === 'right'
-                        ? 'linear-gradient(to right, #FF4D4D 50%, #76ACFF 50%)'
-                        : 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)',
+                background: `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`,
             }}
         >
             {bannerUrl && (
@@ -77,8 +70,7 @@ export default function Home({ bannerUrl }) {
                     onClick={() => router.push('/instigate')}
                     style={{
                         flex: 1,
-                        backgroundColor:
-                            hoveredSide === 'left' ? '#FF6A6A' : '#FF4D4D',
+                        backgroundColor: leftSideColor,
                         color: 'white',
                         display: 'flex',
                         justifyContent: 'center',
@@ -110,8 +102,7 @@ export default function Home({ bannerUrl }) {
                     onClick={() => router.push('/debate')}
                     style={{
                         flex: 1,
-                        backgroundColor:
-                            hoveredSide === 'right' ? '#76ACFF' : '#4D94FF',
+                        backgroundColor: rightSideColor,
                         color: 'white',
                         display: 'flex',
                         justifyContent: 'center',
