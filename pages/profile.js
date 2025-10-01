@@ -56,12 +56,25 @@ export default function Profile() {
   if (status === 'loading') return <p>Loading...</p>;
   if (status === 'unauthenticated') return <p>Please sign in to edit your profile.</p>;
 
+  const inputStyle = {
+    padding: '10px',
+    borderRadius: '8px',
+    border: '1px solid rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    color: '#ffffff',
+  };
+
+  const labelStyle = {
+    color: '#ffffff',
+    fontWeight: '600',
+  };
+
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '80px auto' }}>
+    <div style={{ padding: '20px', maxWidth: '600px', margin: '80px auto', color: '#ffffff' }}>
       <h1>Edit Profile</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <label>Profile Picture</label>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <label style={labelStyle}>Profile Picture</label>
+        <input type="file" accept="image/*" onChange={handleFileChange} style={inputStyle} />
         {form.profilePicture && (
           <img
             src={form.profilePicture}
@@ -69,24 +82,38 @@ export default function Profile() {
             style={{ width: '100px', height: '100px', objectFit: 'cover' }}
           />
         )}
-        <label>Username</label>
-        <input name="username" value={form.username} onChange={handleChange} />
-        <label>Bio</label>
-        <textarea name="bio" value={form.bio} onChange={handleChange} />
-        <label>Public Badge</label>
-        <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange}>
+        <label style={labelStyle}>Username</label>
+        <input name="username" value={form.username} onChange={handleChange} style={inputStyle} />
+        <label style={labelStyle}>Bio</label>
+        <textarea name="bio" value={form.bio} onChange={handleChange} style={{ ...inputStyle, minHeight: '120px' }} />
+        <label style={labelStyle}>Public Badge</label>
+        <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange} style={inputStyle}>
           <option value="">None</option>
           {badges.map(b => (
             <option key={b} value={b}>{b}</option>
           ))}
         </select>
-        <label>Color Scheme</label>
-        <select name="colorScheme" value={form.colorScheme} onChange={handleChange}>
+        <label style={labelStyle}>Color Scheme</label>
+        <select name="colorScheme" value={form.colorScheme} onChange={handleChange} style={inputStyle}>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
           <option value="blue">Blue</option>
         </select>
-        <button type="submit" style={{ marginTop: '10px' }}>Save</button>
+        <button
+          type="submit"
+          style={{
+            marginTop: '10px',
+            padding: '10px 16px',
+            borderRadius: '999px',
+            border: '1px solid rgba(255, 255, 255, 0.7)',
+            backgroundColor: 'transparent',
+            color: '#ffffff',
+            fontWeight: '600',
+            cursor: 'pointer',
+          }}
+        >
+          Save
+        </button>
       </form>
     </div>
   );

@@ -84,7 +84,7 @@ export default function NavBar() {
         padding: '10px 20px',
         fontSize: '16px',
         fontWeight: 'bold',
-        border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
+        border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
         borderRadius: '999px',
         backgroundColor: 'transparent',
         color: '#ffffff',
@@ -98,23 +98,23 @@ export default function NavBar() {
     // Hover effects
     const handleMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
-        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(31, 31, 31, 0.6))';
+        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
         e.target.style.color = '#ffffff';
     };
     const handleMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
-        e.target.style.borderColor = 'var(--nav-button-border, rgba(31, 31, 31, 0.4))';
+        e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
         e.target.style.color = '#ffffff';
     };
 
     const handleCircularMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
-        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(31, 31, 31, 0.6))';
+        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
         e.target.style.color = '#ffffff';
     };
     const handleCircularMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
-        e.target.style.borderColor = 'var(--nav-button-border, rgba(31, 31, 31, 0.4))';
+        e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
         e.target.style.color = '#ffffff';
     };
 
@@ -149,7 +149,7 @@ export default function NavBar() {
                         height: isMobile ? '54px' : '44px',
                         borderRadius: '50%',
                         backgroundColor: 'transparent',
-                        border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
+                        border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
                         color: '#ffffff'
                     }}
                     onMouseEnter={handleCircularMouseEnter}

@@ -123,7 +123,15 @@ export default function MyStats() {
           </div>
         </div>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <Select value={sort} onValueChange={setSort}>
+          <Select
+            value={sort}
+            onValueChange={setSort}
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              color: '#ffffff',
+              border: '1px solid rgba(255, 255, 255, 0.7)',
+            }}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>

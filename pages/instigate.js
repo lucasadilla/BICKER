@@ -96,8 +96,10 @@ export default function InstigatePage() {
                             padding: '10px',
                             fontSize: '36px',
                             borderRadius: '4px',
-                            border: '1px solid #ccc',
+                            border: '1px solid rgba(255, 255, 255, 0.8)',
                             resize: 'none',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            color: '#ffffff',
                         }}
                     />
                     <div
@@ -106,7 +108,7 @@ export default function InstigatePage() {
                             bottom: '15px',
                             right: '15px',
                             fontSize: '14px',
-                            color: '#555',
+                            color: '#ffffff',
                             pointerEvents: 'none',
                         }}
                     >
