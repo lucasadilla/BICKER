@@ -30,6 +30,10 @@ export default function DeliberatePage({ initialDebates }) {
         const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
         if (typeof document !== 'undefined') {
             document.documentElement.style.setProperty('--nav-gradient', gradient);
+            document.documentElement.style.setProperty('--nav-button-color', '#ffffff');
+            document.documentElement.style.setProperty('--nav-button-color-hover', '#ffffff');
+            document.documentElement.style.setProperty('--nav-button-border', 'rgba(255, 255, 255, 0.7)');
+            document.documentElement.style.setProperty('--nav-button-border-hover', 'rgba(255, 255, 255, 0.9)');
         }
     }, [leftSideColor, rightSideColor]);
 
@@ -37,6 +41,10 @@ export default function DeliberatePage({ initialDebates }) {
         return () => {
             if (typeof document !== 'undefined') {
                 document.documentElement.style.removeProperty('--nav-gradient');
+                document.documentElement.style.removeProperty('--nav-button-color');
+                document.documentElement.style.removeProperty('--nav-button-color-hover');
+                document.documentElement.style.removeProperty('--nav-button-border');
+                document.documentElement.style.removeProperty('--nav-button-border-hover');
             }
         };
     }, []);
