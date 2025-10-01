@@ -1,5 +1,5 @@
 // pages/debate.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { NextSeo } from 'next-seo';
 
 export default function DebatePage({ initialDebates }) {
@@ -8,6 +8,8 @@ export default function DebatePage({ initialDebates }) {
     const [debateText, setDebateText] = useState('');
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
+    const useIsomorphicLayoutEffect =
+        typeof window !== 'undefined' ? useLayoutEffect : useEffect;
     // Search-related state
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -24,7 +26,7 @@ export default function DebatePage({ initialDebates }) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
         const gradient =
             hoveringSide === 'red'
                 ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
@@ -36,7 +38,7 @@ export default function DebatePage({ initialDebates }) {
         }
     }, [hoveringSide]);
 
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
         return () => {
             if (typeof document !== 'undefined') {
                 document.documentElement.style.removeProperty('--nav-gradient');
