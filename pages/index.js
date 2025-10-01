@@ -53,7 +53,6 @@ export default function Home({ bannerUrl }) {
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100vh',
-                paddingTop: '74px',
                 boxSizing: 'border-box',
                 transition: 'background 0.3s ease',
                 background: splitGradient,
