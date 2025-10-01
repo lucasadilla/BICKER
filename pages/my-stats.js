@@ -127,8 +127,8 @@ export default function MyStats() {
             value={sort}
             onValueChange={setSort}
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              color: '#ffffff',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              color: '#1f2937',
               border: '1px solid rgba(255, 255, 255, 0.7)',
             }}
           >
