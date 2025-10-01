@@ -2,7 +2,7 @@ import dbConnect from '../../../lib/dbConnect';
 import Deliberate from '../../../models/Deliberate';
 import User from '../../../models/User';
 import updateBadges from '../../../lib/badges';
-import { STREAK_WINDOW_MS } from '../../../lib/updateUserActivity';
+import { isStreakBroken } from '../../../lib/updateUserActivity';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -87,13 +87,10 @@ export default async function handler(req, res) {
         const userDoc = await User.findOne({ email: userId }).lean();
 
         let streak = userDoc?.streak || 0;
-        if (userDoc?.lastActivityAt) {
-            const lastActivity = new Date(userDoc.lastActivityAt);
-            if (Date.now() - lastActivity.getTime() > STREAK_WINDOW_MS) {
-                streak = 0;
-                if (userDoc.streak !== 0) {
-                    await User.updateOne({ email: userId }, { $set: { streak: 0 } });
-                }
+        if (userDoc?.lastActivityAt && isStreakBroken(userDoc.lastActivityAt)) {
+            streak = 0;
+            if (userDoc.streak !== 0) {
+                await User.updateOne({ email: userId }, { $set: { streak: 0 } });
             }
         }
 
