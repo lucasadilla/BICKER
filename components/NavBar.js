@@ -84,34 +84,38 @@ export default function NavBar() {
         padding: '10px 20px',
         fontSize: '16px',
         fontWeight: 'bold',
-        border: 'none',
-        borderRadius: '5px',
-        backgroundColor: '#007BFF',
-        color: 'white',
+        border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
+        borderRadius: '999px',
+        backgroundColor: 'transparent',
+        color: 'var(--nav-button-color, #1f1f1f)',
         cursor: 'pointer',
-        boxShadow: '0 4px 0 #0056b3',
-        transition: 'all 0.1s ease',
+        transition: 'transform 0.15s ease, border-color 0.15s ease, color 0.15s ease',
         marginLeft: '20px',
         position: 'relative',
+        backdropFilter: 'blur(4px)'
     };
 
     // Hover effects
     const handleMouseEnter = (e) => {
-        e.target.style.transform = 'translateY(4px)';
-        e.target.style.boxShadow = 'none';
+        e.target.style.transform = 'translateY(2px) scale(0.98)';
+        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(31, 31, 31, 0.6))';
+        e.target.style.color = 'var(--nav-button-color-hover, var(--nav-button-color, #1f1f1f))';
     };
     const handleMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = '0 4px 0 #0056b3';
+        e.target.style.borderColor = 'var(--nav-button-border, rgba(31, 31, 31, 0.4))';
+        e.target.style.color = 'var(--nav-button-color, #1f1f1f)';
     };
 
     const handleCircularMouseEnter = (e) => {
-        e.target.style.boxShadow = 'none';
-        e.target.style.transform = 'translateY(2px)';
+        e.target.style.transform = 'translateY(2px) scale(0.98)';
+        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(31, 31, 31, 0.6))';
+        e.target.style.color = 'var(--nav-button-color-hover, var(--nav-button-color, #1f1f1f))';
     };
     const handleCircularMouseLeave = (e) => {
-        e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
         e.target.style.transform = 'translateY(0)';
+        e.target.style.borderColor = 'var(--nav-button-border, rgba(31, 31, 31, 0.4))';
+        e.target.style.color = 'var(--nav-button-color, #1f1f1f)';
     };
 
     return (
@@ -122,7 +126,7 @@ export default function NavBar() {
                 gap: '20px',
                 padding: '10px 0',
                 transition: 'background 0.3s ease',
-                background: 'var(--nav-gradient, transparent)',
+                background: 'transparent',
                 position: 'fixed',
                 top: 0,
                 width: '100%',
@@ -144,8 +148,9 @@ export default function NavBar() {
                         width: isMobile ? '54px' : '44px',
                         height: isMobile ? '54px' : '44px',
                         borderRadius: '50%',
-                        backgroundColor: '#007BFF',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        backgroundColor: 'transparent',
+                        border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
+                        color: 'var(--nav-button-color, #1f1f1f)'
                     }}
                     onMouseEnter={handleCircularMouseEnter}
                     onMouseLeave={handleCircularMouseLeave}
@@ -253,8 +258,9 @@ export default function NavBar() {
                             width: isMobile ? '54px' : '44px',
                             height: isMobile ? '54px' : '44px',
                             borderRadius: '50%',
-                            backgroundColor: '#ffc107',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            backgroundColor: 'transparent',
+                            border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
+                            color: 'var(--nav-button-color, #1f1f1f)'
                         }}
                         onMouseEnter={handleCircularMouseEnter}
                         onMouseLeave={handleCircularMouseLeave}
@@ -377,7 +383,7 @@ export default function NavBar() {
                         top: '74px',
                         left: 0,
                         right: 0,
-                        backgroundColor: 'white',
+                        background: 'rgba(0, 0, 0, 0.8)',
                         padding: '20px',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                         display: 'flex',
@@ -387,40 +393,46 @@ export default function NavBar() {
                     }}
                 >
                     {[
-                { label: 'Instigate', path: '/instigate' },
-                { label: 'Debate', path: '/debate' },
-                { label: 'Deliberate', path: '/deliberate' },
-                { label: 'Leaderboard', path: '/leaderboard' }
-            ].map(({ label, path }) => (
-                <Link key={label} href={path} passHref>
-                    <button
-                        style={{
+                        { label: 'Instigate', path: '/instigate' },
+                        { label: 'Debate', path: '/debate' },
+                        { label: 'Deliberate', path: '/deliberate' },
+                        { label: 'Leaderboard', path: '/leaderboard' }
+                    ].map(({ label, path }) => (
+                        <Link key={label} href={path} passHref>
+                            <button
+                                style={{
                                     ...buttonStyle,
                                     width: '100%',
                                     margin: '5px 0',
                                     padding: '15px 20px',
-                                    fontSize: '18px'
+                                    fontSize: '18px',
+                                    backdropFilter: 'none',
+                                    color: '#ffffff',
+                                    borderColor: 'rgba(255, 255, 255, 0.7)'
                                 }}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                        {label}
-                    </button>
-                </Link>
-            ))}
-            {!session && (
-                <button
-                    style={{
-                        ...buttonStyle,
-                        width: '100%',
-                        margin: '5px 0',
-                        padding: '15px 20px',
-                        fontSize: '18px'
-                    }}
-                    onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
-                >
-                    Sign In
-                </button>
-            )}
+                            >
+                                {label}
+                            </button>
+                        </Link>
+                    ))}
+                    {!session && (
+                        <button
+                            style={{
+                                ...buttonStyle,
+                                width: '100%',
+                                margin: '5px 0',
+                                padding: '15px 20px',
+                                fontSize: '18px',
+                                backdropFilter: 'none',
+                                color: '#ffffff',
+                                borderColor: 'rgba(255, 255, 255, 0.7)'
+                            }}
+                            onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
+                        >
+                            Sign In
+                        </button>
+                    )}
                 </div>
             )}
         </nav>
