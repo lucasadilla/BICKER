@@ -26,17 +26,15 @@ export default function DebatePage({ initialDebates }) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    const leftSideColor = hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D';
+    const rightSideColor = hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF';
+
     useIsomorphicLayoutEffect(() => {
-        const gradient =
-            hoveringSide === 'red'
-                ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
-                : hoveringSide === 'blue'
-                ? 'linear-gradient(to right, #FF4D4D 50%, #76ACFF 50%)'
-                : 'linear-gradient(to right, #FF4D4D 50%, #4D94FF 50%)';
+        const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
         if (typeof document !== 'undefined') {
             document.documentElement.style.setProperty('--nav-gradient', gradient);
         }
-    }, [hoveringSide]);
+    }, [leftSideColor, rightSideColor]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -322,7 +320,7 @@ export default function DebatePage({ initialDebates }) {
                 onMouseLeave={() => setHoveringSide('')}
                 style={{
                     flex: 1,
-                    backgroundColor: hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D',
+                    backgroundColor: leftSideColor,
                     padding: '20px',
                     boxSizing: 'border-box',
                     color: 'white',
@@ -421,7 +419,7 @@ export default function DebatePage({ initialDebates }) {
                 onMouseLeave={() => setHoveringSide('')}
                 style={{
                     flex: 1,
-                    backgroundColor: hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF',
+                    backgroundColor: rightSideColor,
                     padding: '20px',
                     boxSizing: 'border-box',
                     color: 'white',
