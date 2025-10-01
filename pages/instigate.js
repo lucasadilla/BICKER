@@ -96,10 +96,10 @@ export default function InstigatePage() {
                             padding: '10px',
                             fontSize: '36px',
                             borderRadius: '4px',
-                            border: '1px solid rgba(255, 255, 255, 0.8)',
+                            border: '1px solid rgba(0, 0, 0, 0.2)',
                             resize: 'none',
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            color: '#ffffff',
+                            backgroundColor: '#ffffff',
+                            color: '#000000',
                         }}
                     />
                     <div
