@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import dbConnect from '../lib/dbConnect';
 import Banner from '../models/Banner';
 
@@ -7,6 +7,8 @@ export default function Home({ bannerUrl }) {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
     const [hoveredSide, setHoveredSide] = useState(null);
+    const useIsomorphicLayoutEffect =
+        typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
     useEffect(() => {
         const handleResize = () => {
@@ -17,7 +19,7 @@ export default function Home({ bannerUrl }) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
         const gradient =
             hoveredSide === 'left'
                 ? 'linear-gradient(to right, #FF6A6A 50%, #4D94FF 50%)'
@@ -29,7 +31,7 @@ export default function Home({ bannerUrl }) {
         }
     }, [hoveredSide]);
 
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
         return () => {
             if (typeof document !== 'undefined') {
                 document.documentElement.style.removeProperty('--nav-gradient');
