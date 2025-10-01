@@ -21,9 +21,10 @@ export default function Home({ bannerUrl }) {
 
     const leftSideColor = hoveredSide === 'left' ? '#FF6A6A' : '#FF4D4D';
     const rightSideColor = hoveredSide === 'right' ? '#76ACFF' : '#4D94FF';
+    const splitGradient = `linear-gradient(to right, ${leftSideColor} 0%, ${leftSideColor} 50%, ${rightSideColor} 50%, ${rightSideColor} 100%)`;
 
     useIsomorphicLayoutEffect(() => {
-        const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
+        const gradient = splitGradient;
         if (typeof document !== 'undefined') {
             document.documentElement.style.setProperty('--nav-gradient', gradient);
             document.documentElement.style.setProperty('--nav-button-color', '#ffffff');
@@ -31,7 +32,7 @@ export default function Home({ bannerUrl }) {
             document.documentElement.style.setProperty('--nav-button-border', 'rgba(255, 255, 255, 0.7)');
             document.documentElement.style.setProperty('--nav-button-border-hover', 'rgba(255, 255, 255, 0.9)');
         }
-    }, [leftSideColor, rightSideColor]);
+    }, [splitGradient]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -55,7 +56,7 @@ export default function Home({ bannerUrl }) {
                 paddingTop: '74px',
                 boxSizing: 'border-box',
                 transition: 'background 0.3s ease',
-                background: `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`,
+                background: splitGradient,
             }}
         >
             {bannerUrl && (
@@ -78,13 +79,13 @@ export default function Home({ bannerUrl }) {
                     onClick={() => router.push('/instigate')}
                     style={{
                         flex: 1,
-                        backgroundColor: leftSideColor,
+                        background: leftSideColor,
                         color: 'white',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: 'pointer',
-                        transition: 'background-color 0.3s ease',
+                        transition: 'background 0.3s ease',
                         width: isMobile ? '100%' : '50%',
                         height: isMobile ? '50%' : '100%',
                     }}
@@ -110,13 +111,13 @@ export default function Home({ bannerUrl }) {
                     onClick={() => router.push('/debate')}
                     style={{
                         flex: 1,
-                        backgroundColor: rightSideColor,
+                        background: rightSideColor,
                         color: 'white',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: 'pointer',
-                        transition: 'background-color 0.3s ease',
+                        transition: 'background 0.3s ease',
                         width: isMobile ? '100%' : '50%',
                         height: isMobile ? '50%' : '100%',
                     }}
