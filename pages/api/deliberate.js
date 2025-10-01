@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 import updateBadges from '../../lib/badges';
 import emitter from '../../lib/deliberateEvents';
+import updateUserActivity from '../../lib/updateUserActivity';
 
 export default async function handler(req, res) {
     try {
@@ -101,10 +102,7 @@ export default async function handler(req, res) {
             console.log('Deliberation saved:', savedDeliberation);
 
             if (voter !== 'anonymous') {
-                await User.findOneAndUpdate(
-                    { email: voter },
-                    { $inc: { points: 1, streak: 1 } }
-                );
+                await updateUserActivity(voter, { pointsToAdd: 1 });
                 await updateBadges(voter);
             }
 

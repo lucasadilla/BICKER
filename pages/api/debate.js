@@ -3,10 +3,10 @@ import Debate from '../../models/Debate';
 import Instigate from '../../models/Instigate';
 import Deliberate from '../../models/Deliberate';
 import Notification from '../../models/Notification';
-import User from '../../models/User';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 import updateBadges from '../../lib/badges';
+import updateUserActivity from '../../lib/updateUserActivity';
 
 export default async function handler(req, res) {
     await dbConnect();
@@ -62,10 +62,7 @@ export default async function handler(req, res) {
             });
 
             if (creator !== 'anonymous') {
-                await User.findOneAndUpdate(
-                    { email: creator },
-                    { $inc: { points: 1, streak: 1 } }
-                );
+                await updateUserActivity(creator, { pointsToAdd: 1 });
                 await updateBadges(creator);
             }
 
