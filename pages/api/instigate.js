@@ -3,6 +3,7 @@ import Instigate from '../../models/Instigate';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 import updateBadges from '../../lib/badges';
+import updateUserActivity from '../../lib/updateUserActivity';
 
 export default async function handler(req, res) {
     await dbConnect();
@@ -33,6 +34,7 @@ export default async function handler(req, res) {
                     .json({ error: 'You can only submit 10 instigates per hour.' });
             }
             const newInstigate = await Instigate.create({ text, createdBy: creator });
+            await updateUserActivity(creator);
             await updateBadges(creator);
             return res.status(201).json(newInstigate);
         } catch (error) {

@@ -15,6 +15,10 @@ const UserSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    lastActivityAt: {
+        type: Date,
+        default: null
+    },
     badges: {
         type: [String],
         default: []
