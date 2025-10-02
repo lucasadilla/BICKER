@@ -71,7 +71,7 @@ export default function UserProfile({ user, debates }) {
                     const image = badgeImages[badge];
                     return (
                       <Badge key={badge} variant="secondary" style={image ? { padding: '4px' } : {}}>
-                        {image ? <img src={image} alt={badge} style={{ width: '24px', height: '24px' }} /> : badge}
+                        {image ? <img src={image} alt={badge} style={{ width: '75px', height: '75px' }} /> : badge}
                       </Badge>
                     );
                   })}
