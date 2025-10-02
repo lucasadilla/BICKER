@@ -14,8 +14,6 @@ export default function DebatePage({ initialDebates }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
-    // Toggle search bar expansion
-    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -53,21 +51,25 @@ export default function DebatePage({ initialDebates }) {
     }, []);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            const searchBar = document.querySelector('.search-bar-container');
-            if (searchBar && !searchBar.contains(event.target) && !searchTerm) {
-                setIsSearchExpanded(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [searchTerm]);
-
-    useEffect(() => {
         if (!initialDebates || initialDebates.length === 0) {
             fetchInstigates();
         }
     }, [initialDebates]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const containers = document.querySelectorAll('.search-bar-container');
+            const clickedInside = Array.from(containers).some((container) =>
+                container.contains(event.target)
+            );
+            if (!clickedInside) {
+                setShowSearchResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const fetchInstigates = async (search = '') => {
         try {
@@ -179,42 +181,42 @@ export default function DebatePage({ initialDebates }) {
 
     // Shared search bar content
     const searchBarContent = (
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                gap: '19px',
-                backgroundColor: isSearchExpanded
-                    ? 'rgba(255, 255, 255, 0.98)'
-                    : 'transparent',
-                        padding: isSearchExpanded ? '10px 20px' : '0',
-                        borderRadius: isSearchExpanded ? '16px' : '0',
-                boxShadow: isSearchExpanded
-                    ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)'
-                    : 'none',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        border: isSearchExpanded ? '1px solid rgba(0, 0, 0, 0.05)' : 'none',
-                        cursor: 'pointer',
-                        width: isSearchExpanded ? '100%' : 'auto',
-                    }}
-                    onClick={() => setIsSearchExpanded(true)}
-                >
+        <div
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                padding: '12px 20px',
+                borderRadius: showSearchResults
+                    ? '16px 16px 0 0'
+                    : '16px',
+                boxShadow: showSearchResults
+                    ? '0 0 0 rgba(0, 0, 0, 0)'
+                    : '0 6px 18px rgba(15, 23, 42, 0.08), 0 1px 4px rgba(15, 23, 42, 0.06)',
+                transition: 'all 0.2s ease',
+                border: '1px solid rgba(15, 23, 42, 0.12)',
+                borderBottom: showSearchResults ? 'none' : '1px solid rgba(15, 23, 42, 0.12)',
+                width: '100%',
+                boxSizing: 'border-box',
+            }}
+        >
                     <svg 
                         xmlns="http://www.w3.org/2000/svg" 
                         width="24" 
                         height="24" 
                         viewBox="0 0 24 24" 
                         fill="none" 
-                stroke={isSearchExpanded ? "#666" : 'white'}
+                        stroke="#4B5563"
                         strokeWidth="2" 
                         strokeLinecap="round" 
                         strokeLinejoin="round"
                         style={{
                             flexShrink: 0, 
-                            opacity: isSearchExpanded ? 0.7 : 1,
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            transform: isSearchExpanded ? 'scale(1)' : 'scale(1.2)',
+                            opacity: 0.7,
+                            transition: 'opacity 0.2s ease',
+                            transform: 'scale(1)',
                         }}
                     >
                         <circle cx="11" cy="11" r="8"></circle>
@@ -225,20 +227,20 @@ export default function DebatePage({ initialDebates }) {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search debates..."
+                        onFocus={() =>
+                            searchResults.length > 0 && setShowSearchResults(true)
+                        }
                         style={{
                             flex: 1,
-                            padding: '12px 8px',
+                            padding: '0',
                             fontSize: '16px',
                             border: 'none',
                             outline: 'none',
                             backgroundColor: 'transparent',
-                            color: '#333',
+                            color: '#1F2937',
                             fontWeight: '500',
                             letterSpacing: '0.2px',
-                            width: isSearchExpanded ? '100%' : '0',
-                            opacity: isSearchExpanded ? 1 : 0,
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            pointerEvents: isSearchExpanded ? 'auto' : 'none',
+                            width: '100%',
                         }}
                     />
                 </div>
@@ -253,27 +255,48 @@ export default function DebatePage({ initialDebates }) {
                     left: 0,
                     width: '100%',
                     backgroundColor: '#fff',
-                    border: '1px solid #eee',
+                    border: '1px solid rgba(15, 23, 42, 0.12)',
                     borderTop: 'none',
-                    maxHeight: '200px',
+                    maxHeight: '260px',
                     overflowY: 'auto',
-                    borderRadius: '0 0 8px 8px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    borderRadius: '0 0 16px 16px',
+                    boxShadow:
+                        '0 16px 24px rgba(15, 23, 42, 0.08), 0 8px 16px rgba(15, 23, 42, 0.04)',
                     zIndex: 1000,
                 }}
             >
-                {searchResults.map((instigate) => (
+                {searchResults.map((instigate, index) => (
                     <div
                         key={instigate._id}
                         onClick={() => selectSearchResult(instigate)}
+                        onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                                'rgba(37, 99, 235, 0.08)')
+                        }
+                        onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor = '#fff')
+                        }
                         style={{
-                            padding: '10px',
+                            padding: '12px 16px',
                             cursor: 'pointer',
-                            borderBottom: '1px solid #eee',
+                            borderBottom:
+                                index === searchResults.length - 1
+                                    ? 'none'
+                                    : '1px solid rgba(15, 23, 42, 0.06)',
                             backgroundColor: '#fff',
+                            transition: 'background-color 0.15s ease',
                         }}
                     >
-                        <p className="text-base" style={{ margin: 0, color: '#333' }}>{instigate.text}</p>
+                        <p
+                            className="text-base"
+                            style={{
+                                margin: 0,
+                                color: '#1F2937',
+                                fontWeight: 500,
+                            }}
+                        >
+                            {instigate.text}
+                        </p>
                     </div>
                 ))}
             </div>
@@ -304,7 +327,7 @@ export default function DebatePage({ initialDebates }) {
                         top: '80px',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        width: isSearchExpanded ? '80%' : '48px',
+                        width: '90%',
                         maxWidth: '600px',
                         zIndex: 1000,
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -314,6 +337,7 @@ export default function DebatePage({ initialDebates }) {
                         flexDirection: 'column',
                         alignItems: 'center',
                         boxSizing: 'border-box',
+                        pointerEvents: 'auto',
                     }}
                 >
                     {searchBarContent}
@@ -354,16 +378,16 @@ export default function DebatePage({ initialDebates }) {
                             top: '60px', // increased from 20px to lower the search bar
                             left: '50%',
                             transform: 'translateX(-50%)',
-                            width: isSearchExpanded ? '80%' : '48px',
+                            width: '80%',
                             maxWidth: '600px',
                             zIndex: 1000,
-                            padding: '0 20px',
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                             willChange: 'width, transform',
                             display: 'flex',
                             justifyContent: 'center',
                             flexDirection: 'column',
                             alignItems: 'stretch',
+                            pointerEvents: 'auto',
                         }}
                     >
                         {searchBarContent}
@@ -523,36 +547,6 @@ export default function DebatePage({ initialDebates }) {
                     </button>
                 </div>
             </div>
-                <style jsx>{`
-                    .search-bar-container {
-                        position: fixed;
-                        top: 80px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        z-index: 1000;
-                        padding: 0 20px;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                        will-change: width, transform;
-                        display: flex;
-                        justify-content: center;
-                    }
-
-                    @media (min-width: 769px) {
-                        .search-bar-container {
-                            width: 600px;
-                            max-width: 100%;
-                        }
-                    }
-
-                    @media (max-width: 768px) {
-                        .search-bar-container {
-                            width: 80%;
-                            max-width: 600px;
-                            left: 20%;
-                            transform: translateX(0);
-                        }
-                    }
-                `}</style>
         </div>
     );
 }
