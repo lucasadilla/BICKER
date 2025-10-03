@@ -160,6 +160,15 @@ body.blue {
     font-weight: 500;
 }
 
+.search-results-dropdown {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.search-results-dropdown::-webkit-scrollbar {
+    display: none;
+}
+
 .pagination-link.disabled {
     opacity: 0.5;
     pointer-events: none;
