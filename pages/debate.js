@@ -249,6 +249,7 @@ export default function DebatePage({ initialDebates }) {
     const searchResultsList =
         showSearchResults && searchResults.length > 0 ? (
             <div
+                className="search-results-dropdown"
                 style={{
                     position: 'absolute',
                     top: '100%',
@@ -263,6 +264,7 @@ export default function DebatePage({ initialDebates }) {
                     boxShadow:
                         '0 16px 24px rgba(15, 23, 42, 0.08), 0 8px 16px rgba(15, 23, 42, 0.04)',
                     zIndex: 1000,
+                    boxSizing: 'border-box',
                 }}
             >
                 {searchResults.map((instigate, index) => (
