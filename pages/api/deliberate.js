@@ -41,13 +41,7 @@ export default async function handler(req, res) {
 
             res.status(200).json(deliberationsWithUsers);
         } else if (req.method === 'POST') {
-            // Handle reset request
-            if (req.body.reset) {
-                console.log('Resetting collection...');
-                await Deliberate.collection.drop();
-                console.log('Collection dropped successfully');
-                return res.status(200).json({ message: 'Collection reset successfully' });
-            }
+
 
             const { debateId, vote } = req.body;
             
