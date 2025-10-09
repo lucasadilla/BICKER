@@ -2,6 +2,9 @@ import dbConnect from '../../../lib/dbConnect';
 import Deliberate from '../../../models/Deliberate';
 import User from '../../../models/User';
 
+const sanitizeVotes = (votes = []) =>
+  votes.map(({ vote, timestamp }) => ({ vote, timestamp }));
+
 export default async function handler(req, res) {
   await dbConnect();
   const { id } = req.query;
@@ -32,11 +35,16 @@ export default async function handler(req, res) {
         instigator = map[deliberationDoc.instigatedBy] || null;
       }
 
+      const { _id, createdBy, instigatedBy, votedBy = [], ...rest } = deliberationDoc;
+
       return res.status(200).json({
-        ...deliberationDoc,
-        _id: deliberationDoc._id.toString(),
+        ...rest,
+        _id: _id.toString(),
         creator,
-        instigator
+        instigator,
+        votesRed: deliberationDoc.votesRed || 0,
+        votesBlue: deliberationDoc.votesBlue || 0,
+        votedBy: sanitizeVotes(votedBy)
       });
     } catch (error) {
       console.error('Error fetching deliberation:', error);

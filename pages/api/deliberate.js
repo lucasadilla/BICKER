@@ -8,6 +8,26 @@ import updateBadges from '../../lib/badges';
 import emitter from '../../lib/deliberateEvents';
 import updateUserActivity from '../../lib/updateUserActivity';
 
+const sanitizeVotes = (votes = []) =>
+    votes.map(({ vote, timestamp }) => ({ vote, timestamp }));
+
+const buildResponseDebate = (debate, userMap = {}) => {
+    const { _id, createdBy, instigatedBy, votedBy = [], ...rest } = debate;
+
+    return {
+        ...rest,
+        _id: _id.toString(),
+        creator: createdBy && createdBy !== 'anonymous' ? userMap[createdBy] || null : null,
+        instigator:
+            instigatedBy && instigatedBy !== 'anonymous'
+                ? userMap[instigatedBy] || null
+                : null,
+        votesRed: debate.votesRed || 0,
+        votesBlue: debate.votesBlue || 0,
+        votedBy: sanitizeVotes(votedBy)
+    };
+};
+
 export default async function handler(req, res) {
     try {
         await dbConnect();
@@ -32,12 +52,9 @@ export default async function handler(req, res) {
                 return acc;
             }, {});
 
-            const deliberationsWithUsers = deliberations.map(d => ({
-                ...d,
-                _id: d._id.toString(),
-                creator: userMap[d.createdBy] || null,
-                instigator: userMap[d.instigatedBy] || null,
-            }));
+            const deliberationsWithUsers = deliberations.map(d =>
+                buildResponseDebate(d, userMap)
+            );
 
             res.status(200).json(deliberationsWithUsers);
         } else if (req.method === 'POST') {
@@ -120,7 +137,7 @@ export default async function handler(req, res) {
                 _id: savedDeliberation._id,
                 votesRed: savedDeliberation.votesRed || 0,
                 votesBlue: savedDeliberation.votesBlue || 0,
-                votedBy: savedDeliberation.votedBy || []
+                votedBy: sanitizeVotes(savedDeliberation.votedBy || [])
             });
         } else {
             res.status(405).json({ error: 'Method not allowed' });
