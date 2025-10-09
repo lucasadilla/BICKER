@@ -20,7 +20,30 @@ export default async function handler(req, res) {
             0
         );
 
-        return res.status(200).json({ debates, totalVotes, totalDebates: debates.length });
+        // 4. Remove any personally identifiable information before returning data
+        const sanitizedDebates = debates.map(({
+            _id,
+            instigateText,
+            debateText,
+            votesRed,
+            votesBlue,
+            createdAt,
+            updatedAt,
+        }) => ({
+            _id,
+            instigateText,
+            debateText,
+            votesRed,
+            votesBlue,
+            createdAt,
+            updatedAt,
+        }));
+
+        return res.status(200).json({
+            debates: sanitizedDebates,
+            totalVotes,
+            totalDebates: sanitizedDebates.length,
+        });
     } catch (error) {
         console.error('Error fetching stats:', error);
         return res.status(500).json({ error: 'Something went wrong.' });
