@@ -33,11 +33,20 @@ export default async function handler(req, res) {
         await dbConnect();
 
         if (req.method === 'GET') {
+            const session = await getServerSession(req, res, authOptions);
+            const currentUser = session?.user?.email || null;
+
             const deliberations = await Deliberate.find({}).lean();
+
+            const filteredDeliberations = currentUser
+                ? deliberations.filter(debate =>
+                      !(debate.votedBy || []).some(vote => vote.userId === currentUser)
+                  )
+                : deliberations;
 
             const userEmails = Array.from(
                 new Set(
-                    deliberations
+                    filteredDeliberations
                         .flatMap(d => [d.createdBy, d.instigatedBy])
                         .filter(email => email && email !== 'anonymous')
                 )
@@ -52,7 +61,7 @@ export default async function handler(req, res) {
                 return acc;
             }, {});
 
-            const deliberationsWithUsers = deliberations.map(d =>
+            const deliberationsWithUsers = filteredDeliberations.map(d =>
                 buildResponseDebate(d, userMap)
             );
 

@@ -1,6 +1,8 @@
 import dbConnect from '../../../lib/dbConnect';
 import Deliberate from '../../../models/Deliberate';
 import User from '../../../models/User';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]';
 
 const sanitizeVotes = (votes = []) =>
   votes.map(({ vote, timestamp }) => ({ vote, timestamp }));
@@ -13,6 +15,16 @@ export default async function handler(req, res) {
     try {
       const deliberationDoc = await Deliberate.findById(id).lean();
       if (!deliberationDoc) {
+        return res.status(404).json({ error: 'Deliberation not found' });
+      }
+
+      const session = await getServerSession(req, res, authOptions);
+      const currentUser = session?.user?.email || null;
+
+      if (
+        currentUser &&
+        (deliberationDoc.votedBy || []).some(vote => vote.userId === currentUser)
+      ) {
         return res.status(404).json({ error: 'Deliberation not found' });
       }
 
