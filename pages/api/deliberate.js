@@ -112,16 +112,26 @@ export default async function handler(req, res) {
             const savedDeliberation = await deliberation.save();
             console.log('Deliberation saved:', savedDeliberation);
 
+            const backgroundTasks = [];
+
             if (voter !== 'anonymous') {
-                await updateUserActivity(voter, { pointsToAdd: 1 });
-                await updateBadges(voter);
+                backgroundTasks.push(updateUserActivity(voter, { pointsToAdd: 1 }));
+                backgroundTasks.push(updateBadges(voter));
             }
 
             // Notify the creator of the debate about the new vote
             if (deliberation.createdBy && deliberation.createdBy !== voter) {
-                await Notification.create({
-                    userId: deliberation.createdBy,
-                    message: `Your debate received a new ${vote} vote.`
+                backgroundTasks.push(
+                    Notification.create({
+                        userId: deliberation.createdBy,
+                        message: `Your debate received a new ${vote} vote.`
+                    })
+                );
+            }
+
+            if (backgroundTasks.length > 0) {
+                Promise.allSettled(backgroundTasks).catch(error => {
+                    console.error('Background task error:', error);
                 });
             }
 
