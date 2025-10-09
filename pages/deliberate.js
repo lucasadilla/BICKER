@@ -126,6 +126,28 @@ export default function DeliberatePage({ initialDebates }) {
         }
     };
 
+    const removeDebateFromList = (debateId) => {
+        setDebates((prevDebates) => {
+            const filteredDebates = prevDebates.filter((debate) => debate._id !== debateId);
+
+            setCurrentDebateIndex((prevIndex) => {
+                if (filteredDebates.length === 0) {
+                    return 0;
+                }
+
+                const removedDebateIndex = prevDebates.findIndex((debate) => debate._id === debateId);
+
+                if (removedDebateIndex === -1) {
+                    return prevIndex >= filteredDebates.length ? 0 : prevIndex % filteredDebates.length;
+                }
+
+                return removedDebateIndex >= filteredDebates.length ? 0 : removedDebateIndex;
+            });
+
+            return filteredDebates;
+        });
+    };
+
     const handleVote = async (vote) => {
         if (debates.length === 0) {
             return;
@@ -201,7 +223,9 @@ export default function DeliberatePage({ initialDebates }) {
 
             advanceTimeoutRef.current = setTimeout(() => {
                 advanceTimeoutRef.current = null;
-                nextDebate();
+                removeDebateFromList(currentDebateId);
+                setShowVotes(false);
+                setHoveringSide('');
             }, 2000);
         } catch (error) {
             console.error('Error voting:', error);
@@ -538,7 +562,13 @@ export async function getServerSideProps(context) {
     const protocol = context.req.headers["x-forwarded-proto"] || "http";
     const host = context.req.headers["host"];
     const baseUrl = `${protocol}://${host}`;
-    const res = await fetch(`${baseUrl}/api/deliberate`);
+    const headers = {};
+
+    if (context.req.headers.cookie) {
+        headers.cookie = context.req.headers.cookie;
+    }
+
+    const res = await fetch(`${baseUrl}/api/deliberate`, { headers });
     let initialDebates = [];
     try {
         initialDebates = await res.json();
@@ -563,7 +593,7 @@ export async function getServerSideProps(context) {
     const { id } = context.query;
     if (id) {
         try {
-            const specificRes = await fetch(`${baseUrl}/api/deliberate/${id}`);
+            const specificRes = await fetch(`${baseUrl}/api/deliberate/${id}`, { headers });
             if (specificRes.ok) {
                 const specificDebate = await specificRes.json();
                 initialDebates = [
