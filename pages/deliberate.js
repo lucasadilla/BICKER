@@ -1,5 +1,5 @@
 // pages/deliberate/index.js
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
@@ -18,6 +18,9 @@ export default function DeliberatePage({ initialDebates }) {
     const [debates, setDebates] = useState(initialDebates || []);
     const [currentDebateIndex, setCurrentDebateIndex] = useState(0);
     const [showVotes, setShowVotes] = useState(false);
+    const voteInFlightRef = useRef(new Set());
+    const advanceTimeoutRef = useRef(null);
+    const debatesRef = useRef(debates);
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
     const useIsomorphicLayoutEffect =
@@ -50,11 +53,22 @@ export default function DeliberatePage({ initialDebates }) {
     }, []);
 
     useEffect(() => {
+        debatesRef.current = debates;
+    }, [debates]);
+
+    useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth <= 768);
         if (typeof window !== 'undefined') {
             handleResize();
             window.addEventListener('resize', handleResize);
             return () => window.removeEventListener('resize', handleResize);
+        }
+    }, []);
+
+    useEffect(() => () => {
+        if (advanceTimeoutRef.current) {
+            clearTimeout(advanceTimeoutRef.current);
+            advanceTimeoutRef.current = null;
         }
     }, []);
 
@@ -90,16 +104,6 @@ export default function DeliberatePage({ initialDebates }) {
         }
     }, [initialDebates]);
 
-    // After voting, show results for 4 seconds before moving on
-    useEffect(() => {
-        if (showVotes) {
-            const timer = setTimeout(() => {
-                nextDebate();
-            }, 2000);
-            return () => clearTimeout(timer);
-        }
-    }, [showVotes]);
-
     const fetchDeliberations = async () => {
         try {
             const response = await fetch('/api/deliberate');
@@ -123,6 +127,42 @@ export default function DeliberatePage({ initialDebates }) {
     };
 
     const handleVote = async (vote) => {
+        if (debates.length === 0) {
+            return;
+        }
+
+        const currentDebate = debates[currentDebateIndex];
+        if (!currentDebate) {
+            return;
+        }
+
+        const currentDebateId = currentDebate._id;
+        if (voteInFlightRef.current.has(currentDebateId) || showVotes) {
+            return;
+        }
+
+        const previousVotes = {
+            votesRed: currentDebate.votesRed ?? 0,
+            votesBlue: currentDebate.votesBlue ?? 0,
+        };
+
+        voteInFlightRef.current.add(currentDebateId);
+        setHoveringSide('');
+        setShowVotes(true);
+
+        setDebates((prevDebates) =>
+            prevDebates.map((debate) =>
+                debate._id === currentDebateId
+                    ? {
+                        ...debate,
+                        votesRed:
+                            (debate.votesRed ?? 0) + (vote === 'red' ? 1 : 0),
+                        votesBlue:
+                            (debate.votesBlue ?? 0) + (vote === 'blue' ? 1 : 0),
+                    }
+                    : debate
+            )
+        );
 
         try {
             const response = await fetch('/api/deliberate', {
@@ -131,8 +171,8 @@ export default function DeliberatePage({ initialDebates }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    debateId: debates[currentDebateIndex]._id,
-                    vote: vote
+                    debateId: currentDebateId,
+                    vote: vote,
                 }),
             });
 
@@ -142,36 +182,84 @@ export default function DeliberatePage({ initialDebates }) {
                 console.error('Vote failed:', data);
                 throw new Error(data.details || data.error || 'Failed to update votes');
             }
-            
-            // Update the local state with the new vote counts
-            const updatedDebates = [...debates];
-            updatedDebates[currentDebateIndex] = {
-                ...updatedDebates[currentDebateIndex],
-                votesRed: data.votesRed || 0,
-                votesBlue: data.votesBlue || 0
-            };
-            
-            // Move to the next debate
-            setDebates(updatedDebates);
-            setShowVotes(true);
-            setTimeout(() => {
-                setShowVotes(false);
-                setCurrentDebateIndex((prevIndex) => (prevIndex + 1) % debates.length);
+
+            setDebates((prevDebates) =>
+                prevDebates.map((debate) =>
+                    debate._id === currentDebateId
+                        ? {
+                            ...debate,
+                            votesRed: data.votesRed ?? (debate.votesRed ?? previousVotes.votesRed),
+                            votesBlue: data.votesBlue ?? (debate.votesBlue ?? previousVotes.votesBlue),
+                        }
+                        : debate
+                )
+            );
+
+            if (advanceTimeoutRef.current) {
+                clearTimeout(advanceTimeoutRef.current);
+            }
+
+            advanceTimeoutRef.current = setTimeout(() => {
+                advanceTimeoutRef.current = null;
+                nextDebate();
             }, 2000);
         } catch (error) {
             console.error('Error voting:', error);
             alert(error.message || 'Failed to submit vote. Please try again.');
+
+            if (advanceTimeoutRef.current) {
+                clearTimeout(advanceTimeoutRef.current);
+                advanceTimeoutRef.current = null;
+            }
+
+            setShowVotes(false);
+            setDebates((prevDebates) =>
+                prevDebates.map((debate) =>
+                    debate._id === currentDebateId
+                        ? {
+                            ...debate,
+                            votesRed: previousVotes.votesRed,
+                            votesBlue: previousVotes.votesBlue,
+                        }
+                        : debate
+                )
+            );
+        } finally {
+            voteInFlightRef.current.delete(currentDebateId);
         }
     };
 
     const nextDebate = () => {
+        if (advanceTimeoutRef.current) {
+            clearTimeout(advanceTimeoutRef.current);
+            advanceTimeoutRef.current = null;
+        }
+
+        if (debatesRef.current.length === 0) {
+            setShowVotes(false);
+            return;
+        }
+
+        setHoveringSide('');
         setShowVotes(false);
-        setCurrentDebateIndex((prevIndex) => (prevIndex + 1) % debates.length);
+        setCurrentDebateIndex((prevIndex) => {
+            const totalDebates = debatesRef.current.length;
+            if (totalDebates === 0) {
+                return 0;
+            }
+            return (prevIndex + 1) % totalDebates;
+        });
     };
 
     const currentDebate = debates[currentDebateIndex];
+    const isCurrentDebatePending = currentDebate
+        ? showVotes || voteInFlightRef.current.has(currentDebate._id)
+        : false;
 
     const handleShare = () => {
+        if (!currentDebate) {
+            return;
+        }
         const url = `${window.location.origin}/deliberate?id=${currentDebate._id}`;
         if (navigator.share) {
             navigator.share({ title: 'Deliberation', url });
@@ -269,7 +357,7 @@ export default function DeliberatePage({ initialDebates }) {
                 description="Vote on debates and see how others feel."/>
 
                 <button
-                    onClick={nextDebate}
+                    onClick={() => (!isCurrentDebatePending ? nextDebate() : null)}
                     style={{
                         position: 'absolute',
                         top: isMobile ? redSize : '50%',
@@ -279,7 +367,7 @@ export default function DeliberatePage({ initialDebates }) {
                         backgroundColor: '#f0f0f0',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: 'pointer',
+                        cursor: isCurrentDebatePending ? 'wait' : 'pointer',
                         zIndex: 1000,
                         transition: 'left 1s ease, top 1s ease'
                     }}
@@ -288,7 +376,7 @@ export default function DeliberatePage({ initialDebates }) {
                 </button>
 
                 <button
-                    onClick={handleShare}
+                    onClick={() => (!isCurrentDebatePending ? handleShare() : null)}
                     style={{
                         position: 'absolute',
                         top: isMobile ? redSize : '75%',
@@ -298,7 +386,7 @@ export default function DeliberatePage({ initialDebates }) {
                         backgroundColor: '#f0f0f0',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: 'pointer',
+                        cursor: isCurrentDebatePending ? 'wait' : 'pointer',
                         zIndex: 1000,
                         transition: 'left 1s ease, top 1s ease'
                     }}
@@ -315,7 +403,7 @@ export default function DeliberatePage({ initialDebates }) {
             }}>
                 {/* Left side: Red */}
                 <div
-                    onClick={() => (!showVotes ? handleVote('red') : null)}
+                    onClick={() => (!isCurrentDebatePending ? handleVote('red') : null)}
                     onMouseEnter={() => setHoveringSide('red')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
@@ -327,10 +415,10 @@ export default function DeliberatePage({ initialDebates }) {
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        cursor: showVotes ? 'default' : 'pointer',
+                        cursor: isCurrentDebatePending ? 'wait' : 'pointer',
                         transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
-                    
+
                 >
                     <p
                         className="heading-3"
@@ -370,7 +458,7 @@ export default function DeliberatePage({ initialDebates }) {
                             <span>{currentDebate.instigator.username}</span>
                         </Link>
                     )}
-                    {showVotes && (
+                    {showVotes && totalVotes > 0 && (
                         <p className="text-lg" style={{ marginTop: '20px' }}>
                             Votes: {currentDebate.votesRed || 0}
                         </p>
@@ -379,7 +467,7 @@ export default function DeliberatePage({ initialDebates }) {
 
                 {/* Right side: Blue */}
                 <div
-                    onClick={() => (!showVotes ? handleVote('blue') : null)}
+                    onClick={() => (!isCurrentDebatePending ? handleVote('blue') : null)}
                     onMouseEnter={() => setHoveringSide('blue')}
                     onMouseLeave={() => setHoveringSide('')}
                     style={{
@@ -391,10 +479,10 @@ export default function DeliberatePage({ initialDebates }) {
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        cursor: showVotes ? 'default' : 'pointer',
+                        cursor: isCurrentDebatePending ? 'wait' : 'pointer',
                         transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
-                    
+
                 >
                     <p
                         className="heading-3"
@@ -434,7 +522,7 @@ export default function DeliberatePage({ initialDebates }) {
                             <span>{currentDebate.creator.username}</span>
                         </Link>
                     )}
-                    {showVotes && (
+                    {showVotes && totalVotes > 0 && (
                         <p className="text-lg" style={{ marginTop: '20px' }}>
                             Votes: {currentDebate.votesBlue || 0}
                         </p>
