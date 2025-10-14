@@ -391,7 +391,7 @@ export default function DeliberatePage({ initialDebates }) {
                         backgroundColor: '#f0f0f0',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: isCurrentDebatePending ? 'wait' : 'pointer',
+                        cursor: isCurrentDebatePending ? 'default' : 'pointer',
                         zIndex: 1000,
                         transition: 'left 1s ease, top 1s ease'
                     }}
@@ -410,7 +410,7 @@ export default function DeliberatePage({ initialDebates }) {
                         backgroundColor: '#f0f0f0',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: isCurrentDebatePending ? 'wait' : 'pointer',
+                        cursor: isCurrentDebatePending ? 'default' : 'pointer',
                         zIndex: 1000,
                         transition: 'left 1s ease, top 1s ease'
                     }}
@@ -439,7 +439,7 @@ export default function DeliberatePage({ initialDebates }) {
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        cursor: isCurrentDebatePending ? 'wait' : 'pointer',
+                        cursor: isCurrentDebatePending ? 'default' : 'pointer',
                         transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
 
@@ -503,7 +503,7 @@ export default function DeliberatePage({ initialDebates }) {
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        cursor: isCurrentDebatePending ? 'wait' : 'pointer',
+                        cursor: isCurrentDebatePending ? 'default' : 'pointer',
                         transition: 'width 1s ease, height 1s ease, background-color 0.3s ease',
                     }}
 
