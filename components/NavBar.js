@@ -87,7 +87,7 @@ export default function NavBar() {
         border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
         borderRadius: '999px',
         backgroundColor: 'transparent',
-        color: '#ffffff',
+        color: 'var(--nav-button-color, #ffffff)',
         cursor: 'pointer',
         transition: 'transform 0.15s ease, border-color 0.15s ease, color 0.15s ease',
         marginLeft: '20px',
@@ -99,23 +99,23 @@ export default function NavBar() {
     const handleMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
         e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = '#ffffff';
+        e.target.style.color = 'var(--nav-button-color-hover, var(--nav-button-color, #ffffff))';
     };
     const handleMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
         e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = '#ffffff';
+        e.target.style.color = 'var(--nav-button-color, #ffffff)';
     };
 
     const handleCircularMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
         e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = '#ffffff';
+        e.target.style.color = 'var(--nav-button-color-hover, var(--nav-button-color, #ffffff))';
     };
     const handleCircularMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
         e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = '#ffffff';
+        e.target.style.color = 'var(--nav-button-color, #ffffff)';
     };
 
     return (
@@ -150,7 +150,7 @@ export default function NavBar() {
                         borderRadius: '50%',
                         backgroundColor: 'transparent',
                         border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
-                        color: '#ffffff'
+                        color: 'var(--nav-button-color, #ffffff)'
                     }}
                     onMouseEnter={handleCircularMouseEnter}
                     onMouseLeave={handleCircularMouseLeave}
@@ -198,7 +198,7 @@ export default function NavBar() {
                         <div
                             style={{
                                 marginTop: '10px',
-                                backgroundColor: 'white',
+                                backgroundColor: 'var(--theme-surface, #ffffff)',
                                 padding: '10px 20px',
                                 boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                                 borderRadius: '8px',
@@ -211,7 +211,8 @@ export default function NavBar() {
                                     style={{
                                         padding: '8px 0',
                                         cursor: 'pointer',
-                                        whiteSpace: 'nowrap'
+                                        whiteSpace: 'nowrap',
+                                        color: 'var(--theme-surfaceText, #1f1f1f)'
                                     }}
                                 >
                                     My Stats
@@ -222,14 +223,15 @@ export default function NavBar() {
                                     style={{
                                         padding: '8px 0',
                                         cursor: 'pointer',
-                                        whiteSpace: 'nowrap'
+                                        whiteSpace: 'nowrap',
+                                        color: 'var(--theme-surfaceText, #1f1f1f)'
                                     }}
                                 >
                                     Edit Profile
                                 </div>
                             </Link>
                             <div
-                                style={{ padding: '8px 0', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                style={{ padding: '8px 0', cursor: 'pointer', whiteSpace: 'nowrap', color: 'var(--theme-surfaceText, #1f1f1f)' }}
                                 onClick={() => signOut()}
                             >
                                 Sign Out
@@ -286,8 +288,8 @@ export default function NavBar() {
                                     position: 'absolute',
                                     top: '5px',
                                     right: '5px',
-                                    backgroundColor: 'red',
-                                    color: 'white',
+                                    backgroundColor: 'var(--theme-red, red)',
+                                    color: 'var(--theme-redText, #ffffff)',
                                     borderRadius: '50%',
                                     padding: '2px 6px',
                                     fontSize: '12px'
@@ -303,7 +305,7 @@ export default function NavBar() {
                                 position: 'absolute',
                                 top: '60px',
                                 right: '0',
-                                backgroundColor: 'white',
+                                backgroundColor: 'var(--theme-surface, #ffffff)',
                                 padding: '10px',
                                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                 width: '250px',
@@ -311,14 +313,15 @@ export default function NavBar() {
                             }}
                         >
                             {notifications.length === 0 ? (
-                                <div style={{ padding: '10px' }}>No notifications</div>
+                                <div style={{ padding: '10px', color: 'var(--theme-surfaceText, #1f1f1f)' }}>No notifications</div>
                             ) : (
                                 notifications.map((n) => (
                                     <div
                                         key={n._id}
                                         style={{
-                                            borderBottom: '1px solid #eee',
-                                            padding: '5px 0'
+                                            borderBottom: '1px solid var(--theme-surfaceBorder, #eee)',
+                                            padding: '5px 0',
+                                            color: 'var(--theme-surfaceText, #1f1f1f)'
                                         }}
                                     >
                                         {n.message}

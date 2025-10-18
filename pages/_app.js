@@ -5,7 +5,7 @@ import NavBar from '../components/NavBar';
 import { DefaultSeo } from 'next-seo';
 import SEO from '../next-seo.config';
 import { Analytics } from "@vercel/analytics/react";
-import { ColorSchemeContext } from '../lib/ColorSchemeContext';
+import { ColorSchemeContext, getThemeForScheme } from '../lib/ColorSchemeContext';
 
 function ThemeProvider({ children }) {
     const { status } = useSession();
@@ -22,10 +22,16 @@ function ThemeProvider({ children }) {
     }, []);
 
     useEffect(() => {
+        const scheme = colorScheme || 'light';
+        const theme = getThemeForScheme(scheme);
         document.body.classList.remove('light', 'dark', 'blue');
-        document.body.classList.add(colorScheme || 'light');
+        document.body.classList.add(scheme);
+        const root = document.documentElement;
+        Object.entries(theme).forEach(([key, value]) => {
+            root.style.setProperty(`--theme-${key}`, value);
+        });
         if (typeof window !== 'undefined') {
-            localStorage.setItem('colorScheme', colorScheme || 'light');
+            localStorage.setItem('colorScheme', scheme);
         }
     }, [colorScheme]);
 
