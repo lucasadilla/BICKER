@@ -87,7 +87,7 @@ export default function NavBar() {
         border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
         borderRadius: '999px',
         backgroundColor: 'transparent',
-        color: 'var(--nav-button-color, #ffffff)',
+        color: '#ffffff',
         cursor: 'pointer',
         transition: 'transform 0.15s ease, border-color 0.15s ease, color 0.15s ease',
         marginLeft: '20px',
@@ -99,23 +99,23 @@ export default function NavBar() {
     const handleMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
         e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = 'var(--nav-button-color-hover, var(--nav-button-color, #ffffff))';
+        e.target.style.color = '#ffffff';
     };
     const handleMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
         e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = 'var(--nav-button-color, #ffffff)';
+        e.target.style.color = '#ffffff';
     };
 
     const handleCircularMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
         e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = 'var(--nav-button-color-hover, var(--nav-button-color, #ffffff))';
+        e.target.style.color = '#ffffff';
     };
     const handleCircularMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
         e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = 'var(--nav-button-color, #ffffff)';
+        e.target.style.color = '#ffffff';
     };
 
     return (
@@ -150,7 +150,7 @@ export default function NavBar() {
                         borderRadius: '50%',
                         backgroundColor: 'transparent',
                         border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
-                        color: 'var(--nav-button-color, #ffffff)'
+                        color: '#ffffff'
                     }}
                     onMouseEnter={handleCircularMouseEnter}
                     onMouseLeave={handleCircularMouseLeave}
@@ -198,7 +198,7 @@ export default function NavBar() {
                         <div
                             style={{
                                 marginTop: '10px',
-                                backgroundColor: 'var(--theme-surface, #ffffff)',
+                                backgroundColor: 'white',
                                 padding: '10px 20px',
                                 boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                                 borderRadius: '8px',
@@ -211,8 +211,7 @@ export default function NavBar() {
                                     style={{
                                         padding: '8px 0',
                                         cursor: 'pointer',
-                                        whiteSpace: 'nowrap',
-                                        color: 'var(--theme-surfaceText, #1f1f1f)'
+                                        whiteSpace: 'nowrap'
                                     }}
                                 >
                                     My Stats
@@ -223,15 +222,14 @@ export default function NavBar() {
                                     style={{
                                         padding: '8px 0',
                                         cursor: 'pointer',
-                                        whiteSpace: 'nowrap',
-                                        color: 'var(--theme-surfaceText, #1f1f1f)'
+                                        whiteSpace: 'nowrap'
                                     }}
                                 >
                                     Edit Profile
                                 </div>
                             </Link>
                             <div
-                                style={{ padding: '8px 0', cursor: 'pointer', whiteSpace: 'nowrap', color: 'var(--theme-surfaceText, #1f1f1f)' }}
+                                style={{ padding: '8px 0', cursor: 'pointer', whiteSpace: 'nowrap' }}
                                 onClick={() => signOut()}
                             >
                                 Sign Out
@@ -261,8 +259,8 @@ export default function NavBar() {
                             height: isMobile ? '54px' : '44px',
                             borderRadius: '50%',
                             backgroundColor: 'transparent',
-                            border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
-                            color: 'var(--nav-button-color, #ffffff)'
+                            border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
+                            color: '#ffffff'
                         }}
                         onMouseEnter={handleCircularMouseEnter}
                         onMouseLeave={handleCircularMouseLeave}
@@ -288,8 +286,8 @@ export default function NavBar() {
                                     position: 'absolute',
                                     top: '5px',
                                     right: '5px',
-                                    backgroundColor: 'var(--theme-red, red)',
-                                    color: 'var(--theme-redText, #ffffff)',
+                                    backgroundColor: 'red',
+                                    color: 'white',
                                     borderRadius: '50%',
                                     padding: '2px 6px',
                                     fontSize: '12px'
@@ -305,7 +303,7 @@ export default function NavBar() {
                                 position: 'absolute',
                                 top: '60px',
                                 right: '0',
-                                backgroundColor: 'var(--theme-surface, #ffffff)',
+                                backgroundColor: 'white',
                                 padding: '10px',
                                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                 width: '250px',
@@ -313,15 +311,14 @@ export default function NavBar() {
                             }}
                         >
                             {notifications.length === 0 ? (
-                                <div style={{ padding: '10px', color: 'var(--theme-surfaceText, #1f1f1f)' }}>No notifications</div>
+                                <div style={{ padding: '10px' }}>No notifications</div>
                             ) : (
                                 notifications.map((n) => (
                                     <div
                                         key={n._id}
                                         style={{
-                                            borderBottom: '1px solid var(--theme-surfaceBorder, #eee)',
-                                            padding: '5px 0',
-                                            color: 'var(--theme-surfaceText, #1f1f1f)'
+                                            borderBottom: '1px solid #eee',
+                                            padding: '5px 0'
                                         }}
                                     >
                                         {n.message}
@@ -410,8 +407,8 @@ export default function NavBar() {
                                     padding: '15px 20px',
                                     fontSize: '18px',
                                     backdropFilter: 'none',
-                                    color: 'var(--nav-button-color, #ffffff)',
-                                    borderColor: 'var(--nav-button-border, rgba(255, 255, 255, 0.7))'
+                                    color: '#ffffff',
+                                    borderColor: 'rgba(255, 255, 255, 0.7)'
                                 }}
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
@@ -428,8 +425,8 @@ export default function NavBar() {
                                 padding: '15px 20px',
                                 fontSize: '18px',
                                 backdropFilter: 'none',
-                                color: 'var(--nav-button-color, #ffffff)',
-                                borderColor: 'var(--nav-button-border, rgba(255, 255, 255, 0.7))'
+                                color: '#ffffff',
+                                borderColor: 'rgba(255, 255, 255, 0.7)'
                             }}
                             onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
                         >

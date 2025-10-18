@@ -5,7 +5,7 @@ import NavBar from '../components/NavBar';
 import { DefaultSeo } from 'next-seo';
 import SEO from '../next-seo.config';
 import { Analytics } from "@vercel/analytics/react";
-import { ColorSchemeContext, getThemeForScheme } from '../lib/ColorSchemeContext';
+import { ColorSchemeContext } from '../lib/ColorSchemeContext';
 
 function ThemeProvider({ children }) {
     const { status } = useSession();
@@ -22,28 +22,10 @@ function ThemeProvider({ children }) {
     }, []);
 
     useEffect(() => {
-        const scheme = colorScheme || 'light';
-        const theme = getThemeForScheme(scheme);
         document.body.classList.remove('light', 'dark', 'blue');
-        document.body.classList.add(scheme);
-        const root = document.documentElement;
-        Object.entries(theme).forEach(([key, value]) => {
-            root.style.setProperty(`--theme-${key}`, value);
-        });
-        if (theme.navButtonColor) {
-            root.style.setProperty('--nav-button-color', theme.navButtonColor);
-        }
-        if (theme.navButtonColorHover) {
-            root.style.setProperty('--nav-button-color-hover', theme.navButtonColorHover);
-        }
-        if (theme.navButtonBorder) {
-            root.style.setProperty('--nav-button-border', theme.navButtonBorder);
-        }
-        if (theme.navButtonBorderHover) {
-            root.style.setProperty('--nav-button-border-hover', theme.navButtonBorderHover);
-        }
+        document.body.classList.add(colorScheme || 'light');
         if (typeof window !== 'undefined') {
-            localStorage.setItem('colorScheme', scheme);
+            localStorage.setItem('colorScheme', colorScheme || 'light');
         }
     }, [colorScheme]);
 
