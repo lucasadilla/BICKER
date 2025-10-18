@@ -528,7 +528,7 @@ export default function DebatePage({ initialDebates }) {
                                 bottom: '15px',
                                 right: '15px',
                                 fontSize: '14px',
-                                color: colorScheme === 'dark' ? '#1f1f1f' : '#555555',
+                                color: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : '#555555',
                                 pointerEvents: 'none',
                             }}
                         >
