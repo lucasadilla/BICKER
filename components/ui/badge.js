@@ -1,32 +1,13 @@
 import React from 'react';
-import { useThemeColors } from '../../lib/ColorSchemeContext';
 
-const buildVariantStyles = (theme) => ({
-  default: {
-    backgroundColor: theme.blue,
-    color: theme.blueText,
-    border: `1px solid ${theme.blue}`,
-  },
-  secondary: {
-    backgroundColor: 'transparent',
-    color: theme.surfaceText,
-    border: `1px solid ${theme.surfaceBorder}`,
-  },
-  destructive: {
-    backgroundColor: theme.red,
-    color: theme.redText,
-    border: `1px solid ${theme.red}`,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    color: theme.surfaceText,
-    border: `1px solid ${theme.surfaceBorder}`,
-  },
-});
+const variantStyles = {
+  default: { backgroundColor: '#007bff', color: '#fff', border: '1px solid #007bff' },
+  secondary: { backgroundColor: 'rgba(59,132,189,0)', color: '#fff', border: '0px solid #6c757d' },
+  destructive: { backgroundColor: '#dc3545', color: '#fff', border: '1px solid #dc3545' },
+  outline: { backgroundColor: 'transparent', color: 'rgba(108,117,125,0)', border: '1px solid #6c757d' },
+};
 
 export function Badge({ variant = 'default', className = '', style = {}, children, ...props }) {
-  const theme = useThemeColors();
-  const variantStyles = buildVariantStyles(theme);
   const baseStyle = {
     display: 'inline-flex',
     alignItems: 'center',

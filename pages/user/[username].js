@@ -6,7 +6,6 @@ import Deliberate from '../../models/Deliberate';
 import { Badge } from '../../components/ui/badge';
 import badgeImages from '../../lib/badgeImages';
 import badgeDescriptions from '../../lib/badgeDescriptions';
-import { useThemeColors } from '../../lib/ColorSchemeContext';
 import {
   Select,
   SelectContent,
@@ -30,7 +29,6 @@ export default function UserProfile({ user, debates }) {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [displayedDebates, setDisplayedDebates] = useState([]);
-  const theme = useThemeColors();
 
   useEffect(() => {
     const handleResize = () => {
@@ -53,7 +51,7 @@ export default function UserProfile({ user, debates }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: theme.blue, color: theme.blueText, paddingTop: '80px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', color: 'white', paddingTop: '80px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
           {user.profilePicture && (
@@ -117,14 +115,12 @@ export default function UserProfile({ user, debates }) {
               >
                 <div
                   style={{
-                    backgroundColor: theme.surface,
-                    color: theme.surfaceText,
+                    backgroundColor: 'white',
+                    color: '#333',
                     padding: '15px',
                     borderRadius: '8px',
                     marginBottom: '25px',
-                    cursor: 'pointer',
-                    boxShadow: theme.surfaceShadow,
-                    border: `1px solid ${theme.surfaceBorder}`,
+                    cursor: 'pointer'
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -132,13 +128,13 @@ export default function UserProfile({ user, debates }) {
                       style={{
                         alignSelf: 'flex-start',
                         maxWidth: isMobile ? '80%' : '60%',
-                        backgroundColor: theme.red,
-                        color: theme.redText,
+                        backgroundColor: '#FF4D4D',
+                        color: 'white',
                         padding: '12px 16px',
                         borderRadius: '16px',
                         borderTopLeftRadius: '4px',
                         marginLeft: 0,
-                        boxShadow: theme.surfaceShadow
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                       }}
                     >
                       <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
@@ -149,13 +145,13 @@ export default function UserProfile({ user, debates }) {
                       style={{
                         alignSelf: 'flex-end',
                         maxWidth: isMobile ? '80%' : '60%',
-                        backgroundColor: theme.blue,
-                        color: theme.blueText,
+                        backgroundColor: '#4D94FF',
+                        color: 'white',
                         padding: '12px 16px',
                         borderRadius: '16px',
                         borderTopRightRadius: '4px',
                         marginRight: 0,
-                        boxShadow: theme.surfaceShadow
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                       }}
                     >
                       <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
@@ -164,8 +160,8 @@ export default function UserProfile({ user, debates }) {
                     </div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                    <span style={{ color: theme.red }}>Red Votes: {d.votesRed || 0}</span>
-                    <span style={{ color: theme.blue }}>Blue Votes: {d.votesBlue || 0}</span>
+                    <span style={{ color: '#FF4D4D' }}>Red Votes: {d.votesRed || 0}</span>
+                    <span style={{ color: '#4D94FF' }}>Blue Votes: {d.votesBlue || 0}</span>
                   </div>
                 </div>
               </Link>
