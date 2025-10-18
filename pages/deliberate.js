@@ -3,6 +3,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
+import { useColorScheme, getThemeForScheme } from '../lib/ColorSchemeContext';
 
 // Helper function to shuffle array
 const shuffleArray = (array) => {
@@ -26,8 +27,20 @@ export default function DeliberatePage({ initialDebates }) {
     const useIsomorphicLayoutEffect =
         typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-    const leftSideColor = hoveringSide === 'red' ? 'var(--theme-red-hover)' : 'var(--theme-red)';
-    const rightSideColor = hoveringSide === 'blue' ? 'var(--theme-blue-hover)' : 'var(--theme-blue)';
+    const { colorScheme } = useColorScheme();
+    const themeColors = getThemeForScheme(colorScheme);
+    const isDarkMode = colorScheme === 'dark';
+
+    const baseLeftColor = isDarkMode ? '#000000' : themeColors.red || '#FF4D4D';
+    const hoverLeftColor = isDarkMode ? '#111111' : themeColors.redHover || baseLeftColor;
+    const baseRightColor = isDarkMode ? '#ffffff' : themeColors.blue || '#4D94FF';
+    const hoverRightColor = isDarkMode ? '#f5f5f5' : themeColors.blueHover || baseRightColor;
+
+    const leftSideColor = hoveringSide === 'red' ? hoverLeftColor : baseLeftColor;
+    const rightSideColor = hoveringSide === 'blue' ? hoverRightColor : baseRightColor;
+
+    const leftTextColor = isDarkMode ? '#ffffff' : themeColors.redText || '#ffffff';
+    const rightTextColor = isDarkMode ? '#000000' : themeColors.blueText || '#ffffff';
 
     useIsomorphicLayoutEffect(() => {
         const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
@@ -436,7 +449,7 @@ export default function DeliberatePage({ initialDebates }) {
                         width: isMobile ? '100%' : redSize,
                         height: isMobile ? redSize : '100%',
                         backgroundColor: leftSideColor,
-                        color: 'var(--theme-redText)',
+                        color: leftTextColor,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
@@ -468,7 +481,7 @@ export default function DeliberatePage({ initialDebates }) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                color: 'inherit',
+                                color: leftTextColor,
                                 textDecoration: 'none',
                                 fontSize: '0.875rem'
                             }}
@@ -500,7 +513,7 @@ export default function DeliberatePage({ initialDebates }) {
                         width: isMobile ? '100%' : blueSize,
                         height: isMobile ? blueSize : '100%',
                         backgroundColor: rightSideColor,
-                        color: 'var(--theme-blueText)',
+                        color: rightTextColor,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
@@ -532,7 +545,7 @@ export default function DeliberatePage({ initialDebates }) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                color: 'inherit',
+                                color: rightTextColor,
                                 textDecoration: 'none',
                                 fontSize: '0.875rem'
                             }}
