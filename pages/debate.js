@@ -248,6 +248,19 @@ export default function DebatePage({ initialDebates }) {
                 </div>
     );
 
+    const dropdownBorderColor =
+        colorScheme === 'dark'
+            ? 'rgba(255, 255, 255, 0.12)'
+            : theme.surfaceBorder;
+    const dropdownHoverColor =
+        colorScheme === 'dark'
+            ? 'rgba(255, 255, 255, 0.08)'
+            : 'rgba(37, 99, 235, 0.08)';
+    const dropdownShadow =
+        colorScheme === 'dark'
+            ? '0 12px 28px rgba(0, 0, 0, 0.6)'
+            : theme.surfaceShadow;
+
     const searchResultsList =
         showSearchResults && searchResults.length > 0 ? (
             <div
@@ -258,12 +271,12 @@ export default function DebatePage({ initialDebates }) {
                     left: 0,
                     width: '100%',
                     backgroundColor: theme.surface,
-                    border: `1px solid ${theme.surfaceBorder}`,
+                    border: `1px solid ${dropdownBorderColor}`,
                     borderTop: 'none',
                     maxHeight: '260px',
                     overflowY: 'auto',
                     borderRadius: '0 0 16px 16px',
-                    boxShadow: theme.surfaceShadow,
+                    boxShadow: dropdownShadow,
                     zIndex: 1000,
                     boxSizing: 'border-box',
                 }}
@@ -274,9 +287,7 @@ export default function DebatePage({ initialDebates }) {
                         onClick={() => selectSearchResult(instigate)}
                         onMouseEnter={(e) =>
                             (e.currentTarget.style.backgroundColor =
-                                colorScheme === 'dark'
-                                    ? 'rgba(0, 0, 0, 0.2)'
-                                    : 'rgba(37, 99, 235, 0.08)')
+                                dropdownHoverColor)
                         }
                         onMouseLeave={(e) =>
                             (e.currentTarget.style.backgroundColor = theme.surface)
@@ -287,9 +298,10 @@ export default function DebatePage({ initialDebates }) {
                             borderBottom:
                                 index === searchResults.length - 1
                                     ? 'none'
-                                    : `1px solid ${theme.surfaceBorder}`,
+                                    : `1px solid ${dropdownBorderColor}`,
                             backgroundColor: theme.surface,
                             transition: 'background-color 0.15s ease',
+                            color: theme.surfaceText,
                         }}
                     >
                         <p

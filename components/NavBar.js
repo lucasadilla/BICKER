@@ -261,8 +261,8 @@ export default function NavBar() {
                             height: isMobile ? '54px' : '44px',
                             borderRadius: '50%',
                             backgroundColor: 'transparent',
-                            border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
-                            color: '#ffffff'
+                            border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
+                            color: 'var(--nav-button-color, #ffffff)'
                         }}
                         onMouseEnter={handleCircularMouseEnter}
                         onMouseLeave={handleCircularMouseLeave}
@@ -410,8 +410,8 @@ export default function NavBar() {
                                     padding: '15px 20px',
                                     fontSize: '18px',
                                     backdropFilter: 'none',
-                                    color: '#ffffff',
-                                    borderColor: 'rgba(255, 255, 255, 0.7)'
+                                    color: 'var(--nav-button-color, #ffffff)',
+                                    borderColor: 'var(--nav-button-border, rgba(255, 255, 255, 0.7))'
                                 }}
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
@@ -428,8 +428,8 @@ export default function NavBar() {
                                 padding: '15px 20px',
                                 fontSize: '18px',
                                 backdropFilter: 'none',
-                                color: '#ffffff',
-                                borderColor: 'rgba(255, 255, 255, 0.7)'
+                                color: 'var(--nav-button-color, #ffffff)',
+                                borderColor: 'var(--nav-button-border, rgba(255, 255, 255, 0.7))'
                             }}
                             onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
                         >
