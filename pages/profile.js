@@ -1,6 +1,7 @@
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useColorScheme } from '../lib/ColorSchemeContext';
+import badgeDescriptions from '../lib/badgeDescriptions';
 import { useRouter } from 'next/router';
 
 export default function Profile() {
@@ -90,7 +91,9 @@ export default function Profile() {
         <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange} style={inputStyle}>
           <option value="">None</option>
           {badges.map(b => (
-            <option key={b} value={b}>{b}</option>
+            <option key={b} value={b} title={badgeDescriptions[b] || b}>
+              {b}
+            </option>
           ))}
         </select>
         <label style={labelStyle}>Color Scheme</label>

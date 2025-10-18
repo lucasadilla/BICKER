@@ -5,6 +5,7 @@ import User from '../../models/User';
 import Deliberate from '../../models/Deliberate';
 import { Badge } from '../../components/ui/badge';
 import badgeImages from '../../lib/badgeImages';
+import badgeDescriptions from '../../lib/badgeDescriptions';
 import {
   Select,
   SelectContent,
@@ -69,8 +70,15 @@ export default function UserProfile({ user, debates }) {
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
                   {user.badges.map((badge) => {
                     const image = badgeImages[badge];
+                    const description = badgeDescriptions[badge];
                     return (
-                      <Badge key={badge} variant="secondary" style={image ? { padding: '4px' } : {}}>
+                      <Badge
+                        key={badge}
+                        variant="secondary"
+                        style={image ? { padding: '4px' } : {}}
+                        title={description || badge}
+                        aria-label={description || badge}
+                      >
                         {image ? <img src={image} alt={badge} style={{ width: '75px', height: '75px' }} /> : badge}
                       </Badge>
                     );
