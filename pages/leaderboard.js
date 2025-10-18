@@ -71,8 +71,8 @@ export default function Leaderboard() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--theme-blue)', color: 'var(--theme-blueText)', paddingTop: '60px' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'var(--theme-blueText)' }}>
         <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>Debate Leaderboard</h1>
         <div
           style={{
@@ -96,8 +96,8 @@ export default function Leaderboard() {
           <button
             onClick={toggleTopPlayers}
             style={{
-              backgroundColor: 'white',
-              color: '#333',
+              backgroundColor: 'var(--theme-surface, #ffffff)',
+              color: 'var(--theme-surfaceText, #1f1f1f)',
               padding: '8px 16px',
               borderRadius: '8px',
               fontWeight: 'bold'
@@ -107,7 +107,7 @@ export default function Leaderboard() {
           </button>
         </div>
         {showTopPlayers && playerStats && (
-          <div style={{ backgroundColor: 'white', color: '#333', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+          <div style={{ backgroundColor: 'var(--theme-surface, #ffffff)', color: 'var(--theme-surfaceText, #1f1f1f)', padding: '20px', borderRadius: '8px', marginBottom: '20px', boxShadow: '0 1px 2px rgba(0,0,0,0.12)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
               <div>
                 <h3 style={{ marginTop: 0 }}>Highest Win Rate</h3>
@@ -177,9 +177,9 @@ export default function Leaderboard() {
             value={sort}
             onValueChange={setSort}
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              color: '#1f2937',
-              border: '1px solid rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'var(--theme-surface, rgba(255, 255, 255, 0.95))',
+              color: 'var(--theme-surfaceText, #1f2937)',
+              border: '1px solid var(--theme-surfaceBorder, rgba(255, 255, 255, 0.7))',
             }}
           >
             <SelectTrigger className="w-[180px]">
@@ -215,8 +215,8 @@ export default function Leaderboard() {
                   style={{
                     alignSelf: 'flex-start',
                     maxWidth: isMobile ? '80%' : '60%',
-                    backgroundColor: '#FF4D4D',
-                    color: 'white',
+                    backgroundColor: 'var(--theme-red)',
+                    color: 'var(--theme-redText)',
                     padding: '12px 16px',
                     borderRadius: '16px',
                     borderTopLeftRadius: '4px',
@@ -232,8 +232,8 @@ export default function Leaderboard() {
                   style={{
                     alignSelf: 'flex-end',
                     maxWidth: isMobile ? '80%' : '60%',
-                    backgroundColor: '#4D94FF',
-                    color: 'white',
+                    backgroundColor: 'var(--theme-blue)',
+                    color: 'var(--theme-blueText)',
                     padding: '12px 16px',
                     borderRadius: '16px',
                     borderTopRightRadius: '4px',
@@ -247,8 +247,8 @@ export default function Leaderboard() {
                 </div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span style={{ color: '#FF4D4D' }}>Red Votes: {debate.votesRed || 0}</span>
-                <span style={{ color: '#4D94FF' }}>Blue Votes: {debate.votesBlue || 0}</span>
+                <span style={{ color: 'var(--theme-red)' }}>Red Votes: {debate.votesRed || 0}</span>
+                <span style={{ color: 'var(--theme-blue)' }}>Blue Votes: {debate.votesBlue || 0}</span>
               </div>
             </div>
           </Link>

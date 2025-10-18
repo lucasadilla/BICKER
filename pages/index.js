@@ -2,11 +2,13 @@ import { useRouter } from 'next/router';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import dbConnect from '../lib/dbConnect';
 import Banner from '../models/Banner';
+import { useThemeColors } from '../lib/ColorSchemeContext';
 
 export default function Home({ bannerUrl }) {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
     const [hoveredSide, setHoveredSide] = useState(null);
+    const theme = useThemeColors();
     const useIsomorphicLayoutEffect =
         typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -19,20 +21,20 @@ export default function Home({ bannerUrl }) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const leftSideColor = hoveredSide === 'left' ? '#FF6A6A' : '#FF4D4D';
-    const rightSideColor = hoveredSide === 'right' ? '#76ACFF' : '#4D94FF';
+    const leftSideColor = hoveredSide === 'left' ? theme.redHover : theme.red;
+    const rightSideColor = hoveredSide === 'right' ? theme.blueHover : theme.blue;
     const splitGradient = `linear-gradient(to right, ${leftSideColor} 0%, ${leftSideColor} 50%, ${rightSideColor} 50%, ${rightSideColor} 100%)`;
 
     useIsomorphicLayoutEffect(() => {
         const gradient = splitGradient;
         if (typeof document !== 'undefined') {
             document.documentElement.style.setProperty('--nav-gradient', gradient);
-            document.documentElement.style.setProperty('--nav-button-color', '#ffffff');
-            document.documentElement.style.setProperty('--nav-button-color-hover', '#ffffff');
-            document.documentElement.style.setProperty('--nav-button-border', 'rgba(255, 255, 255, 0.7)');
-            document.documentElement.style.setProperty('--nav-button-border-hover', 'rgba(255, 255, 255, 0.9)');
+            document.documentElement.style.setProperty('--nav-button-color', theme.navButtonColor);
+            document.documentElement.style.setProperty('--nav-button-color-hover', theme.navButtonColor);
+            document.documentElement.style.setProperty('--nav-button-border', theme.navButtonBorder);
+            document.documentElement.style.setProperty('--nav-button-border-hover', theme.navButtonBorderHover);
         }
-    }, [splitGradient]);
+    }, [splitGradient, theme.navButtonBorder, theme.navButtonBorderHover, theme.navButtonColor]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -79,7 +81,7 @@ export default function Home({ bannerUrl }) {
                     style={{
                         flex: 1,
                         background: leftSideColor,
-                        color: 'white',
+                        color: theme.redText,
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -111,7 +113,7 @@ export default function Home({ bannerUrl }) {
                     style={{
                         flex: 1,
                         background: rightSideColor,
-                        color: 'white',
+                        color: theme.blueText,
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',

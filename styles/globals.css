@@ -24,21 +24,32 @@ body {
     font-family: var(--font-family-sans);
     font-size: var(--font-size-base);
     line-height: var(--line-height-text);
+    background-color: var(--theme-background, #f5f5f5);
+    color: var(--theme-text, #1f1f1f);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body.light {
-    background-color: #f5f5f5;
-    color: #1f1f1f;
+    background-color: var(--theme-background, #f5f5f5);
+    color: var(--theme-text, #1f1f1f);
 }
 
 body.dark {
-    background-color: #1f1f1f;
-    color: #f5f5f5;
+    background-color: var(--theme-background, #1f1f1f);
+    color: var(--theme-text, #f5f5f5);
 }
 
 body.blue {
-    background-color: #001f3f;
-    color: #ffffff;
+    background-color: var(--theme-background, #001f3f);
+    color: var(--theme-text, #ffffff);
+}
+
+input,
+textarea,
+select {
+    background-color: var(--theme-inputBackground, #ffffff);
+    color: var(--theme-inputText, #1f1f1f);
+    border: 1px solid var(--theme-inputBorder, rgba(15, 23, 42, 0.12));
 }
 
 .heading-1 {

@@ -75,8 +75,8 @@ export default function MyStats() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--theme-blue)', color: 'var(--theme-blueText)', paddingTop: '60px' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'var(--theme-blueText)' }}>
         <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>My Debates</h1>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div
@@ -135,9 +135,9 @@ export default function MyStats() {
             value={sort}
             onValueChange={setSort}
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              color: '#1f2937',
-              border: '1px solid rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'var(--theme-surface, rgba(255, 255, 255, 0.95))',
+              color: 'var(--theme-surfaceText, #1f2937)',
+              border: '1px solid var(--theme-surfaceBorder, rgba(255, 255, 255, 0.7))',
             }}
           >
             <SelectTrigger className="w-[180px]">
@@ -153,36 +153,38 @@ export default function MyStats() {
           </Select>
         </div>
         {debates.map((debate) => (
-          <Link
-            key={debate._id}
-            href={{ pathname: '/deliberate', query: { id: debate._id } }}
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
-            <div
-              style={{
-                backgroundColor: 'white',
-                color: '#333',
-                padding: '15px',
-                borderRadius: '8px',
-                marginBottom: '25px',
-                cursor: 'pointer'
-              }}
+            <Link
+              key={debate._id}
+              href={{ pathname: '/deliberate', query: { id: debate._id } }}
+              style={{ textDecoration: 'none', color: 'inherit' }}
             >
+              <div
+                style={{
+                  backgroundColor: 'var(--theme-surface, #ffffff)',
+                  color: 'var(--theme-surfaceText, #333333)',
+                  padding: '15px',
+                  borderRadius: '8px',
+                  marginBottom: '25px',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.12)',
+                  border: '1px solid var(--theme-surfaceBorder, rgba(0,0,0,0.08))'
+                }}
+              >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ alignSelf: 'flex-start', maxWidth: isMobile ? '80%' : '60%', backgroundColor: '#FF4D4D', color: 'white', padding: '12px 16px', borderRadius: '16px', borderTopLeftRadius: '4px', marginLeft: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+                <div style={{ alignSelf: 'flex-start', maxWidth: isMobile ? '80%' : '60%', backgroundColor: 'var(--theme-red)', color: 'var(--theme-redText)', padding: '12px 16px', borderRadius: '16px', borderTopLeftRadius: '4px', marginLeft: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
                   <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
                     {debate.instigateText}
                   </p>
                 </div>
-                <div style={{ alignSelf: 'flex-end', maxWidth: isMobile ? '80%' : '60%', backgroundColor: '#4D94FF', color: 'white', padding: '12px 16px', borderRadius: '16px', borderTopRightRadius: '4px', marginRight: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+                <div style={{ alignSelf: 'flex-end', maxWidth: isMobile ? '80%' : '60%', backgroundColor: 'var(--theme-blue)', color: 'var(--theme-blueText)', padding: '12px 16px', borderRadius: '16px', borderTopRightRadius: '4px', marginRight: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
                   <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
                     {debate.debateText}
                   </p>
                 </div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span style={{ color: '#FF4D4D' }}>Red Votes: {debate.votesRed || 0}</span>
-                <span style={{ color: '#4D94FF' }}>Blue Votes: {debate.votesBlue || 0}</span>
+                <span style={{ color: 'var(--theme-red)' }}>Red Votes: {debate.votesRed || 0}</span>
+                <span style={{ color: 'var(--theme-blue)' }}>Blue Votes: {debate.votesBlue || 0}</span>
               </div>
               {debate.userWroteSide && (
                 <div style={{ marginTop: '8px', textAlign: 'center', fontWeight: 'bold' }}>
