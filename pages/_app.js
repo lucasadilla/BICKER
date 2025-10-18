@@ -30,6 +30,18 @@ function ThemeProvider({ children }) {
         Object.entries(theme).forEach(([key, value]) => {
             root.style.setProperty(`--theme-${key}`, value);
         });
+        if (theme.navButtonColor) {
+            root.style.setProperty('--nav-button-color', theme.navButtonColor);
+        }
+        if (theme.navButtonColorHover) {
+            root.style.setProperty('--nav-button-color-hover', theme.navButtonColorHover);
+        }
+        if (theme.navButtonBorder) {
+            root.style.setProperty('--nav-button-border', theme.navButtonBorder);
+        }
+        if (theme.navButtonBorderHover) {
+            root.style.setProperty('--nav-button-border-hover', theme.navButtonBorderHover);
+        }
         if (typeof window !== 'undefined') {
             localStorage.setItem('colorScheme', scheme);
         }

@@ -248,6 +248,17 @@ export default function DebatePage({ initialDebates }) {
                 </div>
     );
 
+    const isDark = colorScheme === 'dark';
+    const dropdownBorderColor = isDark
+        ? 'rgba(255, 255, 255, 0.12)'
+        : theme.surfaceBorder;
+    const dropdownHoverColor = isDark
+        ? 'rgba(255, 255, 255, 0.08)'
+        : 'rgba(37, 99, 235, 0.08)';
+    const dropdownShadow = isDark
+        ? '0 12px 28px rgba(0, 0, 0, 0.6)'
+        : theme.surfaceShadow;
+
     const searchResultsList =
         showSearchResults && searchResults.length > 0 ? (
             <div
@@ -258,12 +269,12 @@ export default function DebatePage({ initialDebates }) {
                     left: 0,
                     width: '100%',
                     backgroundColor: theme.surface,
-                    border: `1px solid ${theme.surfaceBorder}`,
+                    border: `1px solid ${dropdownBorderColor}`,
                     borderTop: 'none',
                     maxHeight: '260px',
                     overflowY: 'auto',
                     borderRadius: '0 0 16px 16px',
-                    boxShadow: theme.surfaceShadow,
+                    boxShadow: dropdownShadow,
                     zIndex: 1000,
                     boxSizing: 'border-box',
                 }}
@@ -274,9 +285,7 @@ export default function DebatePage({ initialDebates }) {
                         onClick={() => selectSearchResult(instigate)}
                         onMouseEnter={(e) =>
                             (e.currentTarget.style.backgroundColor =
-                                colorScheme === 'dark'
-                                    ? 'rgba(0, 0, 0, 0.2)'
-                                    : 'rgba(37, 99, 235, 0.08)')
+                                dropdownHoverColor)
                         }
                         onMouseLeave={(e) =>
                             (e.currentTarget.style.backgroundColor = theme.surface)
@@ -287,9 +296,10 @@ export default function DebatePage({ initialDebates }) {
                             borderBottom:
                                 index === searchResults.length - 1
                                     ? 'none'
-                                    : `1px solid ${theme.surfaceBorder}`,
+                                    : `1px solid ${dropdownBorderColor}`,
                             backgroundColor: theme.surface,
                             transition: 'background-color 0.15s ease',
+                            color: theme.surfaceText,
                         }}
                     >
                         <p
@@ -516,7 +526,7 @@ export default function DebatePage({ initialDebates }) {
                                 bottom: '15px',
                                 right: '15px',
                                 fontSize: '14px',
-                                color: colorScheme === 'dark' ? '#1f1f1f' : '#555555',
+                                color: isDark ? 'rgba(255, 255, 255, 0.7)' : '#555555',
                                 pointerEvents: 'none',
                             }}
                         >
@@ -528,13 +538,15 @@ export default function DebatePage({ initialDebates }) {
                         style={{
                             width: isMobile ? '85%' : '30%',
                             padding: '10px',
-                            backgroundColor: theme.blue,
-                            color: theme.blueText,
+                            backgroundColor: isDark ? '#ffffff' : theme.blue,
+                            color: isDark ? '#000000' : theme.blueText,
                             fontSize: isMobile ? '20px' : '30px',
                             borderRadius: '4px',
-                            border: 'none',
+                            border: isDark ? '1px solid rgba(0, 0, 0, 0.65)' : 'none',
                             cursor: 'pointer',
-                            boxShadow: colorScheme === 'dark' ? '0 4px 0 rgba(0,0,0,0.2)' : `0 4px 0 ${theme.blueHover}`,
+                            boxShadow: isDark
+                                ? '0 4px 0 rgba(255, 255, 255, 0.25)'
+                                : `0 4px 0 ${theme.blueHover}`,
                             transition: 'all 0.1s ease',
                             position: 'relative',
                             marginLeft: 'auto',
@@ -542,11 +554,27 @@ export default function DebatePage({ initialDebates }) {
                         }}
                         onMouseEnter={(e) => {
                             e.target.style.transform = 'translateY(4px)';
-                            e.target.style.boxShadow = 'none';
+                            e.target.style.boxShadow = isDark
+                                ? '0 2px 0 rgba(255, 255, 255, 0.18)'
+                                : 'none';
+                            e.target.style.backgroundColor = isDark
+                                ? '#e6e6e6'
+                                : theme.blueHover;
+                            e.target.style.color = isDark
+                                ? '#000000'
+                                : theme.blueText;
                         }}
                         onMouseLeave={(e) => {
                             e.target.style.transform = 'translateY(0)';
-                            e.target.style.boxShadow = colorScheme === 'dark' ? '0 4px 0 rgba(0,0,0,0.2)' : `0 4px 0 ${theme.blueHover}`;
+                            e.target.style.boxShadow = isDark
+                                ? '0 4px 0 rgba(255, 255, 255, 0.25)'
+                                : `0 4px 0 ${theme.blueHover}`;
+                            e.target.style.backgroundColor = isDark
+                                ? '#ffffff'
+                                : theme.blue;
+                            e.target.style.color = isDark
+                                ? '#000000'
+                                : theme.blueText;
                         }}
                     >
                         Submit Debate
