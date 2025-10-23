@@ -1,10 +1,12 @@
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Avatar from './Avatar';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 
 export default function NavBar() {
     const { data: session } = useSession();
+    const { colorScheme: activeScheme } = useColorScheme() || { colorScheme: 'light' };
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [notifications, setNotifications] = useState([]);
@@ -79,15 +81,32 @@ export default function NavBar() {
         }
     };
 
+    const navButtonColor = 'var(--nav-button-color, var(--color-text, #ffffff))';
+    const navButtonColorHover = 'var(--nav-button-color-hover, var(--nav-button-color, var(--color-text, #ffffff)))';
+    const navButtonBorder = 'var(--nav-button-border, var(--color-border, #d4d4d8))';
+    const navButtonBorderHover = 'var(--nav-button-border-hover, var(--color-accent, #2563eb))';
+    const surfaceColor = 'var(--color-surface, #ffffff)';
+    const borderColor = 'var(--color-border, #d4d4d8)';
+    const accentColor = 'var(--color-accent, #2563eb)';
+    const backgroundOverlay = useMemo(
+        () => (activeScheme === 'monochrome'
+            ? 'color-mix(in srgb, var(--color-surface, #000000) 92%, transparent)'
+            : 'color-mix(in srgb, var(--color-surface, #ffffff) 92%, transparent)'),
+        [activeScheme]
+    );
+    const notificationBadgeTextColor = activeScheme === 'monochrome'
+        ? 'var(--color-bg, #000000)'
+        : 'var(--color-surface, #ffffff)';
+
     // Common button style
     const buttonStyle = {
         padding: '10px 20px',
         fontSize: '16px',
         fontWeight: 'bold',
-        border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
+        border: `2px solid ${navButtonBorder}`,
         borderRadius: '999px',
         backgroundColor: 'transparent',
-        color: '#ffffff',
+        color: navButtonColor,
         cursor: 'pointer',
         transition: 'transform 0.15s ease, border-color 0.15s ease, color 0.15s ease',
         marginLeft: '20px',
@@ -98,24 +117,24 @@ export default function NavBar() {
     // Hover effects
     const handleMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
-        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = '#ffffff';
+        e.target.style.borderColor = navButtonBorderHover;
+        e.target.style.color = navButtonColorHover;
     };
     const handleMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
-        e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = '#ffffff';
+        e.target.style.borderColor = navButtonBorder;
+        e.target.style.color = navButtonColor;
     };
 
     const handleCircularMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
-        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = '#ffffff';
+        e.target.style.borderColor = navButtonBorderHover;
+        e.target.style.color = navButtonColorHover;
     };
     const handleCircularMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
-        e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = '#ffffff';
+        e.target.style.borderColor = navButtonBorder;
+        e.target.style.color = navButtonColor;
     };
 
     return (
@@ -149,8 +168,8 @@ export default function NavBar() {
                         height: isMobile ? '54px' : '44px',
                         borderRadius: '50%',
                         backgroundColor: 'transparent',
-                        border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
-                        color: '#ffffff'
+                        border: `2px solid ${navButtonBorder}`,
+                        color: navButtonColor
                     }}
                     onMouseEnter={handleCircularMouseEnter}
                     onMouseLeave={handleCircularMouseLeave}
@@ -198,11 +217,12 @@ export default function NavBar() {
                         <div
                             style={{
                                 marginTop: '10px',
-                                backgroundColor: 'white',
+                                backgroundColor: surfaceColor,
                                 padding: '10px 20px',
                                 boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                                 borderRadius: '8px',
                                 minWidth: '160px',
+                                border: `1px solid ${borderColor}`,
                                 zIndex: 1000
                             }}
                         >
@@ -259,8 +279,8 @@ export default function NavBar() {
                             height: isMobile ? '54px' : '44px',
                             borderRadius: '50%',
                             backgroundColor: 'transparent',
-                            border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
-                            color: '#ffffff'
+                            border: `2px solid ${navButtonBorder}`,
+                            color: navButtonColor
                         }}
                         onMouseEnter={handleCircularMouseEnter}
                         onMouseLeave={handleCircularMouseLeave}
@@ -286,8 +306,8 @@ export default function NavBar() {
                                     position: 'absolute',
                                     top: '5px',
                                     right: '5px',
-                                    backgroundColor: 'red',
-                                    color: 'white',
+                                    backgroundColor: accentColor,
+                                    color: notificationBadgeTextColor,
                                     borderRadius: '50%',
                                     padding: '2px 6px',
                                     fontSize: '12px'
@@ -303,10 +323,11 @@ export default function NavBar() {
                                 position: 'absolute',
                                 top: '60px',
                                 right: '0',
-                                backgroundColor: 'white',
+                                backgroundColor: surfaceColor,
                                 padding: '10px',
                                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                 width: '250px',
+                                border: `1px solid ${borderColor}`,
                                 zIndex: 1000
                             }}
                         >
@@ -317,7 +338,7 @@ export default function NavBar() {
                                     <div
                                         key={n._id}
                                         style={{
-                                            borderBottom: '1px solid #eee',
+                                            borderBottom: `1px solid ${borderColor}`,
                                             padding: '5px 0'
                                         }}
                                     >
@@ -378,15 +399,16 @@ export default function NavBar() {
             {isMobile && isMobileMenuOpen && (
                 <div
                     ref={mobileMenuRef}
-                    style={{
-                        position: 'fixed',
-                        top: '74px',
-                        left: 0,
-                        right: 0,
-                        background: 'rgba(0, 0, 0, 0.8)',
-                        padding: '20px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                        display: 'flex',
+                        style={{
+                            position: 'fixed',
+                            top: '74px',
+                            left: 0,
+                            right: 0,
+                            backgroundColor: surfaceColor,
+                            background: backgroundOverlay,
+                            padding: '20px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                            display: 'flex',
                         flexDirection: 'column',
                         gap: '15px',
                         zIndex: 1000
@@ -405,12 +427,12 @@ export default function NavBar() {
                                     width: '100%',
                                     margin: '5px 0',
                                     padding: '15px 20px',
-                                    fontSize: '18px',
-                                    backdropFilter: 'none',
-                                    color: '#ffffff',
-                                    borderColor: 'rgba(255, 255, 255, 0.7)'
-                                }}
-                                onClick={() => setIsMobileMenuOpen(false)}
+                                fontSize: '18px',
+                                backdropFilter: 'none',
+                                color: navButtonColor,
+                                borderColor: navButtonBorder
+                            }}
+                            onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 {label}
                             </button>
@@ -425,8 +447,8 @@ export default function NavBar() {
                                 padding: '15px 20px',
                                 fontSize: '18px',
                                 backdropFilter: 'none',
-                                color: '#ffffff',
-                                borderColor: 'rgba(255, 255, 255, 0.7)'
+                                color: navButtonColor,
+                                borderColor: navButtonBorder
                             }}
                             onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
                         >

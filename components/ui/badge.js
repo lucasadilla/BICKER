@@ -1,13 +1,31 @@
 import React from 'react';
 
-const variantStyles = {
-  default: { backgroundColor: '#007bff', color: '#fff', border: '1px solid #007bff' },
-  secondary: { backgroundColor: 'rgba(59,132,189,0)', color: '#fff', border: '0px solid #6c757d' },
-  destructive: { backgroundColor: '#dc3545', color: '#fff', border: '1px solid #dc3545' },
-  outline: { backgroundColor: 'transparent', color: 'rgba(108,117,125,0)', border: '1px solid #6c757d' },
+const neutralVariantStyles = {
+  'neutral-solid': {
+    backgroundColor: 'var(--color-text, #1f1f1f)',
+    color: 'var(--color-surface, #ffffff)',
+    border: '1px solid var(--color-text, #1f1f1f)'
+  },
+  'neutral-soft': {
+    backgroundColor: 'var(--color-surface, #ffffff)',
+    color: 'var(--color-text, #1f1f1f)',
+    border: '1px solid var(--color-border, #d4d4d8)'
+  },
+  'neutral-outline': {
+    backgroundColor: 'transparent',
+    color: 'var(--color-text, #1f1f1f)',
+    border: '1px solid var(--color-border, #d4d4d8)'
+  },
 };
 
-export function Badge({ variant = 'default', className = '', style = {}, children, ...props }) {
+const legacyVariantMap = {
+  default: 'neutral-solid',
+  secondary: 'neutral-soft',
+  destructive: 'neutral-solid',
+  outline: 'neutral-outline',
+};
+
+export function Badge({ variant = 'neutral-solid', className = '', style = {}, children, ...props }) {
   const baseStyle = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -16,7 +34,14 @@ export function Badge({ variant = 'default', className = '', style = {}, childre
     fontSize: '0.75rem',
     fontWeight: 500,
   };
-  const combinedStyle = { ...baseStyle, ...(variantStyles[variant] || variantStyles.default), ...style };
+  const resolvedVariantKey = neutralVariantStyles[variant]
+    ? variant
+    : legacyVariantMap[variant] || 'neutral-solid';
+  const combinedStyle = {
+    ...baseStyle,
+    ...neutralVariantStyles[resolvedVariantKey],
+    ...style,
+  };
   return (
     <span style={combinedStyle} className={className} {...props}>
       {children}
