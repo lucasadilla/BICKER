@@ -68,6 +68,12 @@ export default function Profile() {
     color: '#ffffff',
   };
 
+  const selectStyle = {
+    ...inputStyle,
+    backgroundColor: '#ffffff',
+    color: '#000000',
+  };
+
   const labelStyle = {
     color: '#ffffff',
     fontWeight: '600',
@@ -77,7 +83,7 @@ export default function Profile() {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: colorScheme === 'light' ? '#001f3f' : undefined,
+        backgroundColor: colorScheme === 'light' ? '#4D94FF' : undefined,
         padding: '80px 20px',
         boxSizing: 'border-box',
       }}
@@ -99,18 +105,18 @@ export default function Profile() {
           <label style={labelStyle}>Bio</label>
           <textarea name="bio" value={form.bio} onChange={handleChange} style={{ ...inputStyle, minHeight: '120px' }} />
           <label style={labelStyle}>Public Badge</label>
-          <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange} style={inputStyle}>
-            <option value="">None</option>
+          <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange} style={selectStyle}>
+            <option value="" style={{ color: '#000000' }}>None</option>
             {badges.map(b => (
-              <option key={b} value={b} title={badgeDescriptions[b] || b}>
+              <option key={b} value={b} title={badgeDescriptions[b] || b} style={{ color: '#000000' }}>
                 {b}
               </option>
             ))}
           </select>
           <label style={labelStyle}>Color Scheme</label>
-          <select name="colorScheme" value={form.colorScheme} onChange={handleChange} style={inputStyle}>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
+          <select name="colorScheme" value={form.colorScheme} onChange={handleChange} style={selectStyle}>
+            <option value="light" style={{ color: '#000000' }}>Light</option>
+            <option value="dark" style={{ color: '#000000' }}>Dark</option>
           </select>
           <button
             type="submit"
