@@ -39,6 +39,19 @@ const formatReactionTotals = (reactions = {}) => ({
   blue: toPlainObject(reactions.blue)
 });
 
+const sumReactionValues = (counts = {}) =>
+  Object.values(counts || {}).reduce((total, value) => total + (typeof value === 'number' ? value : 0), 0);
+
+const buildReactionTotals = (countsBySide = {}) => {
+  const redCounts = countsBySide.red || {};
+  const blueCounts = countsBySide.blue || {};
+
+  return {
+    red: sumReactionValues(redCounts),
+    blue: sumReactionValues(blueCounts)
+  };
+};
+
 const extractMyReactions = (reactionsBy = [], userId = null) => {
   const selections = { red: null, blue: null };
 
@@ -100,7 +113,12 @@ export default async function handler(req, res) {
 
       const { votes: sanitizedVotes, myVote } = sanitizeVotes(votedBy, currentUser);
 
-      const reactionTotals = formatReactionTotals(reactions);
+      const reactionsByEmoji = formatReactionTotals(reactions);
+      const reactionCounts = {
+        red: { ...reactionsByEmoji.red },
+        blue: { ...reactionsByEmoji.blue }
+      };
+      const reactionTotalsBySide = buildReactionTotals(reactionsByEmoji);
       const myReactions = extractMyReactions(reactionsBy, currentUser);
 
       return res.status(200).json({
@@ -112,7 +130,10 @@ export default async function handler(req, res) {
         votesBlue: deliberationDoc.votesBlue || 0,
         votedBy: sanitizedVotes,
         myVote,
-        reactions: reactionTotals,
+        reactions: reactionsByEmoji,
+        reactionCounts,
+        reactionTotals: reactionTotalsBySide,
+        totalReactions: reactionTotalsBySide.red + reactionTotalsBySide.blue,
         myReactions
       });
     } catch (error) {
