@@ -1,13 +1,9 @@
 // pages/instigate/index.js
 import { useState, useEffect } from 'react';
-import { useColorScheme } from '../lib/ColorSchemeContext';
-import { getSplitTheme } from '../lib/splitTheme';
 
 export default function InstigatePage() {
     const [instigates, setInstigates] = useState([]);
     const [newInstigate, setNewInstigate] = useState('');
-    const { colorScheme: activeScheme } = useColorScheme() || { colorScheme: 'light' };
-    const theme = getSplitTheme(activeScheme);
 
     // Disable scrolling on mount
     useEffect(() => {
@@ -66,18 +62,14 @@ export default function InstigatePage() {
         <div
             style={{
                 padding: '70px',
-                backgroundColor: theme.left.base,
+                backgroundColor: '#ee4343',
                 minHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                color: theme.left.text,
             }}
         >
-            <h1
-                className="heading-1"
-                style={{ textAlign: 'center', color: theme.left.text, marginBottom: '20px' }}
-            >
+            <h1 className="heading-1" style={{ textAlign: 'center', color: '#ffffff', marginBottom: '20px' }}>
                 Instigate
             </h1>
 
@@ -104,10 +96,10 @@ export default function InstigatePage() {
                             padding: '10px',
                             fontSize: '36px',
                             borderRadius: '4px',
-                            border: `1px solid ${theme.surfaces.border}`,
+                            border: '1px solid rgba(0, 0, 0, 0.2)',
                             resize: 'none',
-                            backgroundColor: theme.surfaces.solid,
-                            color: theme.text.strong,
+                            backgroundColor: '#ffffff',
+                            color: '#000000',
                         }}
                     />
                     <div
@@ -116,7 +108,7 @@ export default function InstigatePage() {
                             bottom: '15px',
                             right: '15px',
                             fontSize: '14px',
-                            color: theme.counter,
+                            color: '#ffffff',
                             pointerEvents: 'none',
                         }}
                     >
@@ -129,13 +121,13 @@ export default function InstigatePage() {
                     style={{
                         width: '50%',
                         padding: '10px',
-                        backgroundColor: theme.buttons.primary.bg,
-                        color: theme.buttons.primary.text,
+                        backgroundColor: '#007BFF',
+                        color: 'white',
                         fontSize: '26px',
                         borderRadius: '4px',
                         border: 'none',
                         cursor: 'pointer',
-                        boxShadow: theme.buttons.floating.shadow,
+                        boxShadow: '10px 12px black',
                         transition: 'all 0.2s ease',
                         position: 'relative',
                         marginTop: '10px',
@@ -143,12 +135,10 @@ export default function InstigatePage() {
                     onMouseEnter={(e) => {
                         e.target.style.transform = 'translateY(4px)';
                         e.target.style.boxShadow = 'none';
-                        e.target.style.backgroundColor = theme.buttons.primary.hoverBg;
                     }}
                     onMouseLeave={(e) => {
                         e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = theme.buttons.floating.shadow;
-                        e.target.style.backgroundColor = theme.buttons.primary.bg;
+                        e.target.style.boxShadow = '10px 12px black';
                     }}
                 >
                     Submit Topic

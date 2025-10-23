@@ -1,8 +1,6 @@
 // pages/debate.js
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { NextSeo } from 'next-seo';
-import { useColorScheme } from '../lib/ColorSchemeContext';
-import { getSplitTheme } from '../lib/splitTheme';
 
 export default function DebatePage({ initialDebates }) {
     const [instigates, setInstigates] = useState(initialDebates || []);
@@ -10,8 +8,6 @@ export default function DebatePage({ initialDebates }) {
     const [debateText, setDebateText] = useState('');
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
-    const { colorScheme: activeScheme } = useColorScheme() || { colorScheme: 'light' };
-    const theme = getSplitTheme(activeScheme);
     const useIsomorphicLayoutEffect =
         typeof window !== 'undefined' ? useLayoutEffect : useEffect;
     // Search-related state
@@ -28,23 +24,19 @@ export default function DebatePage({ initialDebates }) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    const leftSideColor = hoveringSide === 'red' ? theme.left.hover : theme.left.base;
-    const rightSideColor = hoveringSide === 'blue' ? theme.right.hover : theme.right.base;
-    const splitGradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
-    const navGradient =
-        activeScheme === 'monochrome'
-            ? `linear-gradient(to right, ${theme.left.base} 0%, ${theme.left.base} 100%)`
-            : splitGradient;
+    const leftSideColor = hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D';
+    const rightSideColor = hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF';
 
     useIsomorphicLayoutEffect(() => {
+        const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
         if (typeof document !== 'undefined') {
-            document.documentElement.style.setProperty('--nav-gradient', navGradient);
-            document.documentElement.style.setProperty('--nav-button-color', theme.nav.text);
-            document.documentElement.style.setProperty('--nav-button-color-hover', theme.nav.text);
-            document.documentElement.style.setProperty('--nav-button-border', theme.nav.border);
-            document.documentElement.style.setProperty('--nav-button-border-hover', theme.nav.borderHover);
+            document.documentElement.style.setProperty('--nav-gradient', gradient);
+            document.documentElement.style.setProperty('--nav-button-color', '#ffffff');
+            document.documentElement.style.setProperty('--nav-button-color-hover', '#ffffff');
+            document.documentElement.style.setProperty('--nav-button-border', 'rgba(255, 255, 255, 0.7)');
+            document.documentElement.style.setProperty('--nav-button-border-hover', 'rgba(255, 255, 255, 0.9)');
         }
-    }, [navGradient, theme.nav.border, theme.nav.borderHover, theme.nav.text]);
+    }, [leftSideColor, rightSideColor]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -195,38 +187,36 @@ export default function DebatePage({ initialDebates }) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '12px',
-                backgroundColor: theme.surfaces.raised,
+                backgroundColor: 'rgba(255, 255, 255, 0.98)',
                 padding: '12px 20px',
                 borderRadius: showSearchResults
                     ? '16px 16px 0 0'
                     : '16px',
-                boxShadow: showSearchResults ? 'none' : theme.shadows.raised,
+                boxShadow: showSearchResults
+                    ? '0 0 0 rgba(0, 0, 0, 0)'
+                    : '0 6px 18px rgba(15, 23, 42, 0.08), 0 1px 4px rgba(15, 23, 42, 0.06)',
                 transition: 'all 0.2s ease',
-                border: `1px solid ${theme.surfaces.border}`,
-                borderBottom: showSearchResults
-                    ? 'none'
-                    : `1px solid ${theme.surfaces.border}`,
+                border: '1px solid rgba(15, 23, 42, 0.12)',
+                borderBottom: showSearchResults ? 'none' : '1px solid rgba(15, 23, 42, 0.12)',
                 width: '100%',
                 boxSizing: 'border-box',
-                color: theme.text.strong,
             }}
         >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
+                    <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="24" 
+                        height="24" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="#4B5563"
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
                         strokeLinejoin="round"
                         style={{
-                            flexShrink: 0,
+                            flexShrink: 0, 
                             opacity: 0.7,
                             transition: 'opacity 0.2s ease',
                             transform: 'scale(1)',
-                            color: theme.icon.muted,
                         }}
                     >
                         <circle cx="11" cy="11" r="8"></circle>
@@ -247,7 +237,7 @@ export default function DebatePage({ initialDebates }) {
                             border: 'none',
                             outline: 'none',
                             backgroundColor: 'transparent',
-                            color: theme.text.strong,
+                            color: '#1F2937',
                             fontWeight: '500',
                             letterSpacing: '0.2px',
                             width: '100%',
@@ -265,13 +255,14 @@ export default function DebatePage({ initialDebates }) {
                     top: '100%',
                     left: 0,
                     width: '100%',
-                    backgroundColor: theme.surfaces.solid,
-                    border: `1px solid ${theme.surfaces.border}`,
+                    backgroundColor: '#fff',
+                    border: '1px solid rgba(15, 23, 42, 0.12)',
                     borderTop: 'none',
                     maxHeight: '260px',
                     overflowY: 'auto',
                     borderRadius: '0 0 16px 16px',
-                    boxShadow: theme.shadows.dropdown,
+                    boxShadow:
+                        '0 16px 24px rgba(15, 23, 42, 0.08), 0 8px 16px rgba(15, 23, 42, 0.04)',
                     zIndex: 1000,
                     boxSizing: 'border-box',
                 }}
@@ -281,10 +272,11 @@ export default function DebatePage({ initialDebates }) {
                         key={instigate._id}
                         onClick={() => selectSearchResult(instigate)}
                         onMouseEnter={(e) =>
-                            (e.currentTarget.style.backgroundColor = theme.surfaces.highlight)
+                            (e.currentTarget.style.backgroundColor =
+                                'rgba(37, 99, 235, 0.08)')
                         }
                         onMouseLeave={(e) =>
-                            (e.currentTarget.style.backgroundColor = theme.surfaces.solid)
+                            (e.currentTarget.style.backgroundColor = '#fff')
                         }
                         style={{
                             padding: '12px 16px',
@@ -292,8 +284,8 @@ export default function DebatePage({ initialDebates }) {
                             borderBottom:
                                 index === searchResults.length - 1
                                     ? 'none'
-                                    : `1px solid ${theme.surfaces.borderMuted}`,
-                            backgroundColor: theme.surfaces.solid,
+                                    : '1px solid rgba(15, 23, 42, 0.06)',
+                            backgroundColor: '#fff',
                             transition: 'background-color 0.15s ease',
                         }}
                     >
@@ -301,7 +293,7 @@ export default function DebatePage({ initialDebates }) {
                             className="text-base"
                             style={{
                                 margin: 0,
-                                color: theme.text.strong,
+                                color: '#1F2937',
                                 fontWeight: 500,
                             }}
                         >
@@ -365,7 +357,7 @@ export default function DebatePage({ initialDebates }) {
                     backgroundColor: leftSideColor,
                     padding: '20px',
                     boxSizing: 'border-box',
-                    color: theme.left.text,
+                    color: 'white',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
@@ -464,7 +456,7 @@ export default function DebatePage({ initialDebates }) {
                     backgroundColor: rightSideColor,
                     padding: '20px',
                     boxSizing: 'border-box',
-                    color: theme.right.text,
+                    color: 'white',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
@@ -506,13 +498,12 @@ export default function DebatePage({ initialDebates }) {
                                 padding: '10px',
                                 fontSize: isMobile ? '20px' : '30px',
                                 borderRadius: '4px',
-                                border: `1px solid ${theme.surfaces.border}`,
-                                color: theme.text.strong,
+                                border: '1px solid #ccc',
+                                color: 'black',
                                 resize: 'none',
                                 overflow: 'hidden',
                                 boxSizing: 'border-box',
                                 margin: '0 auto',
-                                backgroundColor: theme.surfaces.solid,
                             }}
                         />
                         <div
@@ -521,7 +512,7 @@ export default function DebatePage({ initialDebates }) {
                                 bottom: '15px',
                                 right: '15px',
                                 fontSize: '14px',
-                                color: theme.counter,
+                                color: '#555',
                                 pointerEvents: 'none',
                             }}
                         >
@@ -533,13 +524,13 @@ export default function DebatePage({ initialDebates }) {
                         style={{
                             width: isMobile ? '85%' : '30%',
                             padding: '10px',
-                            backgroundColor: theme.buttons.primary.bg,
-                            color: theme.buttons.primary.text,
+                            backgroundColor: '#007BFF',
+                            color: 'white',
                             fontSize: isMobile ? '20px' : '30px',
                             borderRadius: '4px',
                             border: 'none',
                             cursor: 'pointer',
-                            boxShadow: theme.buttons.primary.shadow,
+                            boxShadow: '0 4px 0 #0056b3',
                             transition: 'all 0.1s ease',
                             position: 'relative',
                             marginLeft: 'auto',
@@ -548,12 +539,10 @@ export default function DebatePage({ initialDebates }) {
                         onMouseEnter={(e) => {
                             e.target.style.transform = 'translateY(4px)';
                             e.target.style.boxShadow = 'none';
-                            e.target.style.backgroundColor = theme.buttons.primary.hoverBg;
                         }}
                         onMouseLeave={(e) => {
                             e.target.style.transform = 'translateY(0)';
-                            e.target.style.boxShadow = theme.buttons.primary.shadow;
-                            e.target.style.backgroundColor = theme.buttons.primary.bg;
+                            e.target.style.boxShadow = '0 4px 0 #0056b3';
                         }}
                     >
                         Submit Debate
