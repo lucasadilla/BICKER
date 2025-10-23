@@ -2,15 +2,11 @@ import { useRouter } from 'next/router';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import dbConnect from '../lib/dbConnect';
 import Banner from '../models/Banner';
-import { useColorScheme } from '../lib/ColorSchemeContext';
-import { getSplitTheme } from '../lib/splitTheme';
 
 export default function Home({ bannerUrl }) {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
     const [hoveredSide, setHoveredSide] = useState(null);
-    const { colorScheme: activeScheme } = useColorScheme() || { colorScheme: 'light' };
-    const theme = getSplitTheme(activeScheme);
     const useIsomorphicLayoutEffect =
         typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -23,23 +19,20 @@ export default function Home({ bannerUrl }) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const leftSideColor = hoveredSide === 'left' ? theme.left.hover : theme.left.base;
-    const rightSideColor = hoveredSide === 'right' ? theme.right.hover : theme.right.base;
+    const leftSideColor = hoveredSide === 'left' ? '#FF6A6A' : '#FF4D4D';
+    const rightSideColor = hoveredSide === 'right' ? '#76ACFF' : '#4D94FF';
     const splitGradient = `linear-gradient(to right, ${leftSideColor} 0%, ${leftSideColor} 50%, ${rightSideColor} 50%, ${rightSideColor} 100%)`;
-    const navGradient =
-        activeScheme === 'monochrome'
-            ? `linear-gradient(to right, ${theme.left.base} 0%, ${theme.left.base} 100%)`
-            : splitGradient;
 
     useIsomorphicLayoutEffect(() => {
+        const gradient = splitGradient;
         if (typeof document !== 'undefined') {
-            document.documentElement.style.setProperty('--nav-gradient', navGradient);
-            document.documentElement.style.setProperty('--nav-button-color', theme.nav.text);
-            document.documentElement.style.setProperty('--nav-button-color-hover', theme.nav.text);
-            document.documentElement.style.setProperty('--nav-button-border', theme.nav.border);
-            document.documentElement.style.setProperty('--nav-button-border-hover', theme.nav.borderHover);
+            document.documentElement.style.setProperty('--nav-gradient', gradient);
+            document.documentElement.style.setProperty('--nav-button-color', '#ffffff');
+            document.documentElement.style.setProperty('--nav-button-color-hover', '#ffffff');
+            document.documentElement.style.setProperty('--nav-button-border', 'rgba(255, 255, 255, 0.7)');
+            document.documentElement.style.setProperty('--nav-button-border-hover', 'rgba(255, 255, 255, 0.9)');
         }
-    }, [navGradient, theme.nav.border, theme.nav.borderHover, theme.nav.text]);
+    }, [splitGradient]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -86,7 +79,7 @@ export default function Home({ bannerUrl }) {
                     style={{
                         flex: 1,
                         background: leftSideColor,
-                        color: theme.left.text,
+                        color: 'white',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -104,7 +97,6 @@ export default function Home({ bannerUrl }) {
                             fontSize: isMobile ? '28px' : '36px',
                             textAlign: 'center',
                             margin: '0 20px',
-                            color: theme.left.text,
                         }}
                     >
                         Instigate
@@ -119,7 +111,7 @@ export default function Home({ bannerUrl }) {
                     style={{
                         flex: 1,
                         background: rightSideColor,
-                        color: theme.right.text,
+                        color: 'white',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -137,7 +129,6 @@ export default function Home({ bannerUrl }) {
                             fontSize: isMobile ? '28px' : '36px',
                             textAlign: 'center',
                             margin: '0 20px',
-                            color: theme.right.text,
                         }}
                     >
                         Debate

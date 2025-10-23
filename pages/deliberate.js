@@ -3,8 +3,6 @@ import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
-import { useColorScheme } from '../lib/ColorSchemeContext';
-import { getSplitTheme, getOverlayTokens } from '../lib/splitTheme';
 
 // Helper function to shuffle array
 const shuffleArray = (array) => {
@@ -27,10 +25,7 @@ export default function DeliberatePage({ initialDebates }) {
     const debatesRef = useRef(debates);
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
-    const { colorScheme: activeScheme } = useColorScheme() || { colorScheme: 'light' };
-    const theme = getSplitTheme(activeScheme);
     const [reactionMenusOpen, setReactionMenusOpen] = useState({ red: false, blue: false });
-    const [hoveredReactionEmoji, setHoveredReactionEmoji] = useState({ red: null, blue: null });
     const [userReactions, setUserReactions] = useState(() => {
         const initial = {};
         (initialDebates || []).forEach((debate) => {
@@ -46,26 +41,21 @@ export default function DeliberatePage({ initialDebates }) {
     const useIsomorphicLayoutEffect =
         typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-    const leftSideColor = hoveringSide === 'red' ? theme.left.hover : theme.left.base;
-    const rightSideColor = hoveringSide === 'blue' ? theme.right.hover : theme.right.base;
+    const leftSideColor = hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D';
+    const rightSideColor = hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF';
     const reactionInFlightRef = useRef(new Set());
     const currentDebate = debates[currentDebateIndex];
 
-    const splitGradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
-    const navGradient =
-        activeScheme === 'monochrome'
-            ? `linear-gradient(to right, ${theme.left.base} 0%, ${theme.left.base} 100%)`
-            : splitGradient;
-
     useIsomorphicLayoutEffect(() => {
+        const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
         if (typeof document !== 'undefined') {
-            document.documentElement.style.setProperty('--nav-gradient', navGradient);
-            document.documentElement.style.setProperty('--nav-button-color', theme.nav.text);
-            document.documentElement.style.setProperty('--nav-button-color-hover', theme.nav.text);
-            document.documentElement.style.setProperty('--nav-button-border', theme.nav.border);
-            document.documentElement.style.setProperty('--nav-button-border-hover', theme.nav.borderHover);
+            document.documentElement.style.setProperty('--nav-gradient', gradient);
+            document.documentElement.style.setProperty('--nav-button-color', '#ffffff');
+            document.documentElement.style.setProperty('--nav-button-color-hover', '#ffffff');
+            document.documentElement.style.setProperty('--nav-button-border', 'rgba(255, 255, 255, 0.7)');
+            document.documentElement.style.setProperty('--nav-button-border-hover', 'rgba(255, 255, 255, 0.9)');
         }
-    }, [navGradient, theme.nav.border, theme.nav.borderHover, theme.nav.text]);
+    }, [leftSideColor, rightSideColor]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -268,12 +258,10 @@ export default function DeliberatePage({ initialDebates }) {
             red: side === 'red',
             blue: side === 'blue',
         });
-        setHoveredReactionEmoji({ red: null, blue: null });
     };
 
     const closeReactionMenu = () => {
         setReactionMenusOpen({ red: false, blue: false });
-        setHoveredReactionEmoji({ red: null, blue: null });
     };
 
     const handleReaction = async (side, emoji) => {
@@ -444,9 +432,6 @@ export default function DeliberatePage({ initialDebates }) {
         const myReaction =
             userReactions[debateId]?.[side] ?? currentDebate.myReactions?.[side] ?? null;
         const isMenuOpen = reactionMenusOpen[side];
-        const hoveredEmoji = hoveredReactionEmoji[side];
-        const overlayTokens = getOverlayTokens(theme, side);
-        const baseTextColor = side === 'red' ? theme.left.text : theme.right.text;
 
         return (
             <div
@@ -458,7 +443,9 @@ export default function DeliberatePage({ initialDebates }) {
                     gap: '10px',
                 }}
                 onClick={(event) => event.stopPropagation()}
+                onMouseEnter={() => openReactionMenu(side)}
                 onMouseLeave={closeReactionMenu}
+                onFocus={() => openReactionMenu(side)}
                 onBlur={(event) => {
                     const nextFocus = event.relatedTarget;
                     if (!nextFocus) {
@@ -481,17 +468,15 @@ export default function DeliberatePage({ initialDebates }) {
                         event.stopPropagation();
                         openReactionMenu(side);
                     }}
-                    onMouseEnter={() => openReactionMenu(side)}
-                    onFocus={() => openReactionMenu(side)}
                     style={{
                         padding: '6px 16px',
                         borderRadius: '9999px',
-                        border: `1px solid ${overlayTokens.border}`,
+                        border: '1px solid rgba(255, 255, 255, 0.6)',
                         backgroundColor:
                             isMenuOpen || myReaction
-                                ? overlayTokens.contrast
-                                : overlayTokens.subtle,
-                        color: baseTextColor,
+                                ? 'rgba(255, 255, 255, 0.25)'
+                                : 'rgba(0, 0, 0, 0.2)',
+                        color: '#ffffff',
                         cursor: 'pointer',
                         fontSize: '0.875rem',
                         fontWeight: 600,
@@ -508,14 +493,13 @@ export default function DeliberatePage({ initialDebates }) {
                             gap: '12px',
                             padding: '8px 12px',
                             borderRadius: '16px',
-                            border: `1px solid ${overlayTokens.border}`,
-                            backgroundColor: overlayTokens.contrast,
+                            border: '1px solid rgba(255, 255, 255, 0.6)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.35)',
                             backdropFilter: 'blur(4px)',
                         }}
                     >
                         {REACTION_EMOJIS.map((emoji) => {
                             const isSelected = myReaction === emoji;
-                            const isHovered = hoveredEmoji === emoji;
 
                             return (
                                 <button
@@ -525,30 +509,6 @@ export default function DeliberatePage({ initialDebates }) {
                                         event.stopPropagation();
                                         handleReaction(side, emoji);
                                     }}
-                                    onMouseEnter={() =>
-                                        setHoveredReactionEmoji((prev) => ({
-                                            ...prev,
-                                            [side]: emoji,
-                                        }))
-                                    }
-                                    onMouseLeave={() =>
-                                        setHoveredReactionEmoji((prev) => ({
-                                            ...prev,
-                                            [side]: null,
-                                        }))
-                                    }
-                                    onFocus={() =>
-                                        setHoveredReactionEmoji((prev) => ({
-                                            ...prev,
-                                            [side]: emoji,
-                                        }))
-                                    }
-                                    onBlur={() =>
-                                        setHoveredReactionEmoji((prev) => ({
-                                            ...prev,
-                                            [side]: null,
-                                        }))
-                                    }
                                     style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
@@ -558,24 +518,12 @@ export default function DeliberatePage({ initialDebates }) {
                                         borderRadius: '50%',
                                         border: 'none',
                                         backgroundColor: 'transparent',
-                                        color: baseTextColor,
+                                        color: '#ffffff',
                                         cursor: 'pointer',
                                         fontSize: '1.25rem',
-                                        transform: isSelected
-                                            ? 'scale(1.15)'
-                                            : isHovered
-                                            ? 'scale(1.1)'
-                                            : 'scale(1)',
-                                        transition:
-                                            'transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease',
-                                        background: isSelected
-                                            ? overlayTokens.active
-                                            : isHovered
-                                            ? overlayTokens.hover
-                                            : 'transparent',
-                                        boxShadow: isHovered
-                                            ? theme.shadows.emojiHover
-                                            : 'none',
+                                        transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                                        transition: 'transform 0.15s ease, background-color 0.15s ease',
+                                        background: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
                                     }}
                                 >
                                     <span>{emoji}</span>
@@ -594,7 +542,6 @@ export default function DeliberatePage({ initialDebates }) {
                         flexWrap: 'wrap',
                         justifyContent: 'center',
                         maxWidth: '260px',
-                        color: baseTextColor,
                     }}
                 >
                     {REACTION_EMOJIS.map((emoji) => (
@@ -779,57 +726,34 @@ export default function DeliberatePage({ initialDebates }) {
     // If no debates available, show fallback
     if (!currentDebate) {
         return (
-            <div
-                style={{
-                    textAlign: 'center',
-                    marginTop: '50px',
-                    color: theme.text.strong,
-                }}
-            >
+            <div style={{ textAlign: 'center', marginTop: '50px' }}>
                 <h2 className="heading-2">No debates available</h2>
                 <p className="text-base">You've voted on all available debates! Check back later for new debates.</p>
-                <button
+                <button 
                     onClick={fetchDeliberations}
                     style={{
                         marginTop: '20px',
                         padding: '10px 20px',
-                        backgroundColor: theme.buttons.primary.bg,
-                        color: theme.buttons.primary.text,
+                        backgroundColor: '#4D94FF',
+                        color: 'white',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: 'pointer',
-                        boxShadow: theme.buttons.primary.shadow,
-                    }}
-                    onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = theme.buttons.primary.hoverBg;
-                        e.target.style.boxShadow = 'none';
-                        e.target.style.transform = 'translateY(4px)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = theme.buttons.primary.bg;
-                        e.target.style.boxShadow = theme.buttons.primary.shadow;
-                        e.target.style.transform = 'translateY(0)';
+                        cursor: 'pointer'
                     }}
                 >
                     Check for New Debates
                 </button>
-                <button
+                <button 
                     onClick={resetCollection}
                     style={{
                         marginTop: '20px',
                         marginLeft: '10px',
                         padding: '10px 20px',
-                        backgroundColor: theme.buttons.danger.bg,
-                        color: theme.buttons.danger.text,
-                        border: theme.buttons.danger.border,
+                        backgroundColor: '#FF4D4D',
+                        color: 'white',
+                        border: 'none',
                         borderRadius: '5px',
                         cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = theme.buttons.danger.hoverBg;
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = theme.buttons.danger.bg;
                     }}
                 >
                     Reset Collection
@@ -872,20 +796,12 @@ export default function DeliberatePage({ initialDebates }) {
                         left: isMobile ? 'calc(50% - 80px)' : redSize,
                         transform: 'translate(-50%, -50%)',
                         padding: '10px 20px',
-                        backgroundColor: theme.buttons.secondary.bg,
-                        border: theme.buttons.secondary.border,
-                        color: theme.buttons.secondary.text,
+                        backgroundColor: '#f0f0f0',
+                        border: 'none',
                         borderRadius: '5px',
                         cursor: isCurrentDebatePending ? 'default' : 'pointer',
                         zIndex: 1000,
                         transition: 'left 1s ease, top 1s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                        if (isCurrentDebatePending) return;
-                        e.target.style.backgroundColor = theme.buttons.secondary.hoverBg;
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = theme.buttons.secondary.bg;
                     }}
                 >
                     Skip
@@ -899,20 +815,12 @@ export default function DeliberatePage({ initialDebates }) {
                         left: isMobile ? 'calc(50% + 80px)' : redSize,
                         transform: 'translate(-50%, -50%)',
                         padding: '10px 20px',
-                        backgroundColor: theme.buttons.secondary.bg,
-                        border: theme.buttons.secondary.border,
-                        color: theme.buttons.secondary.text,
+                        backgroundColor: '#f0f0f0',
+                        border: 'none',
                         borderRadius: '5px',
                         cursor: isCurrentDebatePending ? 'default' : 'pointer',
                         zIndex: 1000,
                         transition: 'left 1s ease, top 1s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                        if (isCurrentDebatePending) return;
-                        e.target.style.backgroundColor = theme.buttons.secondary.hoverBg;
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = theme.buttons.secondary.bg;
                     }}
                 >
                     Share
@@ -934,7 +842,7 @@ export default function DeliberatePage({ initialDebates }) {
                         width: isMobile ? '100%' : redSize,
                         height: isMobile ? redSize : '100%',
                         backgroundColor: leftSideColor,
-                        color: theme.left.text,
+                        color: 'white',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
@@ -966,7 +874,7 @@ export default function DeliberatePage({ initialDebates }) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                color: theme.left.text,
+                                color: 'white',
                                 textDecoration: 'none',
                                 fontSize: '0.875rem'
                             }}
@@ -999,7 +907,7 @@ export default function DeliberatePage({ initialDebates }) {
                         width: isMobile ? '100%' : blueSize,
                         height: isMobile ? blueSize : '100%',
                         backgroundColor: rightSideColor,
-                        color: theme.right.text,
+                        color: 'white',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
@@ -1031,7 +939,7 @@ export default function DeliberatePage({ initialDebates }) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                color: theme.right.text,
+                                color: 'white',
                                 textDecoration: 'none',
                                 fontSize: '0.875rem'
                             }}

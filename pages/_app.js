@@ -1,70 +1,51 @@
 import '../styles/globals.css';
 import { SessionProvider, useSession } from 'next-auth/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import NavBar from '../components/NavBar';
 import { DefaultSeo } from 'next-seo';
 import SEO from '../next-seo.config';
 import { Analytics } from "@vercel/analytics/react";
 import { ColorSchemeContext } from '../lib/ColorSchemeContext';
 
-const normalizeScheme = (value) => {
-    const normalized = (value || '').toString().toLowerCase();
-    if (normalized === 'monochrome' || normalized === 'dark') {
-        return 'monochrome';
-    }
-    if (normalized === 'light') {
-        return 'light';
-    }
-    return 'light';
-};
-
 function ThemeProvider({ children }) {
     const { status } = useSession();
-    const [colorScheme, setColorSchemeState] = useState('light');
+    const [colorScheme, setColorScheme] = useState('light');
 
-    const setColorScheme = useCallback((value) => {
-        setColorSchemeState(normalizeScheme(value));
-    }, [setColorSchemeState]);
-
+    // On initial load, try to use the user's last chosen scheme
     useEffect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-        const stored = localStorage.getItem('colorScheme');
-        if (stored) {
-            setColorScheme(stored);
-        }
-    }, [setColorScheme]);
-
-    useEffect(() => {
-        const scheme = normalizeScheme(colorScheme);
-        document.body.classList.remove('light', 'monochrome', 'dark', 'blue');
-        document.body.classList.add(scheme);
         if (typeof window !== 'undefined') {
-            localStorage.setItem('colorScheme', scheme);
+            const stored = localStorage.getItem('colorScheme');
+            if (stored) {
+                setColorScheme(stored);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        document.body.classList.remove('light', 'dark', 'blue');
+        document.body.classList.add(colorScheme || 'light');
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('colorScheme', colorScheme || 'light');
         }
     }, [colorScheme]);
 
     useEffect(() => {
-        const stored = typeof window !== 'undefined' ? localStorage.getItem('colorScheme') : null;
-
         if (status === 'authenticated') {
             fetch('/api/profile')
                 .then(res => res.json())
-                .then(data => {
-                    const scheme = data.colorScheme || stored || 'light';
-                    setColorScheme(scheme);
-                })
+                .then(data => setColorScheme(data.colorScheme || localStorage.getItem('colorScheme') || 'light'))
                 .catch(() => {
+                    const stored = typeof window !== 'undefined' ? localStorage.getItem('colorScheme') : null;
                     setColorScheme(stored || 'light');
                 });
         } else {
+            const stored = typeof window !== 'undefined' ? localStorage.getItem('colorScheme') : null;
             setColorScheme(stored || 'light');
         }
-    }, [setColorScheme, status]);
+    }, [status]);
 
     return (
-        <ColorSchemeContext.Provider value={{ colorScheme: normalizeScheme(colorScheme), setColorScheme }}>
+        <ColorSchemeContext.Provider value={{ colorScheme, setColorScheme }}>
             {children}
         </ColorSchemeContext.Provider>
     );
