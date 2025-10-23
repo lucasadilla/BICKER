@@ -79,12 +79,46 @@ export default function DeliberatePage({ initialDebates }) {
         eventSource.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
+
                 setDebates((prevDebates) =>
-                    prevDebates.map((debate) =>
-                        debate._id === data.debateId
-                            ? { ...debate, votesRed: data.votesRed, votesBlue: data.votesBlue }
-                            : debate
-                    )
+                    prevDebates.map((debate) => {
+                        if (debate._id !== data.debateId) {
+                            return debate;
+                        }
+
+                        const updatedDebate = {
+                            ...debate,
+                            ...(typeof data.votesRed === 'number'
+                                ? { votesRed: data.votesRed }
+                                : {}),
+                            ...(typeof data.votesBlue === 'number'
+                                ? { votesBlue: data.votesBlue }
+                                : {}),
+                        };
+
+                        if (data.reactions && typeof data.reactions === 'object') {
+                            const currentReactions = debate.reactions || {};
+                            const hasRed = Object.prototype.hasOwnProperty.call(
+                                data.reactions,
+                                'red'
+                            );
+                            const hasBlue = Object.prototype.hasOwnProperty.call(
+                                data.reactions,
+                                'blue'
+                            );
+
+                            updatedDebate.reactions = {
+                                red: hasRed
+                                    ? { ...(data.reactions.red || {}) }
+                                    : { ...(currentReactions.red || {}) },
+                                blue: hasBlue
+                                    ? { ...(data.reactions.blue || {}) }
+                                    : { ...(currentReactions.blue || {}) },
+                            };
+                        }
+
+                        return updatedDebate;
+                    })
                 );
             } catch (err) {
                 console.error('Error parsing SSE data:', err);

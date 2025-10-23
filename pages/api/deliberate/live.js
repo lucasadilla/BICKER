@@ -15,14 +15,21 @@ export default function handler(req, res) {
   // Send an initial comment to establish the stream
   res.write(': connected\n\n');
 
-  const onVote = (data) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  const sendUpdate = (data = {}) => {
+    const payload = {
+      ...data,
+      reactions: data.reactions || { red: {}, blue: {} },
+    };
+
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
   };
 
-  emitter.on('vote', onVote);
+  const events = ['vote', 'reaction'];
+
+  events.forEach((eventName) => emitter.on(eventName, sendUpdate));
 
   req.on('close', () => {
-    emitter.off('vote', onVote);
+    events.forEach((eventName) => emitter.off(eventName, sendUpdate));
     res.end();
   });
 }
