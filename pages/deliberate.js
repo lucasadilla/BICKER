@@ -14,6 +14,8 @@ const shuffleArray = (array) => {
     return newArray;
 };
 
+const REACTION_EMOJIS = ['🔥', '😂', '🤔', '😮', '👏'];
+
 export default function DeliberatePage({ initialDebates }) {
     const [debates, setDebates] = useState(initialDebates || []);
     const [currentDebateIndex, setCurrentDebateIndex] = useState(0);
@@ -23,11 +25,26 @@ export default function DeliberatePage({ initialDebates }) {
     const debatesRef = useRef(debates);
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
+    const [reactionMenusOpen, setReactionMenusOpen] = useState({ red: false, blue: false });
+    const [userReactions, setUserReactions] = useState(() => {
+        const initial = {};
+        (initialDebates || []).forEach((debate) => {
+            if (debate && debate._id) {
+                initial[debate._id] = {
+                    red: debate.myReactions?.red ?? null,
+                    blue: debate.myReactions?.blue ?? null,
+                };
+            }
+        });
+        return initial;
+    });
     const useIsomorphicLayoutEffect =
         typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
     const leftSideColor = hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D';
     const rightSideColor = hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF';
+    const reactionInFlightRef = useRef(new Set());
+    const currentDebate = debates[currentDebateIndex];
 
     useIsomorphicLayoutEffect(() => {
         const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
@@ -55,6 +72,52 @@ export default function DeliberatePage({ initialDebates }) {
     useEffect(() => {
         debatesRef.current = debates;
     }, [debates]);
+
+    useEffect(() => {
+        setUserReactions((prev) => {
+            const next = {};
+            let changed = false;
+
+            debates.forEach((debate) => {
+                if (!debate || !debate._id) {
+                    return;
+                }
+
+                const existing = prev[debate._id] || { red: null, blue: null };
+                const serverReactions = debate.myReactions || {};
+                const entry = {
+                    red:
+                        serverReactions.red !== undefined
+                            ? serverReactions.red
+                            : existing.red ?? null,
+                    blue:
+                        serverReactions.blue !== undefined
+                            ? serverReactions.blue
+                            : existing.blue ?? null,
+                };
+
+                next[debate._id] = entry;
+
+                if (
+                    !prev[debate._id] ||
+                    prev[debate._id].red !== entry.red ||
+                    prev[debate._id].blue !== entry.blue
+                ) {
+                    changed = true;
+                }
+            });
+
+            if (Object.keys(prev).length !== Object.keys(next).length) {
+                changed = true;
+            }
+
+            return changed ? next : prev;
+        });
+    }, [debates]);
+
+    useEffect(() => {
+        setReactionMenusOpen({ red: false, blue: false });
+    }, [currentDebateIndex, currentDebate?._id]);
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -94,26 +157,34 @@ export default function DeliberatePage({ initialDebates }) {
                             ...(typeof data.votesBlue === 'number'
                                 ? { votesBlue: data.votesBlue }
                                 : {}),
+                            reactions: {
+                                red: { ...(debate.reactions?.red || {}) },
+                                blue: { ...(debate.reactions?.blue || {}) },
+                            },
                         };
 
                         if (data.reactions && typeof data.reactions === 'object') {
-                            const currentReactions = debate.reactions || {};
-                            const hasRed = Object.prototype.hasOwnProperty.call(
-                                data.reactions,
-                                'red'
-                            );
-                            const hasBlue = Object.prototype.hasOwnProperty.call(
-                                data.reactions,
-                                'blue'
-                            );
+                            if (
+                                Object.prototype.hasOwnProperty.call(data.reactions, 'red')
+                            ) {
+                                updatedDebate.reactions.red = {
+                                    ...(data.reactions.red || {}),
+                                };
+                            }
 
-                            updatedDebate.reactions = {
-                                red: hasRed
-                                    ? { ...(data.reactions.red || {}) }
-                                    : { ...(currentReactions.red || {}) },
-                                blue: hasBlue
-                                    ? { ...(data.reactions.blue || {}) }
-                                    : { ...(currentReactions.blue || {}) },
+                            if (
+                                Object.prototype.hasOwnProperty.call(data.reactions, 'blue')
+                            ) {
+                                updatedDebate.reactions.blue = {
+                                    ...(data.reactions.blue || {}),
+                                };
+                            }
+                        }
+
+                        if (data.myReactions && typeof data.myReactions === 'object') {
+                            updatedDebate.myReactions = {
+                                red: data.myReactions.red ?? debate.myReactions?.red ?? null,
+                                blue: data.myReactions.blue ?? debate.myReactions?.blue ?? null,
                             };
                         }
 
@@ -182,12 +253,294 @@ export default function DeliberatePage({ initialDebates }) {
         });
     };
 
+    const toggleReactionMenu = (side) => {
+        setReactionMenusOpen((prev) => ({
+            red: side === 'red' ? !prev.red : false,
+            blue: side === 'blue' ? !prev.blue : false,
+        }));
+    };
+
+    const handleReaction = async (side, emoji) => {
+        if (!currentDebate || !side || (side !== 'red' && side !== 'blue')) {
+            return;
+        }
+
+        const debateId = currentDebate._id;
+        if (!debateId) {
+            return;
+        }
+
+        const key = `${debateId}:${side}`;
+        if (reactionInFlightRef.current.has(key)) {
+            return;
+        }
+
+        const existingSelection = userReactions[debateId]?.[side] ?? currentDebate.myReactions?.[side] ?? null;
+        const nextSelection = existingSelection === emoji ? null : emoji;
+
+        const debateSnapshot = debatesRef.current.find((debate) => debate._id === debateId);
+        const previousReactionsState = {
+            red: { ...(debateSnapshot?.reactions?.red || {}) },
+            blue: { ...(debateSnapshot?.reactions?.blue || {}) },
+        };
+        const previousMyReactionsState = {
+            red: debateSnapshot?.myReactions?.red ?? null,
+            blue: debateSnapshot?.myReactions?.blue ?? null,
+        };
+
+        reactionInFlightRef.current.add(key);
+        setReactionMenusOpen((prev) => ({ ...prev, [side]: false }));
+
+        setUserReactions((prev) => ({
+            ...prev,
+            [debateId]: {
+                ...(prev[debateId] || { red: null, blue: null }),
+                [side]: nextSelection,
+            },
+        }));
+
+        setDebates((prevDebates) =>
+            prevDebates.map((debate) => {
+                if (debate._id !== debateId) {
+                    return debate;
+                }
+
+                const updatedReactions = {
+                    red: { ...(debate.reactions?.red || {}) },
+                    blue: { ...(debate.reactions?.blue || {}) },
+                };
+
+                if (existingSelection) {
+                    const currentCount = updatedReactions[side][existingSelection] || 0;
+                    if (currentCount <= 1) {
+                        delete updatedReactions[side][existingSelection];
+                    } else {
+                        updatedReactions[side][existingSelection] = currentCount - 1;
+                    }
+                }
+
+                if (nextSelection) {
+                    updatedReactions[side][nextSelection] =
+                        (updatedReactions[side][nextSelection] || 0) + 1;
+                }
+
+                return {
+                    ...debate,
+                    reactions: updatedReactions,
+                    myReactions: {
+                        ...(debate.myReactions || { red: null, blue: null }),
+                        [side]: nextSelection,
+                    },
+                };
+            })
+        );
+
+        try {
+            const response = await fetch('/api/deliberate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    debateId,
+                    type: 'reaction',
+                    side,
+                    emoji: nextSelection,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.details || data.error || 'Failed to update reaction');
+            }
+
+            setDebates((prevDebates) =>
+                prevDebates.map((debate) => {
+                    if (debate._id !== debateId) {
+                        return debate;
+                    }
+
+                    const reactionTotals = data.reactions || {};
+
+                    return {
+                        ...debate,
+                        reactions: {
+                            red:
+                                reactionTotals.red !== undefined
+                                    ? { ...(reactionTotals.red || {}) }
+                                    : { ...(debate.reactions?.red || {}) },
+                            blue:
+                                reactionTotals.blue !== undefined
+                                    ? { ...(reactionTotals.blue || {}) }
+                                    : { ...(debate.reactions?.blue || {}) },
+                        },
+                        myReactions: {
+                            red: data.myReactions?.red ?? debate.myReactions?.red ?? null,
+                            blue: data.myReactions?.blue ?? debate.myReactions?.blue ?? null,
+                        },
+                    };
+                })
+            );
+
+            setUserReactions((prev) => ({
+                ...prev,
+                [debateId]: {
+                    red: data.myReactions?.red ?? (prev[debateId]?.red ?? null),
+                    blue: data.myReactions?.blue ?? (prev[debateId]?.blue ?? null),
+                },
+            }));
+        } catch (error) {
+            console.error('Error submitting reaction:', error);
+            alert(error.message || 'Failed to submit reaction. Please try again.');
+
+            setDebates((prevDebates) =>
+                prevDebates.map((debate) =>
+                    debate._id === debateId
+                        ? {
+                              ...debate,
+                              reactions: {
+                                  red: { ...previousReactionsState.red },
+                                  blue: { ...previousReactionsState.blue },
+                              },
+                              myReactions: { ...previousMyReactionsState },
+                          }
+                        : debate
+                )
+            );
+
+            setUserReactions((prev) => ({
+                ...prev,
+                [debateId]: { ...previousMyReactionsState },
+            }));
+        } finally {
+            reactionInFlightRef.current.delete(key);
+        }
+    };
+
+    const renderReactionControls = (side) => {
+        if (!currentDebate || !currentDebate._id) {
+            return null;
+        }
+
+        const debateId = currentDebate._id;
+        const reactionCounts = currentDebate.reactions?.[side] || {};
+        const myReaction =
+            userReactions[debateId]?.[side] ?? currentDebate.myReactions?.[side] ?? null;
+        const isMenuOpen = reactionMenusOpen[side];
+
+        return (
+            <div
+                style={{
+                    marginTop: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '10px',
+                }}
+                onClick={(event) => event.stopPropagation()}
+            >
+                <button
+                    type="button"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        toggleReactionMenu(side);
+                    }}
+                    style={{
+                        padding: '6px 16px',
+                        borderRadius: '9999px',
+                        border: '1px solid rgba(255, 255, 255, 0.6)',
+                        backgroundColor:
+                            isMenuOpen || myReaction
+                                ? 'rgba(255, 255, 255, 0.25)'
+                                : 'rgba(0, 0, 0, 0.2)',
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        backdropFilter: 'blur(4px)',
+                    }}
+                >
+                    {myReaction ? `Reacted ${myReaction}` : 'React'}
+                </button>
+                {isMenuOpen && (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            maxWidth: '260px',
+                        }}
+                    >
+                        {REACTION_EMOJIS.map((emoji) => {
+                            const count = reactionCounts?.[emoji] || 0;
+                            const isSelected = myReaction === emoji;
+
+                            return (
+                                <button
+                                    key={`${side}-${emoji}`}
+                                    type="button"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        handleReaction(side, emoji);
+                                    }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        padding: '6px 12px',
+                                        borderRadius: '9999px',
+                                        border: '1px solid rgba(255, 255, 255, 0.6)',
+                                        backgroundColor: isSelected
+                                            ? 'rgba(255, 255, 255, 0.35)'
+                                            : 'rgba(0, 0, 0, 0.25)',
+                                        color: '#ffffff',
+                                        cursor: 'pointer',
+                                        fontSize: '0.95rem',
+                                        fontWeight: 600,
+                                        minWidth: '64px',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <span>{emoji}</span>
+                                    <span style={{ fontSize: '0.75rem' }}>{count}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+                <div
+                    style={{
+                        display: 'flex',
+                        gap: '10px',
+                        fontSize: '0.75rem',
+                        opacity: 0.9,
+                        pointerEvents: 'none',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        maxWidth: '260px',
+                    }}
+                >
+                    {REACTION_EMOJIS.map((emoji) => (
+                        <span
+                            key={`${side}-summary-${emoji}`}
+                            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                            <span>{emoji}</span>
+                            <span>{reactionCounts?.[emoji] || 0}</span>
+                        </span>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
     const handleVote = async (vote) => {
         if (debates.length === 0) {
             return;
         }
 
-        const currentDebate = debates[currentDebateIndex];
         if (!currentDebate) {
             return;
         }
@@ -309,7 +662,6 @@ export default function DeliberatePage({ initialDebates }) {
         });
     };
 
-    const currentDebate = debates[currentDebateIndex];
     const isCurrentDebatePending = currentDebate
         ? showVotes || voteInFlightRef.current.has(currentDebate._id)
         : false;
@@ -516,6 +868,7 @@ export default function DeliberatePage({ initialDebates }) {
                             <span>{currentDebate.instigator.username}</span>
                         </Link>
                     )}
+                    {renderReactionControls('red')}
                     {showVotes && totalVotes > 0 && (
                         <p className="text-lg" style={{ marginTop: '20px' }}>
                             Votes: {currentDebate.votesRed || 0}
@@ -580,6 +933,7 @@ export default function DeliberatePage({ initialDebates }) {
                             <span>{currentDebate.creator.username}</span>
                         </Link>
                     )}
+                    {renderReactionControls('blue')}
                     {showVotes && totalVotes > 0 && (
                         <p className="text-lg" style={{ marginTop: '20px' }}>
                             Votes: {currentDebate.votesBlue || 0}
