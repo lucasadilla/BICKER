@@ -14,7 +14,7 @@ const shuffleArray = (array) => {
     return newArray;
 };
 
-const REACTION_EMOJIS = ['🔥', '😂', '🤔', '😮', '👏'];
+const REACTION_EMOJIS = ['😡', '😂', '🤔', '😮', '👏'];
 
 export default function DeliberatePage({ initialDebates }) {
     const [debates, setDebates] = useState(initialDebates || []);

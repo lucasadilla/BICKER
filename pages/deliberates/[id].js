@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { NextSeo } from 'next-seo';
 
-const DEFAULT_REACTION_EMOJIS = ['🔥', '😂', '🤔', '😮', '👏'];
+const DEFAULT_REACTION_EMOJIS = ['😡', '😂', '🤔', '😮', '👏'];
 
 const toPlainObject = counts => {
   if (!counts) {
