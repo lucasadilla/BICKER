@@ -11,21 +11,27 @@ function ThemeProvider({ children }) {
     const { status } = useSession();
     const [colorScheme, setColorScheme] = useState('light');
 
+    const normalizeColorScheme = (scheme) => {
+        if (!scheme) return 'light';
+        return scheme === 'blue' ? 'light' : scheme;
+    };
+
     // On initial load, try to use the user's last chosen scheme
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const stored = localStorage.getItem('colorScheme');
             if (stored) {
-                setColorScheme(stored);
+                setColorScheme(normalizeColorScheme(stored));
             }
         }
     }, []);
 
     useEffect(() => {
         document.body.classList.remove('light', 'dark', 'blue');
-        document.body.classList.add(colorScheme || 'light');
+        const nextScheme = normalizeColorScheme(colorScheme);
+        document.body.classList.add(nextScheme);
         if (typeof window !== 'undefined') {
-            localStorage.setItem('colorScheme', colorScheme || 'light');
+            localStorage.setItem('colorScheme', nextScheme);
         }
     }, [colorScheme]);
 
@@ -33,14 +39,31 @@ function ThemeProvider({ children }) {
         if (status === 'authenticated') {
             fetch('/api/profile')
                 .then(res => res.json())
-                .then(data => setColorScheme(data.colorScheme || localStorage.getItem('colorScheme') || 'light'))
+                .then(data => {
+                    const stored = typeof window !== 'undefined' ? localStorage.getItem('colorScheme') : null;
+                    if (data.colorScheme) {
+                        setColorScheme(normalizeColorScheme(data.colorScheme));
+                    } else if (stored) {
+                        setColorScheme(normalizeColorScheme(stored));
+                    } else {
+                        setColorScheme('light');
+                    }
+                })
                 .catch(() => {
                     const stored = typeof window !== 'undefined' ? localStorage.getItem('colorScheme') : null;
-                    setColorScheme(stored || 'light');
+                    if (stored) {
+                        setColorScheme(normalizeColorScheme(stored));
+                    } else {
+                        setColorScheme('light');
+                    }
                 });
         } else {
             const stored = typeof window !== 'undefined' ? localStorage.getItem('colorScheme') : null;
-            setColorScheme(stored || 'light');
+            if (stored) {
+                setColorScheme(normalizeColorScheme(stored));
+            } else {
+                setColorScheme('light');
+            }
         }
     }, [status]);
 

@@ -9,7 +9,9 @@ export default function Profile() {
   const router = useRouter();
   const [form, setForm] = useState({ profilePicture: '', username: '', bio: '', selectedBadge: '', colorScheme: 'light' });
   const [badges, setBadges] = useState([]);
-  const { setColorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
+
+  const normalizeColorScheme = value => (value === 'blue' ? 'light' : value || 'light');
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -21,7 +23,7 @@ export default function Profile() {
             username: data.username || '',
             bio: data.bio || '',
             selectedBadge: data.selectedBadge || '',
-            colorScheme: data.colorScheme || 'light'
+            colorScheme: normalizeColorScheme(data.colorScheme)
           });
           setBadges(data.badges || []);
         });
@@ -30,9 +32,10 @@ export default function Profile() {
 
   const handleChange = e => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    const normalizedValue = name === 'colorScheme' ? normalizeColorScheme(value) : value;
+    setForm(prev => ({ ...prev, [name]: normalizedValue }));
     if (name === 'colorScheme') {
-      setColorScheme(value);
+      setColorScheme(normalizedValue);
     }
   };
 
@@ -49,7 +52,7 @@ export default function Profile() {
     await fetch('/api/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify({ ...form, colorScheme: normalizeColorScheme(form.colorScheme) })
     });
     router.reload();
   };
@@ -71,53 +74,61 @@ export default function Profile() {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '80px auto', color: '#ffffff' }}>
-      <h1>Edit Profile</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <label style={labelStyle}>Profile Picture</label>
-        <input type="file" accept="image/*" onChange={handleFileChange} style={inputStyle} />
-        {form.profilePicture && (
-          <img
-            src={form.profilePicture}
-            alt="Profile preview"
-            style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-          />
-        )}
-        <label style={labelStyle}>Username</label>
-        <input name="username" value={form.username} onChange={handleChange} style={inputStyle} />
-        <label style={labelStyle}>Bio</label>
-        <textarea name="bio" value={form.bio} onChange={handleChange} style={{ ...inputStyle, minHeight: '120px' }} />
-        <label style={labelStyle}>Public Badge</label>
-        <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange} style={inputStyle}>
-          <option value="">None</option>
-          {badges.map(b => (
-            <option key={b} value={b} title={badgeDescriptions[b] || b}>
-              {b}
-            </option>
-          ))}
-        </select>
-        <label style={labelStyle}>Color Scheme</label>
-        <select name="colorScheme" value={form.colorScheme} onChange={handleChange} style={inputStyle}>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="blue">Blue</option>
-        </select>
-        <button
-          type="submit"
-          style={{
-            marginTop: '10px',
-            padding: '10px 16px',
-            borderRadius: '999px',
-            border: '1px solid rgba(255, 255, 255, 0.7)',
-            backgroundColor: 'transparent',
-            color: '#ffffff',
-            fontWeight: '600',
-            cursor: 'pointer',
-          }}
-        >
-          Save
-        </button>
-      </form>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: colorScheme === 'light' ? '#001f3f' : undefined,
+        padding: '80px 20px',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', color: '#ffffff' }}>
+        <h1>Edit Profile</h1>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <label style={labelStyle}>Profile Picture</label>
+          <input type="file" accept="image/*" onChange={handleFileChange} style={inputStyle} />
+          {form.profilePicture && (
+            <img
+              src={form.profilePicture}
+              alt="Profile preview"
+              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+            />
+          )}
+          <label style={labelStyle}>Username</label>
+          <input name="username" value={form.username} onChange={handleChange} style={inputStyle} />
+          <label style={labelStyle}>Bio</label>
+          <textarea name="bio" value={form.bio} onChange={handleChange} style={{ ...inputStyle, minHeight: '120px' }} />
+          <label style={labelStyle}>Public Badge</label>
+          <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange} style={inputStyle}>
+            <option value="">None</option>
+            {badges.map(b => (
+              <option key={b} value={b} title={badgeDescriptions[b] || b}>
+                {b}
+              </option>
+            ))}
+          </select>
+          <label style={labelStyle}>Color Scheme</label>
+          <select name="colorScheme" value={form.colorScheme} onChange={handleChange} style={inputStyle}>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+          <button
+            type="submit"
+            style={{
+              marginTop: '10px',
+              padding: '10px 16px',
+              borderRadius: '999px',
+              border: '1px solid rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'transparent',
+              color: '#ffffff',
+              fontWeight: '600',
+              cursor: 'pointer',
+            }}
+          >
+            Save
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
