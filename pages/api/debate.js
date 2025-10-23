@@ -81,7 +81,9 @@ export default async function handler(req, res) {
                 instigatedBy: instigator,
                 votesRed: 0,
                 votesBlue: 0,
-                votedBy: []
+                votedBy: [],
+                reactions: { red: {}, blue: {} },
+                reactionsBy: []
             });
 
             // 4) Delete the instigate
