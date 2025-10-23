@@ -203,11 +203,16 @@ export default async function handler(req, res) {
                     reaction => reaction.userId === actor && reaction.side === side
                 );
 
-                const updates = {
+                const normalizedEmoji =
+                    typeof emoji === 'string' ? emoji.trim() : emoji;
+                const shouldAddReaction =
+                    normalizedEmoji !== undefined &&
+                    normalizedEmoji !== null &&
+                    normalizedEmoji !== '';
+
+                const removalUpdates = {
                     $pull: { reactionsBy: { userId: actor, side } }
                 };
-
-                const inc = {};
 
                 if (existingReaction?.emoji) {
                     const currentCount = getReactionCount(
@@ -217,36 +222,31 @@ export default async function handler(req, res) {
                     );
 
                     if (currentCount > 0) {
-                        inc[`reactions.${side}.${existingReaction.emoji}`] = -1;
+                        removalUpdates.$inc = {
+                            [`reactions.${side}.${existingReaction.emoji}`]: -1
+                        };
                     }
                 }
 
-                const normalizedEmoji =
-                    typeof emoji === 'string' ? emoji.trim() : emoji;
-                const shouldAddReaction =
-                    normalizedEmoji !== undefined &&
-                    normalizedEmoji !== null &&
-                    normalizedEmoji !== '';
+                await Deliberate.updateOne({ _id: debateId }, removalUpdates);
 
                 if (shouldAddReaction) {
-                    inc[`reactions.${side}.${normalizedEmoji}`] =
-                        (inc[`reactions.${side}.${normalizedEmoji}`] || 0) + 1;
-
-                    updates.$push = {
-                        reactionsBy: {
-                            userId: actor,
-                            side,
-                            emoji: normalizedEmoji,
-                            timestamp: new Date()
+                    const additionUpdates = {
+                        $push: {
+                            reactionsBy: {
+                                userId: actor,
+                                side,
+                                emoji: normalizedEmoji,
+                                timestamp: new Date()
+                            }
+                        },
+                        $inc: {
+                            [`reactions.${side}.${normalizedEmoji}`]: 1
                         }
                     };
-                }
 
-                if (Object.keys(inc).length) {
-                    updates.$inc = inc;
+                    await Deliberate.updateOne({ _id: debateId }, additionUpdates);
                 }
-
-                await Deliberate.updateOne({ _id: debateId }, updates);
 
                 const updatedDeliberation = await Deliberate.findById(debateId);
                 const aggregate = buildAggregateResponse(updatedDeliberation, actor);
