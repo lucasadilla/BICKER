@@ -253,11 +253,15 @@ export default function DeliberatePage({ initialDebates }) {
         });
     };
 
-    const toggleReactionMenu = (side) => {
-        setReactionMenusOpen((prev) => ({
-            red: side === 'red' ? !prev.red : false,
-            blue: side === 'blue' ? !prev.blue : false,
-        }));
+    const openReactionMenu = (side) => {
+        setReactionMenusOpen({
+            red: side === 'red',
+            blue: side === 'blue',
+        });
+    };
+
+    const closeReactionMenu = () => {
+        setReactionMenusOpen({ red: false, blue: false });
     };
 
     const handleReaction = async (side, emoji) => {
@@ -289,7 +293,7 @@ export default function DeliberatePage({ initialDebates }) {
         };
 
         reactionInFlightRef.current.add(key);
-        setReactionMenusOpen((prev) => ({ ...prev, [side]: false }));
+        closeReactionMenu();
 
         setUserReactions((prev) => ({
             ...prev,
@@ -439,12 +443,30 @@ export default function DeliberatePage({ initialDebates }) {
                     gap: '10px',
                 }}
                 onClick={(event) => event.stopPropagation()}
+                onMouseEnter={() => openReactionMenu(side)}
+                onMouseLeave={closeReactionMenu}
+                onFocus={() => openReactionMenu(side)}
+                onBlur={(event) => {
+                    const nextFocus = event.relatedTarget;
+                    if (!nextFocus) {
+                        closeReactionMenu();
+                        return;
+                    }
+
+                    if (typeof Node !== 'undefined' && nextFocus instanceof Node) {
+                        if (!event.currentTarget.contains(nextFocus)) {
+                            closeReactionMenu();
+                        }
+                    } else {
+                        closeReactionMenu();
+                    }
+                }}
             >
                 <button
                     type="button"
                     onClick={(event) => {
                         event.stopPropagation();
-                        toggleReactionMenu(side);
+                        openReactionMenu(side);
                     }}
                     style={{
                         padding: '6px 16px',
@@ -467,14 +489,16 @@ export default function DeliberatePage({ initialDebates }) {
                     <div
                         style={{
                             display: 'flex',
-                            flexWrap: 'wrap',
                             justifyContent: 'center',
-                            gap: '8px',
-                            maxWidth: '260px',
+                            gap: '12px',
+                            padding: '8px 12px',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(255, 255, 255, 0.6)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                            backdropFilter: 'blur(4px)',
                         }}
                     >
                         {REACTION_EMOJIS.map((emoji) => {
-                            const count = reactionCounts?.[emoji] || 0;
                             const isSelected = myReaction === emoji;
 
                             return (
@@ -486,25 +510,23 @@ export default function DeliberatePage({ initialDebates }) {
                                         handleReaction(side, emoji);
                                     }}
                                     style={{
-                                        display: 'flex',
+                                        display: 'inline-flex',
                                         alignItems: 'center',
-                                        gap: '6px',
-                                        padding: '6px 12px',
-                                        borderRadius: '9999px',
-                                        border: '1px solid rgba(255, 255, 255, 0.6)',
-                                        backgroundColor: isSelected
-                                            ? 'rgba(255, 255, 255, 0.35)'
-                                            : 'rgba(0, 0, 0, 0.25)',
+                                        justifyContent: 'center',
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        border: 'none',
+                                        backgroundColor: 'transparent',
                                         color: '#ffffff',
                                         cursor: 'pointer',
-                                        fontSize: '0.95rem',
-                                        fontWeight: 600,
-                                        minWidth: '64px',
-                                        justifyContent: 'center',
+                                        fontSize: '1.25rem',
+                                        transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                                        transition: 'transform 0.15s ease, background-color 0.15s ease',
+                                        background: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
                                     }}
                                 >
                                     <span>{emoji}</span>
-                                    <span style={{ fontSize: '0.75rem' }}>{count}</span>
                                 </button>
                             );
                         })}
