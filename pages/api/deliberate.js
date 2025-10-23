@@ -251,6 +251,15 @@ export default async function handler(req, res) {
                 const updatedDeliberation = await Deliberate.findById(debateId);
                 const aggregate = buildAggregateResponse(updatedDeliberation, actor);
 
+                emitter.emit('vote', {
+                    debateId: aggregate?._id || debateId,
+                    votesRed: aggregate?.votesRed ?? (updatedDeliberation?.votesRed ?? 0),
+                    votesBlue: aggregate?.votesBlue ?? (updatedDeliberation?.votesBlue ?? 0),
+                    reactions:
+                        aggregate?.reactions ||
+                        formatReactionTotals(updatedDeliberation?.reactions || {})
+                });
+
                 return res.status(200).json(aggregate);
             }
 
@@ -313,13 +322,16 @@ export default async function handler(req, res) {
                 });
             }
 
-            emitter.emit('vote', {
-                debateId: savedDeliberation._id.toString(),
-                votesRed: savedDeliberation.votesRed || 0,
-                votesBlue: savedDeliberation.votesBlue || 0
-            });
-
             const aggregate = buildAggregateResponse(savedDeliberation, actor);
+
+            emitter.emit('vote', {
+                debateId: aggregate?._id || savedDeliberation._id.toString(),
+                votesRed: aggregate?.votesRed ?? (savedDeliberation.votesRed ?? 0),
+                votesBlue: aggregate?.votesBlue ?? (savedDeliberation.votesBlue ?? 0),
+                reactions:
+                    aggregate?.reactions ||
+                    formatReactionTotals(savedDeliberation.reactions || {})
+            });
 
             res.status(200).json(aggregate);
         } else {
