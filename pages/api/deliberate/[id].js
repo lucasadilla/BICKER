@@ -4,8 +4,56 @@ import User from '../../../models/User';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]';
 
-const sanitizeVotes = (votes = []) =>
-  votes.map(({ vote, timestamp }) => ({ vote, timestamp }));
+const sanitizeVotes = (votes = [], currentUser = null) => {
+  const sanitizedVotes = votes.map(({ vote, timestamp }) => ({ vote, timestamp }));
+  const myVoteEntry = currentUser
+    ? votes.find(entry => entry.userId === currentUser)
+    : null;
+
+  return {
+    votes: sanitizedVotes,
+    myVote: myVoteEntry ? myVoteEntry.vote : null
+  };
+};
+
+const toPlainObject = counts => {
+  if (!counts) {
+    return {};
+  }
+
+  if (counts instanceof Map) {
+    return Array.from(counts.entries()).reduce((acc, [emoji, value]) => {
+      acc[emoji] = value;
+      return acc;
+    }, {});
+  }
+
+  return Object.entries(counts).reduce((acc, [emoji, value]) => {
+    acc[emoji] = value;
+    return acc;
+  }, {});
+};
+
+const formatReactionTotals = (reactions = {}) => ({
+  red: toPlainObject(reactions.red),
+  blue: toPlainObject(reactions.blue)
+});
+
+const extractMyReactions = (reactionsBy = [], userId = null) => {
+  const selections = { red: null, blue: null };
+
+  if (!userId) {
+    return selections;
+  }
+
+  reactionsBy.forEach(({ userId: reactorId, side, emoji }) => {
+    if (reactorId === userId && (side === 'red' || side === 'blue')) {
+      selections[side] = emoji || null;
+    }
+  });
+
+  return selections;
+};
 
 export default async function handler(req, res) {
   await dbConnect();
@@ -20,13 +68,6 @@ export default async function handler(req, res) {
 
       const session = await getServerSession(req, res, authOptions);
       const currentUser = session?.user?.email || null;
-
-      if (
-        currentUser &&
-        (deliberationDoc.votedBy || []).some(vote => vote.userId === currentUser)
-      ) {
-        return res.status(404).json({ error: 'Deliberation not found' });
-      }
 
       const emails = [deliberationDoc.createdBy, deliberationDoc.instigatedBy].filter(
         email => email && email !== 'anonymous'
@@ -47,7 +88,20 @@ export default async function handler(req, res) {
         instigator = map[deliberationDoc.instigatedBy] || null;
       }
 
-      const { _id, createdBy, instigatedBy, votedBy = [], ...rest } = deliberationDoc;
+      const {
+        _id,
+        createdBy: _createdBy,
+        instigatedBy: _instigatedBy,
+        votedBy = [],
+        reactions = {},
+        reactionsBy = [],
+        ...rest
+      } = deliberationDoc;
+
+      const { votes: sanitizedVotes, myVote } = sanitizeVotes(votedBy, currentUser);
+
+      const reactionTotals = formatReactionTotals(reactions);
+      const myReactions = extractMyReactions(reactionsBy, currentUser);
 
       return res.status(200).json({
         ...rest,
@@ -56,7 +110,10 @@ export default async function handler(req, res) {
         instigator,
         votesRed: deliberationDoc.votesRed || 0,
         votesBlue: deliberationDoc.votesBlue || 0,
-        votedBy: sanitizeVotes(votedBy)
+        votedBy: sanitizedVotes,
+        myVote,
+        reactions: reactionTotals,
+        myReactions
       });
     } catch (error) {
       console.error('Error fetching deliberation:', error);
