@@ -26,6 +26,7 @@ export default function DeliberatePage({ initialDebates }) {
     const [hoveringSide, setHoveringSide] = useState('');
     const [isMobile, setIsMobile] = useState(false);
     const [reactionMenusOpen, setReactionMenusOpen] = useState({ red: false, blue: false });
+    const [hoveredReactionEmoji, setHoveredReactionEmoji] = useState({ red: null, blue: null });
     const [userReactions, setUserReactions] = useState(() => {
         const initial = {};
         (initialDebates || []).forEach((debate) => {
@@ -258,10 +259,12 @@ export default function DeliberatePage({ initialDebates }) {
             red: side === 'red',
             blue: side === 'blue',
         });
+        setHoveredReactionEmoji({ red: null, blue: null });
     };
 
     const closeReactionMenu = () => {
         setReactionMenusOpen({ red: false, blue: false });
+        setHoveredReactionEmoji({ red: null, blue: null });
     };
 
     const handleReaction = async (side, emoji) => {
@@ -432,6 +435,7 @@ export default function DeliberatePage({ initialDebates }) {
         const myReaction =
             userReactions[debateId]?.[side] ?? currentDebate.myReactions?.[side] ?? null;
         const isMenuOpen = reactionMenusOpen[side];
+        const hoveredEmoji = hoveredReactionEmoji[side];
 
         return (
             <div
@@ -443,9 +447,7 @@ export default function DeliberatePage({ initialDebates }) {
                     gap: '10px',
                 }}
                 onClick={(event) => event.stopPropagation()}
-                onMouseEnter={() => openReactionMenu(side)}
                 onMouseLeave={closeReactionMenu}
-                onFocus={() => openReactionMenu(side)}
                 onBlur={(event) => {
                     const nextFocus = event.relatedTarget;
                     if (!nextFocus) {
@@ -468,6 +470,8 @@ export default function DeliberatePage({ initialDebates }) {
                         event.stopPropagation();
                         openReactionMenu(side);
                     }}
+                    onMouseEnter={() => openReactionMenu(side)}
+                    onFocus={() => openReactionMenu(side)}
                     style={{
                         padding: '6px 16px',
                         borderRadius: '9999px',
@@ -500,6 +504,7 @@ export default function DeliberatePage({ initialDebates }) {
                     >
                         {REACTION_EMOJIS.map((emoji) => {
                             const isSelected = myReaction === emoji;
+                            const isHovered = hoveredEmoji === emoji;
 
                             return (
                                 <button
@@ -509,6 +514,30 @@ export default function DeliberatePage({ initialDebates }) {
                                         event.stopPropagation();
                                         handleReaction(side, emoji);
                                     }}
+                                    onMouseEnter={() =>
+                                        setHoveredReactionEmoji((prev) => ({
+                                            ...prev,
+                                            [side]: emoji,
+                                        }))
+                                    }
+                                    onMouseLeave={() =>
+                                        setHoveredReactionEmoji((prev) => ({
+                                            ...prev,
+                                            [side]: null,
+                                        }))
+                                    }
+                                    onFocus={() =>
+                                        setHoveredReactionEmoji((prev) => ({
+                                            ...prev,
+                                            [side]: emoji,
+                                        }))
+                                    }
+                                    onBlur={() =>
+                                        setHoveredReactionEmoji((prev) => ({
+                                            ...prev,
+                                            [side]: null,
+                                        }))
+                                    }
                                     style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
@@ -521,9 +550,21 @@ export default function DeliberatePage({ initialDebates }) {
                                         color: '#ffffff',
                                         cursor: 'pointer',
                                         fontSize: '1.25rem',
-                                        transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                                        transition: 'transform 0.15s ease, background-color 0.15s ease',
-                                        background: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                                        transform: isSelected
+                                            ? 'scale(1.15)'
+                                            : isHovered
+                                            ? 'scale(1.1)'
+                                            : 'scale(1)',
+                                        transition:
+                                            'transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease',
+                                        background: isSelected
+                                            ? 'rgba(255, 255, 255, 0.15)'
+                                            : isHovered
+                                            ? 'rgba(255, 255, 255, 0.12)'
+                                            : 'transparent',
+                                        boxShadow: isHovered
+                                            ? '0 8px 16px rgba(0, 0, 0, 0.25)'
+                                            : 'none',
                                     }}
                                 >
                                     <span>{emoji}</span>
