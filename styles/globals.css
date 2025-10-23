@@ -261,3 +261,66 @@ textarea:focus-visible {
     color: var(--color-text);
 }
 
+.profile-page {
+    padding: 20px;
+    max-width: 600px;
+    margin: 80px auto;
+    color: var(--color-text);
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.profile-label {
+    font-weight: 600;
+    color: var(--color-text);
+    display: block;
+}
+
+.profile-input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #d4d4d8);
+    background-color: var(--color-surface, #ffffff);
+    color: var(--color-text, #1f1f1f);
+}
+
+.profile-input:focus-visible {
+    border-color: var(--color-accent, #2563eb);
+}
+
+.profile-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.profile-picture-preview {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #d4d4d8);
+}
+
+.profile-button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--color-accent, #2563eb);
+    background-color: var(--color-accent, #2563eb);
+    color: var(--color-surface, #ffffff);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.profile-button:hover,
+.profile-button:focus-visible {
+    background-color: var(--color-text, #1f1f1f);
+    border-color: var(--color-text, #1f1f1f);
+    color: var(--color-bg, #f5f5f5);
+}
+

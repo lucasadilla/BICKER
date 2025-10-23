@@ -4,35 +4,59 @@ import { useColorScheme } from '../lib/ColorSchemeContext';
 import badgeDescriptions from '../lib/badgeDescriptions';
 import { useRouter } from 'next/router';
 
+const normalizeColorScheme = value => {
+  const normalized = (value || '').toString().toLowerCase();
+  if (normalized === 'monochrome' || normalized === 'dark') {
+    return 'monochrome';
+  }
+  return 'light';
+};
+
 export default function Profile() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
-  const [form, setForm] = useState({ profilePicture: '', username: '', bio: '', selectedBadge: '', colorScheme: 'light' });
+  const { colorScheme: activeScheme, setColorScheme } = useColorScheme();
+  const [form, setForm] = useState(() => ({
+    profilePicture: '',
+    username: '',
+    bio: '',
+    selectedBadge: '',
+    colorScheme: normalizeColorScheme(activeScheme),
+  }));
   const [badges, setBadges] = useState([]);
-  const { setColorScheme } = useColorScheme();
 
   useEffect(() => {
     if (status === 'authenticated') {
       fetch('/api/profile')
         .then(res => res.json())
         .then(data => {
+          const normalizedScheme = normalizeColorScheme(data.colorScheme);
           setForm({
             profilePicture: data.profilePicture || '',
             username: data.username || '',
             bio: data.bio || '',
             selectedBadge: data.selectedBadge || '',
-            colorScheme: data.colorScheme || 'light'
+            colorScheme: normalizedScheme,
           });
           setBadges(data.badges || []);
+          setColorScheme(normalizedScheme);
         });
     }
-  }, [status]);
+  }, [setColorScheme, status]);
+
+  useEffect(() => {
+    const normalized = normalizeColorScheme(activeScheme);
+    setForm(prev => (prev.colorScheme === normalized ? prev : { ...prev, colorScheme: normalized }));
+  }, [activeScheme]);
 
   const handleChange = e => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
     if (name === 'colorScheme') {
-      setColorScheme(value);
+      const normalized = normalizeColorScheme(value);
+      setForm(prev => ({ ...prev, colorScheme: normalized }));
+      setColorScheme(normalized);
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
     }
   };
 
@@ -57,38 +81,25 @@ export default function Profile() {
   if (status === 'loading') return <p>Loading...</p>;
   if (status === 'unauthenticated') return <p>Please sign in to edit your profile.</p>;
 
-  const inputStyle = {
-    padding: '10px',
-    borderRadius: '8px',
-    border: '1px solid rgba(255, 255, 255, 0.7)',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    color: '#ffffff',
-  };
-
-  const labelStyle = {
-    color: '#ffffff',
-    fontWeight: '600',
-  };
-
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '80px auto', color: '#ffffff' }}>
+    <div className="profile-page">
       <h1>Edit Profile</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <label style={labelStyle}>Profile Picture</label>
-        <input type="file" accept="image/*" onChange={handleFileChange} style={inputStyle} />
+      <form onSubmit={handleSubmit} className="profile-form">
+        <label className="profile-label">Profile Picture</label>
+        <input type="file" accept="image/*" onChange={handleFileChange} className="profile-input" />
         {form.profilePicture && (
           <img
             src={form.profilePicture}
             alt="Profile preview"
-            style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+            className="profile-picture-preview"
           />
         )}
-        <label style={labelStyle}>Username</label>
-        <input name="username" value={form.username} onChange={handleChange} style={inputStyle} />
-        <label style={labelStyle}>Bio</label>
-        <textarea name="bio" value={form.bio} onChange={handleChange} style={{ ...inputStyle, minHeight: '120px' }} />
-        <label style={labelStyle}>Public Badge</label>
-        <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange} style={inputStyle}>
+        <label className="profile-label">Username</label>
+        <input name="username" value={form.username} onChange={handleChange} className="profile-input" />
+        <label className="profile-label">Bio</label>
+        <textarea name="bio" value={form.bio} onChange={handleChange} className="profile-input profile-textarea" />
+        <label className="profile-label">Public Badge</label>
+        <select name="selectedBadge" value={form.selectedBadge} onChange={handleChange} className="profile-input">
           <option value="">None</option>
           {badges.map(b => (
             <option key={b} value={b} title={badgeDescriptions[b] || b}>
@@ -96,24 +107,14 @@ export default function Profile() {
             </option>
           ))}
         </select>
-        <label style={labelStyle}>Color Scheme</label>
-        <select name="colorScheme" value={form.colorScheme} onChange={handleChange} style={inputStyle}>
+        <label className="profile-label">Color Scheme</label>
+        <select name="colorScheme" value={form.colorScheme} onChange={handleChange} className="profile-input">
           <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="blue">Blue</option>
+          <option value="monochrome">Monochrome</option>
         </select>
         <button
           type="submit"
-          style={{
-            marginTop: '10px',
-            padding: '10px 16px',
-            borderRadius: '999px',
-            border: '1px solid rgba(255, 255, 255, 0.7)',
-            backgroundColor: 'transparent',
-            color: '#ffffff',
-            fontWeight: '600',
-            cursor: 'pointer',
-          }}
+          className="profile-button"
         >
           Save
         </button>
