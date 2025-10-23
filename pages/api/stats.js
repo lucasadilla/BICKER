@@ -3,6 +3,27 @@ import dbConnect from '../../lib/dbConnect';
 import Deliberate from '../../models/Deliberate';
 import { sortDeliberates } from '../../lib/sortDeliberates';
 
+const toPlainObject = (counts = {}) => {
+    if (!counts) {
+        return {};
+    }
+
+    if (counts instanceof Map) {
+        return Array.from(counts.entries()).reduce((acc, [emoji, value]) => {
+            acc[emoji] = value;
+            return acc;
+        }, {});
+    }
+
+    return Object.entries(counts).reduce((acc, [emoji, value]) => {
+        acc[emoji] = value;
+        return acc;
+    }, {});
+};
+
+const sumReactionValues = (counts = {}) =>
+    Object.values(counts || {}).reduce((total, value) => total + (typeof value === 'number' ? value : 0), 0);
+
 export default async function handler(req, res) {
     await dbConnect();
 
@@ -16,9 +37,11 @@ export default async function handler(req, res) {
 
         // 3. Calculate total votes and total debates across the site
         const totalVotes = debates.reduce(
-            (sum, d) => sum + d.votesRed + d.votesBlue,
+            (sum, d) => sum + (d.votesRed || 0) + (d.votesBlue || 0),
             0
         );
+
+        let overallReactions = 0;
 
         // 4. Remove any personally identifiable information before returning data
         const sanitizedDebates = debates.map(({
@@ -29,19 +52,39 @@ export default async function handler(req, res) {
             votesBlue,
             createdAt,
             updatedAt,
-        }) => ({
-            _id,
-            instigateText,
-            debateText,
-            votesRed,
-            votesBlue,
-            createdAt,
-            updatedAt,
-        }));
+            reactions = {},
+        }) => {
+            const reactionCounts = {
+                red: toPlainObject(reactions.red),
+                blue: toPlainObject(reactions.blue),
+            };
+
+            const reactionTotals = {
+                red: sumReactionValues(reactionCounts.red),
+                blue: sumReactionValues(reactionCounts.blue),
+            };
+
+            const debateReactionTotal = reactionTotals.red + reactionTotals.blue;
+            overallReactions += debateReactionTotal;
+
+            return {
+                _id,
+                instigateText,
+                debateText,
+                votesRed,
+                votesBlue,
+                createdAt,
+                updatedAt,
+                reactionCounts,
+                reactionTotals,
+                totalReactions: debateReactionTotal,
+            };
+        });
 
         return res.status(200).json({
             debates: sanitizedDebates,
             totalVotes,
+            totalReactions: overallReactions,
             totalDebates: sanitizedDebates.length,
         });
     } catch (error) {
