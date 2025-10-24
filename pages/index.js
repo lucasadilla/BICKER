@@ -2,11 +2,14 @@ import { useRouter } from 'next/router';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import dbConnect from '../lib/dbConnect';
 import Banner from '../models/Banner';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 
 export default function Home({ bannerUrl }) {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
     const [hoveredSide, setHoveredSide] = useState(null);
+    const { colorScheme } = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
     const useIsomorphicLayoutEffect =
         typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -19,20 +22,50 @@ export default function Home({ bannerUrl }) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const leftSideColor = hoveredSide === 'left' ? '#FF6A6A' : '#FF4D4D';
-    const rightSideColor = hoveredSide === 'right' ? '#76ACFF' : '#4D94FF';
-    const splitGradient = `linear-gradient(to right, ${leftSideColor} 0%, ${leftSideColor} 50%, ${rightSideColor} 50%, ${rightSideColor} 100%)`;
+    const baseLeftColor = isDarkMode ? '#000000' : '#FF4D4D';
+    const baseRightColor = isDarkMode ? '#FFFFFF' : '#4D94FF';
+    const leftSideColor =
+        hoveredSide === 'left'
+            ? isDarkMode
+                ? '#111111'
+                : '#FF6A6A'
+            : baseLeftColor;
+    const rightSideColor =
+        hoveredSide === 'right'
+            ? isDarkMode
+                ? '#E5E5E5'
+                : '#76ACFF'
+            : baseRightColor;
+    const leftTextColor = '#ffffff';
+    const rightTextColor = isDarkMode ? '#000000' : '#ffffff';
+    const splitGradient = `linear-gradient(to right, ${baseLeftColor} 0%, ${baseLeftColor} 50%, ${baseRightColor} 50%, ${baseRightColor} 100%)`;
 
     useIsomorphicLayoutEffect(() => {
         const gradient = splitGradient;
         if (typeof document !== 'undefined') {
             document.documentElement.style.setProperty('--nav-gradient', gradient);
-            document.documentElement.style.setProperty('--nav-button-color', '#ffffff');
-            document.documentElement.style.setProperty('--nav-button-color-hover', '#ffffff');
-            document.documentElement.style.setProperty('--nav-button-border', 'rgba(255, 255, 255, 0.7)');
-            document.documentElement.style.setProperty('--nav-button-border-hover', 'rgba(255, 255, 255, 0.9)');
+            document.documentElement.style.setProperty(
+                '--nav-button-color',
+                isDarkMode ? '#f5f5f5' : '#ffffff'
+            );
+            document.documentElement.style.setProperty(
+                '--nav-button-color-hover',
+                '#ffffff'
+            );
+            document.documentElement.style.setProperty(
+                '--nav-button-border',
+                isDarkMode ? 'rgba(245, 245, 245, 0.7)' : 'rgba(255, 255, 255, 0.7)'
+            );
+            document.documentElement.style.setProperty(
+                '--nav-button-border-hover',
+                isDarkMode ? '#ffffff' : 'rgba(255, 255, 255, 0.9)'
+            );
+            document.documentElement.style.setProperty(
+                '--nav-button-text',
+                isDarkMode ? '#f5f5f5' : '#ffffff'
+            );
         }
-    }, [splitGradient]);
+    }, [splitGradient, isDarkMode]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -42,6 +75,7 @@ export default function Home({ bannerUrl }) {
                 document.documentElement.style.removeProperty('--nav-button-color-hover');
                 document.documentElement.style.removeProperty('--nav-button-border');
                 document.documentElement.style.removeProperty('--nav-button-border-hover');
+                document.documentElement.style.removeProperty('--nav-button-text');
             }
         };
     }, []);
@@ -79,7 +113,7 @@ export default function Home({ bannerUrl }) {
                     style={{
                         flex: 1,
                         background: leftSideColor,
-                        color: 'white',
+                        color: leftTextColor,
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -111,7 +145,7 @@ export default function Home({ bannerUrl }) {
                     style={{
                         flex: 1,
                         background: rightSideColor,
-                        color: 'white',
+                        color: rightTextColor,
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
