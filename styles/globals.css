@@ -34,11 +34,11 @@ body.default {
 body.dark {
     background-color: #000000;
     color: #ffffff;
-    filter: grayscale(100%) contrast(110%);
+    filter: grayscale(100%) contrast(200%);
     --nav-button-color: #ffffff;
     --nav-button-color-hover: #ffffff;
-    --nav-button-border: rgba(255, 255, 255, 0.6);
-    --nav-button-border-hover: rgba(255, 255, 255, 0.85);
+    --nav-button-border: #ffffff;
+    --nav-button-border-hover: #ffffff;
 }
 
 body.dark *,
@@ -57,14 +57,17 @@ body.dark select,
 body.dark textarea {
     background-color: #000000 !important;
     color: #ffffff !important;
-    border-color: rgba(255, 255, 255, 0.6) !important;
+    border-color: #ffffff !important;
 }
 
-body.dark img,
-body.dark video,
-body.dark canvas,
-body.dark svg {
-    filter: grayscale(100%) !important;
+body.dark .preserve-color,
+body.dark .preserve-color * {
+    filter: none !important;
+}
+
+body.dark span[role="img"],
+body.dark span.emoji {
+    filter: none !important;
 }
 
 body.blue {
