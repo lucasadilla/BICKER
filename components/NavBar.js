@@ -2,9 +2,11 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Avatar from './Avatar';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 
 export default function NavBar() {
     const { data: session } = useSession();
+    const { colorScheme } = useColorScheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [notifications, setNotifications] = useState([]);
@@ -80,6 +82,18 @@ export default function NavBar() {
     };
 
     const navTextColor = 'var(--nav-button-text, #ffffff)';
+    const isDarkMode = colorScheme === 'dark';
+
+    const dropdownSurfaceStyle = {
+        marginTop: '10px',
+        backgroundColor: isDarkMode ? '#f5f5f5' : '#ffffff',
+        color: '#000000',
+        padding: '10px 20px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        borderRadius: '8px',
+        minWidth: '160px',
+        zIndex: 1000,
+    };
 
     // Common button style
     const buttonStyle = {
@@ -198,22 +212,15 @@ export default function NavBar() {
                     </div>
                     {showUserMenu && (
                         <div
-                            style={{
-                                marginTop: '10px',
-                                backgroundColor: 'white',
-                                padding: '10px 20px',
-                                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                                borderRadius: '8px',
-                                minWidth: '160px',
-                                zIndex: 1000
-                            }}
+                            style={dropdownSurfaceStyle}
                         >
                             <Link href="/my-stats" passHref>
                                 <div
                                     style={{
                                         padding: '8px 0',
                                         cursor: 'pointer',
-                                        whiteSpace: 'nowrap'
+                                        whiteSpace: 'nowrap',
+                                        color: '#000000'
                                     }}
                                 >
                                     My Stats
@@ -224,14 +231,15 @@ export default function NavBar() {
                                     style={{
                                         padding: '8px 0',
                                         cursor: 'pointer',
-                                        whiteSpace: 'nowrap'
+                                        whiteSpace: 'nowrap',
+                                        color: '#000000'
                                     }}
                                 >
                                     Edit Profile
                                 </div>
                             </Link>
                             <div
-                                style={{ padding: '8px 0', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                style={{ padding: '8px 0', cursor: 'pointer', whiteSpace: 'nowrap', color: '#000000' }}
                                 onClick={() => signOut()}
                             >
                                 Sign Out
@@ -305,22 +313,25 @@ export default function NavBar() {
                                 position: 'absolute',
                                 top: '60px',
                                 right: '0',
-                                backgroundColor: 'white',
+                                backgroundColor: isDarkMode ? '#f5f5f5' : '#ffffff',
+                                color: '#000000',
                                 padding: '10px',
                                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                 width: '250px',
+                                borderRadius: '8px',
                                 zIndex: 1000
                             }}
                         >
                             {notifications.length === 0 ? (
-                                <div style={{ padding: '10px' }}>No notifications</div>
+                                <div style={{ padding: '10px', color: '#000000' }}>No notifications</div>
                             ) : (
                                 notifications.map((n) => (
                                     <div
                                         key={n._id}
                                         style={{
                                             borderBottom: '1px solid #eee',
-                                            padding: '5px 0'
+                                            padding: '5px 0',
+                                            color: '#000000'
                                         }}
                                     >
                                         {n.message}

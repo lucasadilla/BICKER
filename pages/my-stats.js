@@ -4,6 +4,7 @@ import { useSession, signIn } from 'next-auth/react';
 import { Badge } from '../components/ui/badge';
 import badgeImages from '../lib/badgeImages';
 import badgeDescriptions from '../lib/badgeDescriptions';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 import {
   Select,
   SelectContent,
@@ -32,8 +33,23 @@ export default function MyStats() {
   const [points, setPoints] = useState(0);
   const [streak, setStreak] = useState(0);
   const [badges, setBadges] = useState([]);
+  const { colorScheme } = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
 
   const winRate = totalDebates ? ((wins / totalDebates) * 100).toFixed(0) : '0';
+
+  const pageBackground = isDarkMode ? '#000000' : '#4D94FF';
+  const headingColor = isDarkMode ? '#f5f5f5' : '#ffffff';
+  const statLabelColor = isDarkMode ? '#d4d4d4' : '#ffffff';
+  const panelBackground = isDarkMode ? '#111111' : '#ffffff';
+  const panelTextColor = isDarkMode ? '#f5f5f5' : '#333333';
+  const primaryBubbleBackground = isDarkMode ? '#1a1a1a' : '#FF4D4D';
+  const secondaryBubbleBackground = isDarkMode ? '#262626' : '#4D94FF';
+  const bubbleTextColor = '#f5f5f5';
+  const primaryVoteColor = isDarkMode ? '#f5f5f5' : '#FF4D4D';
+  const secondaryVoteColor = isDarkMode ? '#d0d0d0' : '#4D94FF';
+  const controlBackground = isDarkMode ? '#111111' : 'rgba(255, 255, 255, 0.95)';
+  const controlTextColor = isDarkMode ? '#f5f5f5' : '#1f2937';
 
   useEffect(() => {
     if (!session) return;
@@ -75,9 +91,9 @@ export default function MyStats() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
-        <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>My Debates</h1>
+    <div style={{ minHeight: '100vh', backgroundColor: pageBackground, paddingTop: '60px' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: headingColor }}>
+        <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px', color: headingColor }}>My Debates</h1>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div
             style={{
@@ -89,23 +105,23 @@ export default function MyStats() {
             }}
           >
             <div>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{totalDebates}</p>
-              <p className="text-sm" style={{ margin: 0 }}>Debates</p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: headingColor }}>{totalDebates}</p>
+              <p className="text-sm" style={{ margin: 0, color: statLabelColor }}>Debates</p>
             </div>
             <div>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{winRate}%</p>
-              <p className="text-sm" style={{ margin: 0 }}>Win Rate</p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: headingColor }}>{winRate}%</p>
+              <p className="text-sm" style={{ margin: 0, color: statLabelColor }}>Win Rate</p>
             </div>
             <div>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{points}</p>
-              <p className="text-sm" style={{ margin: 0 }}>Total Points</p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: headingColor }}>{points}</p>
+              <p className="text-sm" style={{ margin: 0, color: statLabelColor }}>Total Points</p>
             </div>
             <div>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{streak}</p>
-              <p className="text-sm" style={{ margin: 0 }}>Current Streak</p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: headingColor }}>{streak}</p>
+              <p className="text-sm" style={{ margin: 0, color: statLabelColor }}>Current Streak</p>
             </div>
           </div>
-          <div className="text-base" style={{ margin: '4px 0' }}>
+          <div className="text-base" style={{ margin: '4px 0', color: headingColor }}>
             Badges:
             {badges.length ? (
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px', justifyContent: 'center' }}>
@@ -116,7 +132,7 @@ export default function MyStats() {
                     <Badge
                       key={badge}
                       variant="secondary"
-                      style={image ? { padding: '4px' } : {}}
+                      style={image ? { padding: '4px', backgroundColor: isDarkMode ? '#1f1f1f' : undefined } : { backgroundColor: isDarkMode ? '#1f1f1f' : undefined, color: isDarkMode ? '#f5f5f5' : undefined }}
                       title={description || badge}
                       aria-label={description || badge}
                     >
@@ -135,9 +151,9 @@ export default function MyStats() {
             value={sort}
             onValueChange={setSort}
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              color: '#1f2937',
-              border: '1px solid rgba(255, 255, 255, 0.7)',
+              backgroundColor: controlBackground,
+              color: controlTextColor,
+              border: `1px solid ${isDarkMode ? '#1f1f1f' : 'rgba(255, 255, 255, 0.7)'}`,
             }}
           >
             <SelectTrigger className="w-[180px]">
@@ -160,8 +176,8 @@ export default function MyStats() {
           >
             <div
               style={{
-                backgroundColor: 'white',
-                color: '#333',
+                backgroundColor: panelBackground,
+                color: panelTextColor,
                 padding: '15px',
                 borderRadius: '8px',
                 marginBottom: '25px',
@@ -169,23 +185,23 @@ export default function MyStats() {
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ alignSelf: 'flex-start', maxWidth: isMobile ? '80%' : '60%', backgroundColor: '#FF4D4D', color: 'white', padding: '12px 16px', borderRadius: '16px', borderTopLeftRadius: '4px', marginLeft: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+                <div style={{ alignSelf: 'flex-start', maxWidth: isMobile ? '80%' : '60%', backgroundColor: primaryBubbleBackground, color: bubbleTextColor, padding: '12px 16px', borderRadius: '16px', borderTopLeftRadius: '4px', marginLeft: 0, boxShadow: isDarkMode ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.1)' }}>
                   <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
                     {debate.instigateText}
                   </p>
                 </div>
-                <div style={{ alignSelf: 'flex-end', maxWidth: isMobile ? '80%' : '60%', backgroundColor: '#4D94FF', color: 'white', padding: '12px 16px', borderRadius: '16px', borderTopRightRadius: '4px', marginRight: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+                <div style={{ alignSelf: 'flex-end', maxWidth: isMobile ? '80%' : '60%', backgroundColor: secondaryBubbleBackground, color: bubbleTextColor, padding: '12px 16px', borderRadius: '16px', borderTopRightRadius: '4px', marginRight: 0, boxShadow: isDarkMode ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.1)' }}>
                   <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
                     {debate.debateText}
                   </p>
                 </div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span style={{ color: '#FF4D4D' }}>Red Votes: {debate.votesRed || 0}</span>
-                <span style={{ color: '#4D94FF' }}>Blue Votes: {debate.votesBlue || 0}</span>
+                <span style={{ color: primaryVoteColor }}>Red Votes: {debate.votesRed || 0}</span>
+                <span style={{ color: secondaryVoteColor }}>Blue Votes: {debate.votesBlue || 0}</span>
               </div>
               {debate.userWroteSide && (
-                <div style={{ marginTop: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+                <div style={{ marginTop: '8px', textAlign: 'center', fontWeight: 'bold', color: headingColor }}>
                   You wrote: {debate.userWroteSide === 'red' ? 'Red' : 'Blue'}
                 </div>
               )}
@@ -193,7 +209,7 @@ export default function MyStats() {
           </Link>
         ))}
         {debates.length === 0 && (
-          <p className="text-base" style={{ textAlign: 'center' }}>You have not participated in any debates yet.</p>
+          <p className="text-base" style={{ textAlign: 'center', color: headingColor }}>You have not participated in any debates yet.</p>
         )}
         <Pagination>
           <PaginationContent>

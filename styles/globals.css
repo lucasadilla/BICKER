@@ -47,15 +47,15 @@ body.dark a {
 }
 
 body.dark nav {
-    background: rgba(0, 0, 0, 0.92) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    background: transparent !important;
+    box-shadow: none;
 }
 
 body.dark nav button,
 body.dark nav .hamburger-button {
     color: #f5f5f5 !important;
     border-color: rgba(245, 245, 245, 0.8) !important;
-    background-color: rgba(0, 0, 0, 0.4) !important;
+    background-color: transparent !important;
 }
 
 body.dark nav button:hover,

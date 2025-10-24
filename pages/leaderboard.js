@@ -15,6 +15,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from '../components/ui/pagination';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 
 export default function Leaderboard() {
   const [debates, setDebates] = useState([]);
@@ -26,6 +27,22 @@ export default function Leaderboard() {
   const [isMobile, setIsMobile] = useState(false);
   const [showTopPlayers, setShowTopPlayers] = useState(false);
   const [playerStats, setPlayerStats] = useState(null);
+  const { colorScheme } = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+
+  const pageBackground = isDarkMode ? '#000000' : '#4D94FF';
+  const headingColor = isDarkMode ? '#f5f5f5' : '#ffffff';
+  const mutedTextColor = isDarkMode ? '#d4d4d4' : '#ffffff';
+  const panelBackground = isDarkMode ? '#111111' : '#ffffff';
+  const panelTextColor = isDarkMode ? '#f5f5f5' : '#333333';
+  const primaryBubbleBackground = isDarkMode ? '#1a1a1a' : '#FF4D4D';
+  const secondaryBubbleBackground = isDarkMode ? '#262626' : '#4D94FF';
+  const primaryBubbleText = isDarkMode ? '#f5f5f5' : '#ffffff';
+  const secondaryBubbleText = isDarkMode ? '#f5f5f5' : '#ffffff';
+  const primaryVoteColor = isDarkMode ? '#f5f5f5' : '#FF4D4D';
+  const secondaryVoteColor = isDarkMode ? '#d0d0d0' : '#4D94FF';
+  const controlBackground = isDarkMode ? '#111111' : 'rgba(255, 255, 255, 0.95)';
+  const controlTextColor = isDarkMode ? '#f5f5f5' : '#1f2937';
 
   useEffect(() => {
     const fetchDebates = async () => {
@@ -71,9 +88,9 @@ export default function Leaderboard() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', paddingTop: '60px' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: 'white' }}>
-        <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px' }}>Debate Leaderboard</h1>
+    <div style={{ minHeight: '100vh', backgroundColor: pageBackground, paddingTop: '60px' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: headingColor }}>
+        <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px', color: headingColor }}>Debate Leaderboard</h1>
         <div
           style={{
             display: 'grid',
@@ -84,39 +101,40 @@ export default function Leaderboard() {
           }}
         >
           <div>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{totalDebates}</p>
-            <p className="text-sm" style={{ margin: 0 }}>Total Debates</p>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: headingColor }}>{totalDebates}</p>
+            <p className="text-sm" style={{ margin: 0, color: mutedTextColor }}>Total Debates</p>
           </div>
           <div>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{totalVotes}</p>
-            <p className="text-sm" style={{ margin: 0 }}>Total Votes</p>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: headingColor }}>{totalVotes}</p>
+            <p className="text-sm" style={{ margin: 0, color: mutedTextColor }}>Total Votes</p>
           </div>
         </div>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <button
             onClick={toggleTopPlayers}
             style={{
-              backgroundColor: 'white',
-              color: '#333',
+              backgroundColor: isDarkMode ? '#f5f5f5' : '#ffffff',
+              color: '#000000',
               padding: '8px 16px',
               borderRadius: '8px',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              border: 'none'
             }}
           >
             Top Players
           </button>
         </div>
         {showTopPlayers && playerStats && (
-          <div style={{ backgroundColor: 'white', color: '#333', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+          <div style={{ backgroundColor: panelBackground, color: panelTextColor, padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
               <div>
-                <h3 style={{ marginTop: 0 }}>Highest Win Rate</h3>
-                <ol>
+                <h3 style={{ marginTop: 0, color: panelTextColor }}>Highest Win Rate</h3>
+                <ol style={{ paddingLeft: '18px' }}>
                   {playerStats.highestWinRate.map((p, i) => (
                     <li key={p.username || i}>
                       <Link
                         href={`/user/${encodeURIComponent(p.username)}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        style={{ textDecoration: 'none', color: panelTextColor }}
                       >
                         {p.username}
                       </Link>: {(p.winRate * 100).toFixed(0)}%
@@ -125,13 +143,13 @@ export default function Leaderboard() {
                 </ol>
               </div>
               <div>
-                <h3 style={{ marginTop: 0 }}>Most Total Votes</h3>
-                <ol>
+                <h3 style={{ marginTop: 0, color: panelTextColor }}>Most Total Votes</h3>
+                <ol style={{ paddingLeft: '18px' }}>
                   {playerStats.mostVotes.map((p, i) => (
                     <li key={p.username || i}>
                       <Link
                         href={`/user/${encodeURIComponent(p.username)}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        style={{ textDecoration: 'none', color: panelTextColor }}
                       >
                         {p.username}
                       </Link>: {p.votes}
@@ -140,13 +158,13 @@ export default function Leaderboard() {
                 </ol>
               </div>
               <div>
-                <h3 style={{ marginTop: 0 }}>Most Debates Participated</h3>
-                <ol>
+                <h3 style={{ marginTop: 0, color: panelTextColor }}>Most Debates Participated</h3>
+                <ol style={{ paddingLeft: '18px' }}>
                   {playerStats.mostDebates.map((p, i) => (
                     <li key={p.username || i}>
                       <Link
                         href={`/user/${encodeURIComponent(p.username)}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        style={{ textDecoration: 'none', color: panelTextColor }}
                       >
                         {p.username}
                       </Link>: {p.debates}
@@ -155,13 +173,13 @@ export default function Leaderboard() {
                 </ol>
               </div>
               <div>
-                <h3 style={{ marginTop: 0 }}>Biggest Loser</h3>
-                <ol>
+                <h3 style={{ marginTop: 0, color: panelTextColor }}>Biggest Loser</h3>
+                <ol style={{ paddingLeft: '18px' }}>
                   {playerStats.lowestWinRate.map((p, i) => (
                     <li key={p.username || i}>
                       <Link
                         href={`/user/${encodeURIComponent(p.username)}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        style={{ textDecoration: 'none', color: panelTextColor }}
                       >
                         {p.username}
                       </Link>: {(p.winRate * 100).toFixed(0)}%
@@ -177,9 +195,9 @@ export default function Leaderboard() {
             value={sort}
             onValueChange={setSort}
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              color: '#1f2937',
-              border: '1px solid rgba(255, 255, 255, 0.7)',
+              backgroundColor: controlBackground,
+              color: controlTextColor,
+              border: `1px solid ${isDarkMode ? '#1f1f1f' : 'rgba(255, 255, 255, 0.7)'}`,
             }}
           >
             <SelectTrigger className="w-[180px]">
@@ -202,8 +220,8 @@ export default function Leaderboard() {
           >
             <div
               style={{
-                backgroundColor: 'white',
-                color: '#333',
+                backgroundColor: panelBackground,
+                color: panelTextColor,
                 padding: '15px',
                 borderRadius: '8px',
                 marginBottom: '25px',
@@ -215,13 +233,13 @@ export default function Leaderboard() {
                   style={{
                     alignSelf: 'flex-start',
                     maxWidth: isMobile ? '80%' : '60%',
-                    backgroundColor: '#FF4D4D',
-                    color: 'white',
+                    backgroundColor: primaryBubbleBackground,
+                    color: primaryBubbleText,
                     padding: '12px 16px',
                     borderRadius: '16px',
                     borderTopLeftRadius: '4px',
                     marginLeft: 0,
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    boxShadow: isDarkMode ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.1)'
                   }}
                 >
                   <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
@@ -232,13 +250,13 @@ export default function Leaderboard() {
                   style={{
                     alignSelf: 'flex-end',
                     maxWidth: isMobile ? '80%' : '60%',
-                    backgroundColor: '#4D94FF',
-                    color: 'white',
+                    backgroundColor: secondaryBubbleBackground,
+                    color: secondaryBubbleText,
                     padding: '12px 16px',
                     borderRadius: '16px',
                     borderTopRightRadius: '4px',
                     marginRight: 0,
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    boxShadow: isDarkMode ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.1)'
                   }}
                 >
                   <p className={isMobile ? 'text-base' : 'text-lg'} style={{ margin: 0 }}>
@@ -247,8 +265,8 @@ export default function Leaderboard() {
                 </div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span style={{ color: '#FF4D4D' }}>Red Votes: {debate.votesRed || 0}</span>
-                <span style={{ color: '#4D94FF' }}>Blue Votes: {debate.votesBlue || 0}</span>
+                <span style={{ color: primaryVoteColor }}>Red Votes: {debate.votesRed || 0}</span>
+                <span style={{ color: secondaryVoteColor }}>Blue Votes: {debate.votesBlue || 0}</span>
               </div>
             </div>
           </Link>
