@@ -16,8 +16,9 @@ export default async function handler(req, res) {
   }
   if (req.method === 'POST') {
     const { username, bio, profilePicture, selectedBadge, colorScheme } = req.body;
-    const allowedSchemes = ['light', 'dark'];
-    const sanitizedColorScheme = allowedSchemes.includes(colorScheme) ? colorScheme : 'light';
+    const normalizedScheme = colorScheme === 'light' ? 'default' : colorScheme;
+    const allowedSchemes = ['default', 'dark'];
+    const sanitizedColorScheme = allowedSchemes.includes(normalizedScheme) ? normalizedScheme : 'default';
     const update = { username, bio, profilePicture, selectedBadge, colorScheme: sanitizedColorScheme };
     const user = await User.findOneAndUpdate(
       { email },
