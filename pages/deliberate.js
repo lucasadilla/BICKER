@@ -3,6 +3,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { NextSeo } from 'next-seo';
 import Link from 'next/link';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 
 // Helper function to shuffle array
 const shuffleArray = (array) => {
@@ -38,24 +39,56 @@ export default function DeliberatePage({ initialDebates }) {
         });
         return initial;
     });
+    const { colorScheme } = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
     const useIsomorphicLayoutEffect =
         typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-    const leftSideColor = hoveringSide === 'red' ? '#FF6A6A' : '#FF4D4D';
-    const rightSideColor = hoveringSide === 'blue' ? '#76ACFF' : '#4D94FF';
+    const baseLeftColor = isDarkMode ? '#000000' : '#FF4D4D';
+    const baseRightColor = isDarkMode ? '#FFFFFF' : '#4D94FF';
+    const leftSideColor =
+        hoveringSide === 'red'
+            ? isDarkMode
+                ? '#111111'
+                : '#FF6A6A'
+            : baseLeftColor;
+    const rightSideColor =
+        hoveringSide === 'blue'
+            ? isDarkMode
+                ? '#E5E5E5'
+                : '#76ACFF'
+            : baseRightColor;
+    const leftTextColor = '#ffffff';
+    const rightTextColor = isDarkMode ? '#000000' : '#ffffff';
     const reactionInFlightRef = useRef(new Set());
     const currentDebate = debates[currentDebateIndex];
 
     useIsomorphicLayoutEffect(() => {
-        const gradient = `linear-gradient(to right, ${leftSideColor} 50%, ${rightSideColor} 50%)`;
+        const gradient = `linear-gradient(to right, ${baseLeftColor} 50%, ${baseRightColor} 50%)`;
         if (typeof document !== 'undefined') {
             document.documentElement.style.setProperty('--nav-gradient', gradient);
-            document.documentElement.style.setProperty('--nav-button-color', '#ffffff');
-            document.documentElement.style.setProperty('--nav-button-color-hover', '#ffffff');
-            document.documentElement.style.setProperty('--nav-button-border', 'rgba(255, 255, 255, 0.7)');
-            document.documentElement.style.setProperty('--nav-button-border-hover', 'rgba(255, 255, 255, 0.9)');
+            document.documentElement.style.setProperty(
+                '--nav-button-color',
+                isDarkMode ? '#f5f5f5' : '#ffffff'
+            );
+            document.documentElement.style.setProperty(
+                '--nav-button-color-hover',
+                '#ffffff'
+            );
+            document.documentElement.style.setProperty(
+                '--nav-button-border',
+                isDarkMode ? 'rgba(245, 245, 245, 0.7)' : 'rgba(255, 255, 255, 0.7)'
+            );
+            document.documentElement.style.setProperty(
+                '--nav-button-border-hover',
+                isDarkMode ? '#ffffff' : 'rgba(255, 255, 255, 0.9)'
+            );
+            document.documentElement.style.setProperty(
+                '--nav-button-text',
+                isDarkMode ? '#f5f5f5' : '#ffffff'
+            );
         }
-    }, [leftSideColor, rightSideColor]);
+    }, [baseLeftColor, baseRightColor, isDarkMode]);
 
     useIsomorphicLayoutEffect(() => {
         return () => {
@@ -65,6 +98,7 @@ export default function DeliberatePage({ initialDebates }) {
                 document.documentElement.style.removeProperty('--nav-button-color-hover');
                 document.documentElement.style.removeProperty('--nav-button-border');
                 document.documentElement.style.removeProperty('--nav-button-border-hover');
+                document.documentElement.style.removeProperty('--nav-button-text');
             }
         };
     }, []);
@@ -432,6 +466,42 @@ export default function DeliberatePage({ initialDebates }) {
         const myReaction =
             userReactions[debateId]?.[side] ?? currentDebate.myReactions?.[side] ?? null;
         const isMenuOpen = reactionMenusOpen[side];
+        const isLeftSide = side === 'red';
+        const buttonTextColor = isLeftSide ? leftTextColor : rightTextColor;
+        const buttonBorderColor = isLeftSide
+            ? 'rgba(255, 255, 255, 0.6)'
+            : isDarkMode
+                ? 'rgba(0, 0, 0, 0.6)'
+                : 'rgba(255, 255, 255, 0.6)';
+        const idleBackground = isLeftSide
+            ? isDarkMode
+                ? 'rgba(255, 255, 255, 0.08)'
+                : 'rgba(0, 0, 0, 0.2)'
+            : isDarkMode
+                ? 'rgba(0, 0, 0, 0.08)'
+                : 'rgba(0, 0, 0, 0.2)';
+        const activeBackground = isLeftSide
+            ? 'rgba(255, 255, 255, 0.25)'
+            : isDarkMode
+                ? 'rgba(0, 0, 0, 0.2)'
+                : 'rgba(255, 255, 255, 0.25)';
+        const dropdownBackground = isLeftSide
+            ? isDarkMode
+                ? 'rgba(255, 255, 255, 0.12)'
+                : 'rgba(0, 0, 0, 0.35)'
+            : isDarkMode
+                ? 'rgba(0, 0, 0, 0.12)'
+                : 'rgba(0, 0, 0, 0.35)';
+        const dropdownBorder = isLeftSide
+            ? '1px solid rgba(255, 255, 255, 0.6)'
+            : isDarkMode
+                ? '1px solid rgba(0, 0, 0, 0.5)'
+                : '1px solid rgba(255, 255, 255, 0.6)';
+        const selectedEmojiBackground = isLeftSide
+            ? 'rgba(255, 255, 255, 0.2)'
+            : isDarkMode
+                ? 'rgba(0, 0, 0, 0.2)'
+                : 'rgba(255, 255, 255, 0.2)';
 
         return (
             <div
@@ -471,12 +541,11 @@ export default function DeliberatePage({ initialDebates }) {
                     style={{
                         padding: '6px 16px',
                         borderRadius: '9999px',
-                        border: '1px solid rgba(255, 255, 255, 0.6)',
-                        backgroundColor:
-                            isMenuOpen || myReaction
-                                ? 'rgba(255, 255, 255, 0.25)'
-                                : 'rgba(0, 0, 0, 0.2)',
-                        color: '#ffffff',
+                        border: buttonBorderColor,
+                        backgroundColor: isMenuOpen || myReaction
+                            ? activeBackground
+                            : idleBackground,
+                        color: buttonTextColor,
                         cursor: 'pointer',
                         fontSize: '0.875rem',
                         fontWeight: 600,
@@ -493,8 +562,8 @@ export default function DeliberatePage({ initialDebates }) {
                             gap: '12px',
                             padding: '8px 12px',
                             borderRadius: '16px',
-                            border: '1px solid rgba(255, 255, 255, 0.6)',
-                            backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                            border: dropdownBorder,
+                            backgroundColor: dropdownBackground,
                             backdropFilter: 'blur(4px)',
                         }}
                     >
@@ -518,12 +587,12 @@ export default function DeliberatePage({ initialDebates }) {
                                         borderRadius: '50%',
                                         border: 'none',
                                         backgroundColor: 'transparent',
-                                        color: '#ffffff',
+                                        color: buttonTextColor,
                                         cursor: 'pointer',
                                         fontSize: '1.25rem',
                                         transform: isSelected ? 'scale(1.15)' : 'scale(1)',
                                         transition: 'transform 0.15s ease, background-color 0.15s ease',
-                                        background: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                                        background: isSelected ? selectedEmojiBackground : 'transparent',
                                     }}
                                 >
                                     <span>{emoji}</span>
@@ -542,6 +611,7 @@ export default function DeliberatePage({ initialDebates }) {
                         flexWrap: 'wrap',
                         justifyContent: 'center',
                         maxWidth: '260px',
+                        color: buttonTextColor,
                     }}
                 >
                     {REACTION_EMOJIS.map((emoji) => (
@@ -726,17 +796,23 @@ export default function DeliberatePage({ initialDebates }) {
     // If no debates available, show fallback
     if (!currentDebate) {
         return (
-            <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <div
+                style={{
+                    textAlign: 'center',
+                    marginTop: '50px',
+                    color: isDarkMode ? '#f5f5f5' : '#1f1f1f',
+                }}
+            >
                 <h2 className="heading-2">No debates available</h2>
                 <p className="text-base">You've voted on all available debates! Check back later for new debates.</p>
-                <button 
+                <button
                     onClick={fetchDeliberations}
                     style={{
                         marginTop: '20px',
                         padding: '10px 20px',
-                        backgroundColor: '#4D94FF',
-                        color: 'white',
-                        border: 'none',
+                        backgroundColor: isDarkMode ? '#000000' : '#4D94FF',
+                        color: isDarkMode ? '#ffffff' : 'white',
+                        border: isDarkMode ? '1px solid #ffffff' : 'none',
                         borderRadius: '5px',
                         cursor: 'pointer'
                     }}
@@ -749,9 +825,9 @@ export default function DeliberatePage({ initialDebates }) {
                         marginTop: '20px',
                         marginLeft: '10px',
                         padding: '10px 20px',
-                        backgroundColor: '#FF4D4D',
-                        color: 'white',
-                        border: 'none',
+                        backgroundColor: isDarkMode ? '#111111' : '#FF4D4D',
+                        color: isDarkMode ? '#ffffff' : 'white',
+                        border: isDarkMode ? '1px solid #ffffff' : 'none',
                         borderRadius: '5px',
                         cursor: 'pointer'
                     }}
@@ -796,8 +872,9 @@ export default function DeliberatePage({ initialDebates }) {
                         left: isMobile ? 'calc(50% - 80px)' : redSize,
                         transform: 'translate(-50%, -50%)',
                         padding: '10px 20px',
-                        backgroundColor: '#f0f0f0',
-                        border: 'none',
+                        backgroundColor: isDarkMode ? '#111111' : '#f0f0f0',
+                        color: isDarkMode ? '#f5f5f5' : '#1f1f1f',
+                        border: isDarkMode ? '1px solid #f5f5f5' : '1px solid #d0d0d0',
                         borderRadius: '5px',
                         cursor: isCurrentDebatePending ? 'default' : 'pointer',
                         zIndex: 1000,
@@ -815,8 +892,9 @@ export default function DeliberatePage({ initialDebates }) {
                         left: isMobile ? 'calc(50% + 80px)' : redSize,
                         transform: 'translate(-50%, -50%)',
                         padding: '10px 20px',
-                        backgroundColor: '#f0f0f0',
-                        border: 'none',
+                        backgroundColor: isDarkMode ? '#111111' : '#f0f0f0',
+                        color: isDarkMode ? '#f5f5f5' : '#1f1f1f',
+                        border: isDarkMode ? '1px solid #f5f5f5' : '1px solid #d0d0d0',
                         borderRadius: '5px',
                         cursor: isCurrentDebatePending ? 'default' : 'pointer',
                         zIndex: 1000,
@@ -842,7 +920,7 @@ export default function DeliberatePage({ initialDebates }) {
                         width: isMobile ? '100%' : redSize,
                         height: isMobile ? redSize : '100%',
                         backgroundColor: leftSideColor,
-                        color: 'white',
+                        color: leftTextColor,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
@@ -862,6 +940,7 @@ export default function DeliberatePage({ initialDebates }) {
                             overflowWrap: 'break-word',
                             maxWidth: '80%',
                             padding: '0 10px',
+                            color: leftTextColor,
                         }}
                     >
                         {currentDebate.instigateText || 'Unknown Instigate'}
@@ -874,7 +953,7 @@ export default function DeliberatePage({ initialDebates }) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                color: 'white',
+                                color: leftTextColor,
                                 textDecoration: 'none',
                                 fontSize: '0.875rem'
                             }}
@@ -907,7 +986,7 @@ export default function DeliberatePage({ initialDebates }) {
                         width: isMobile ? '100%' : blueSize,
                         height: isMobile ? blueSize : '100%',
                         backgroundColor: rightSideColor,
-                        color: 'white',
+                        color: rightTextColor,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
@@ -927,6 +1006,7 @@ export default function DeliberatePage({ initialDebates }) {
                             overflowWrap: 'break-word',
                             maxWidth: '80%',
                             padding: '0 10px',
+                            color: rightTextColor,
                         }}
                     >
                         {currentDebate.debateText || 'Unknown Debate'}
@@ -939,7 +1019,7 @@ export default function DeliberatePage({ initialDebates }) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                color: 'white',
+                                color: rightTextColor,
                                 textDecoration: 'none',
                                 fontSize: '0.875rem'
                             }}

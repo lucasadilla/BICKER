@@ -79,6 +79,8 @@ export default function NavBar() {
         }
     };
 
+    const navTextColor = 'var(--nav-button-text, #ffffff)';
+
     // Common button style
     const buttonStyle = {
         padding: '10px 20px',
@@ -87,7 +89,7 @@ export default function NavBar() {
         border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
         borderRadius: '999px',
         backgroundColor: 'transparent',
-        color: '#ffffff',
+        color: navTextColor,
         cursor: 'pointer',
         transition: 'transform 0.15s ease, border-color 0.15s ease, color 0.15s ease',
         marginLeft: '20px',
@@ -99,23 +101,23 @@ export default function NavBar() {
     const handleMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
         e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = '#ffffff';
+        e.target.style.color = navTextColor;
     };
     const handleMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
         e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = '#ffffff';
+        e.target.style.color = navTextColor;
     };
 
     const handleCircularMouseEnter = (e) => {
         e.target.style.transform = 'translateY(2px) scale(0.98)';
         e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = '#ffffff';
+        e.target.style.color = navTextColor;
     };
     const handleCircularMouseLeave = (e) => {
         e.target.style.transform = 'translateY(0)';
         e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = '#ffffff';
+        e.target.style.color = navTextColor;
     };
 
     return (
@@ -150,7 +152,7 @@ export default function NavBar() {
                         borderRadius: '50%',
                         backgroundColor: 'transparent',
                         border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
-                        color: '#ffffff'
+                        color: navTextColor
                     }}
                     onMouseEnter={handleCircularMouseEnter}
                     onMouseLeave={handleCircularMouseLeave}
@@ -260,7 +262,7 @@ export default function NavBar() {
                             borderRadius: '50%',
                             backgroundColor: 'transparent',
                             border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
-                            color: '#ffffff'
+                            color: navTextColor
                         }}
                         onMouseEnter={handleCircularMouseEnter}
                         onMouseLeave={handleCircularMouseLeave}
@@ -407,7 +409,7 @@ export default function NavBar() {
                                     padding: '15px 20px',
                                     fontSize: '18px',
                                     backdropFilter: 'none',
-                                    color: '#ffffff',
+                                    color: navTextColor,
                                     borderColor: 'rgba(255, 255, 255, 0.7)'
                                 }}
                                 onClick={() => setIsMobileMenuOpen(false)}
@@ -425,7 +427,7 @@ export default function NavBar() {
                                 padding: '15px 20px',
                                 fontSize: '18px',
                                 backdropFilter: 'none',
-                                color: '#ffffff',
+                                color: navTextColor,
                                 borderColor: 'rgba(255, 255, 255, 0.7)'
                             }}
                             onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
