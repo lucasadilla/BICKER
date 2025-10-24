@@ -80,18 +80,11 @@ export default function DebateDetail({ debate }) {
   );
 }
 
-export async function getServerSideProps({ params, req }) {
-  const protocol = req.headers["x-forwarded-proto"] || "http";
-  const baseUrl = `${protocol}://${req.headers.host}`;
-  try {
-    const res = await fetch(`${baseUrl}/api/debate/${params.id}`);
-    if (!res.ok) {
-      return { notFound: true };
+export async function getServerSideProps({ params }) {
+  return {
+    redirect: {
+      destination: `/deliberates/${params.id}`,
+      permanent: true,
     }
-    const debate = await res.json();
-    return { props: { debate } };
-  } catch (error) {
-    console.error('Failed to load debate:', error);
-    return { props: { debate: null } };
-  }
+  };
 }

@@ -9,21 +9,34 @@ function generateSiteMap(baseUrl, debates, deliberates) {
     .map((path) => `\n  <url>\n    <loc>${baseUrl}${path}</loc>\n  </url>`)
     .join('');
 
-  const debateEntries = debates
+  const entriesById = new Map();
+  const registerEntry = (item) => {
+    if (!item?._id) {
+      return;
+    }
+
+    const id = item._id.toString();
+    const updatedAt = item.updatedAt instanceof Date
+      ? item.updatedAt
+      : new Date(item.updatedAt || Date.now());
+
+    const existing = entriesById.get(id);
+    if (!existing || updatedAt > existing) {
+      entriesById.set(id, updatedAt);
+    }
+  };
+
+  debates.forEach(registerEntry);
+  deliberates.forEach(registerEntry);
+
+  const debateEntries = Array.from(entriesById.entries())
     .map(
-      (debate) =>
-        `\n  <url>\n    <loc>${baseUrl}/debates/${debate._id}</loc>\n    <lastmod>${debate.updatedAt.toISOString()}</lastmod>\n  </url>`
+      ([id, updatedAt]) =>
+        `\n  <url>\n    <loc>${baseUrl}/deliberates/${id}</loc>\n    <lastmod>${updatedAt.toISOString()}</lastmod>\n  </url>`
     )
     .join('');
 
-  const deliberateEntries = deliberates
-    .map(
-      (deliberate) =>
-        `\n  <url>\n    <loc>${baseUrl}/deliberates/${deliberate._id}</loc>\n    <lastmod>${deliberate.updatedAt.toISOString()}</lastmod>\n  </url>`
-    )
-    .join('');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticEntries}${debateEntries}${deliberateEntries}\n</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticEntries}${debateEntries}\n</urlset>`;
 }
 
 export async function getServerSideProps({ res, req }) {
