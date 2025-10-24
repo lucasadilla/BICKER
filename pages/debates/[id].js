@@ -3,10 +3,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function DebateDetail({ debate }) {
-  if (!debate) {
-    return <div>Debate not found</div>;
-  }
-
   const [shareUrl, setShareUrl] = useState('');
 
   useEffect(() => {
@@ -14,6 +10,10 @@ export default function DebateDetail({ debate }) {
       setShareUrl(window.location.href);
     }
   }, []);
+
+  if (!debate) {
+    return <div>Debate not found</div>;
+  }
 
   const handleReport = async () => {
     const reason = prompt('Why are you reporting this debate?');
@@ -80,11 +80,31 @@ export default function DebateDetail({ debate }) {
   );
 }
 
-export async function getServerSideProps({ params }) {
-  return {
-    redirect: {
-      destination: `/deliberates/${params.id}`,
-      permanent: true,
+export async function getServerSideProps({ params, req }) {
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const baseUrl = `${protocol}://${req.headers.host}`;
+
+  try {
+    const deliberateRes = await fetch(`${baseUrl}/api/deliberate/${params.id}`);
+
+    if (deliberateRes.ok) {
+      return {
+        redirect: {
+          destination: `/deliberates/${params.id}`,
+          permanent: true,
+        }
+      };
     }
-  };
+
+    const debateRes = await fetch(`${baseUrl}/api/debate/${params.id}`);
+    if (!debateRes.ok) {
+      return { notFound: true };
+    }
+
+    const debate = await debateRes.json();
+    return { props: { debate } };
+  } catch (error) {
+    console.error('Failed to load debate:', error);
+    return { notFound: true };
+  }
 }
