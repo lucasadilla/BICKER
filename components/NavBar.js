@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Avatar from './Avatar';
 import { useColorScheme } from '../lib/ColorSchemeContext';
 
 export default function NavBar() {
     const { data: session } = useSession();
+    const router = useRouter();
     const { colorScheme } = useColorScheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
@@ -83,6 +85,9 @@ export default function NavBar() {
 
     const navTextColor = 'var(--nav-button-text, #ffffff)';
     const isDarkMode = colorScheme === 'dark';
+    const isTargetDarkPage = isDarkMode && ['/', '/debate', '/deliberate'].includes(router.pathname);
+    const defaultBorderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
+    const defaultHoverBorderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
 
     const dropdownSurfaceStyle = {
         marginTop: '10px',
@@ -100,7 +105,9 @@ export default function NavBar() {
         padding: '10px 20px',
         fontSize: '16px',
         fontWeight: 'bold',
-        border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
+        borderWidth: '2px',
+        borderStyle: 'solid',
+        borderColor: defaultBorderColor,
         borderRadius: '999px',
         backgroundColor: 'transparent',
         color: navTextColor,
@@ -113,25 +120,24 @@ export default function NavBar() {
 
     // Hover effects
     const handleMouseEnter = (e) => {
-        e.target.style.transform = 'translateY(2px) scale(0.98)';
-        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = navTextColor;
+        const target = e.currentTarget;
+        target.style.transform = 'translateY(2px) scale(0.98)';
+        target.style.borderColor = target.dataset.hoverBorderColor || defaultHoverBorderColor;
+        const hoverTextColor = target.dataset.hoverTextColor || target.dataset.textColor || navTextColor;
+        target.style.color = hoverTextColor;
     };
     const handleMouseLeave = (e) => {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = navTextColor;
+        const target = e.currentTarget;
+        target.style.transform = 'translateY(0)';
+        target.style.borderColor = target.dataset.borderColor || defaultBorderColor;
+        target.style.color = target.dataset.textColor || navTextColor;
     };
 
     const handleCircularMouseEnter = (e) => {
-        e.target.style.transform = 'translateY(2px) scale(0.98)';
-        e.target.style.borderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
-        e.target.style.color = navTextColor;
+        handleMouseEnter(e);
     };
     const handleCircularMouseLeave = (e) => {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.borderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
-        e.target.style.color = navTextColor;
+        handleMouseLeave(e);
     };
 
     return (
@@ -165,11 +171,13 @@ export default function NavBar() {
                         height: isMobile ? '54px' : '44px',
                         borderRadius: '50%',
                         backgroundColor: 'transparent',
-                        border: '2px solid var(--nav-button-border, rgba(255, 255, 255, 0.6))',
+                        borderColor: defaultBorderColor,
                         color: navTextColor
                     }}
                     onMouseEnter={handleCircularMouseEnter}
                     onMouseLeave={handleCircularMouseLeave}
+                    data-border-color={defaultBorderColor}
+                    data-text-color={navTextColor}
                 >
                     <svg 
                         xmlns="http://www.w3.org/2000/svg" 
@@ -269,11 +277,14 @@ export default function NavBar() {
                             height: isMobile ? '54px' : '44px',
                             borderRadius: '50%',
                             backgroundColor: 'transparent',
-                            border: '2px solid var(--nav-button-border, rgba(31, 31, 31, 0.4))',
-                            color: navTextColor
+                            borderColor: isTargetDarkPage ? '#000000' : 'var(--nav-button-border, rgba(31, 31, 31, 0.4))',
+                            color: isTargetDarkPage ? '#000000' : navTextColor
                         }}
                         onMouseEnter={handleCircularMouseEnter}
                         onMouseLeave={handleCircularMouseLeave}
+                        data-border-color={isTargetDarkPage ? '#000000' : 'var(--nav-button-border, rgba(31, 31, 31, 0.4))'}
+                        data-hover-border-color={isTargetDarkPage ? '#000000' : undefined}
+                        data-text-color={isTargetDarkPage ? '#000000' : navTextColor}
                         onClick={handleBellClick}
                     >
                         <svg
@@ -363,17 +374,30 @@ export default function NavBar() {
                         { label: 'Debate', path: '/debate' },
                         { label: 'Deliberate', path: '/deliberate' },
                         { label: 'Leaderboard', path: '/leaderboard' }
-                    ].map(({ label, path }) => (
-                        <Link key={label} href={path} passHref>
-                            <button
-                                style={buttonStyle}
-                                onMouseEnter={handleMouseEnter}
-                                onMouseLeave={handleMouseLeave}
-                            >
-                                {label}
-                            </button>
-                        </Link>
-                    ))}
+                    ].map(({ label, path }) => {
+                        const shouldUseDarkDesktop = isTargetDarkPage && (label === 'Deliberate' || label === 'Leaderboard');
+                        const desktopTextColor = shouldUseDarkDesktop ? '#000000' : buttonStyle.color;
+                        const desktopBorderColor = shouldUseDarkDesktop ? '#000000' : buttonStyle.borderColor;
+                        return (
+                            <Link key={label} href={path} passHref>
+                                <button
+                                    style={{
+                                        ...buttonStyle,
+                                        color: desktopTextColor,
+                                        borderColor: desktopBorderColor
+                                    }}
+                                    data-text-color={desktopTextColor}
+                                    data-border-color={desktopBorderColor}
+                                    data-hover-border-color={shouldUseDarkDesktop ? '#000000' : undefined}
+                                    data-hover-text-color={shouldUseDarkDesktop ? '#000000' : undefined}
+                                    onMouseEnter={handleMouseEnter}
+                                    onMouseLeave={handleMouseLeave}
+                                >
+                                    {label}
+                                </button>
+                            </Link>
+                        );
+                    })}
                     {!session && (
                         <button
                             style={buttonStyle}
@@ -396,7 +420,7 @@ export default function NavBar() {
                         top: '74px',
                         left: 0,
                         right: 0,
-                        background: 'rgba(0, 0, 0, 0.8)',
+                        background: isTargetDarkPage ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)',
                         padding: '20px',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                         display: 'flex',
@@ -410,25 +434,33 @@ export default function NavBar() {
                         { label: 'Debate', path: '/debate' },
                         { label: 'Deliberate', path: '/deliberate' },
                         { label: 'Leaderboard', path: '/leaderboard' }
-                    ].map(({ label, path }) => (
-                        <Link key={label} href={path} passHref>
-                            <button
-                                style={{
-                                    ...buttonStyle,
-                                    width: '100%',
-                                    margin: '5px 0',
-                                    padding: '15px 20px',
-                                    fontSize: '18px',
-                                    backdropFilter: 'none',
-                                    color: navTextColor,
-                                    borderColor: 'rgba(255, 255, 255, 0.7)'
-                                }}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                {label}
-                            </button>
-                        </Link>
-                    ))}
+                    ].map(({ label, path }) => {
+                        const mobileTextColor = isTargetDarkPage ? '#000000' : navTextColor;
+                        const mobileBorderColor = isTargetDarkPage ? '#000000' : 'rgba(255, 255, 255, 0.7)';
+                        return (
+                            <Link key={label} href={path} passHref>
+                                <button
+                                    style={{
+                                        ...buttonStyle,
+                                        width: '100%',
+                                        margin: '5px 0',
+                                        padding: '15px 20px',
+                                        fontSize: '18px',
+                                        backdropFilter: 'none',
+                                        color: mobileTextColor,
+                                        borderColor: mobileBorderColor
+                                    }}
+                                    data-text-color={mobileTextColor}
+                                    data-border-color={mobileBorderColor}
+                                    data-hover-border-color={isTargetDarkPage ? '#000000' : undefined}
+                                    data-hover-text-color={isTargetDarkPage ? '#000000' : undefined}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    {label}
+                                </button>
+                            </Link>
+                        );
+                    })}
                     {!session && (
                         <button
                             style={{
@@ -438,9 +470,13 @@ export default function NavBar() {
                                 padding: '15px 20px',
                                 fontSize: '18px',
                                 backdropFilter: 'none',
-                                color: navTextColor,
-                                borderColor: 'rgba(255, 255, 255, 0.7)'
+                                color: isTargetDarkPage ? '#000000' : navTextColor,
+                                borderColor: isTargetDarkPage ? '#000000' : 'rgba(255, 255, 255, 0.7)'
                             }}
+                            data-text-color={isTargetDarkPage ? '#000000' : navTextColor}
+                            data-border-color={isTargetDarkPage ? '#000000' : 'rgba(255, 255, 255, 0.7)'}
+                            data-hover-border-color={isTargetDarkPage ? '#000000' : undefined}
+                            data-hover-text-color={isTargetDarkPage ? '#000000' : undefined}
                             onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
                         >
                             Sign In
