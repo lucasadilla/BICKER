@@ -17,7 +17,7 @@ export default function Document() {
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png" />
         {/* Add more links for different sizes and formats as needed */}
       </Head>
-      <body className="light">
+      <body className="default">
         <Main />
         <NextScript />
       </body>

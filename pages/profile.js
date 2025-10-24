@@ -7,11 +7,15 @@ import { useRouter } from 'next/router';
 export default function Profile() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [form, setForm] = useState({ profilePicture: '', username: '', bio: '', selectedBadge: '', colorScheme: 'light' });
+  const [form, setForm] = useState({ profilePicture: '', username: '', bio: '', selectedBadge: '', colorScheme: 'default' });
   const [badges, setBadges] = useState([]);
   const { colorScheme, setColorScheme } = useColorScheme();
 
-  const normalizeColorScheme = value => (value === 'blue' ? 'light' : value || 'light');
+  const normalizeColorScheme = value => {
+    if (!value) return 'default';
+    if (value === 'blue' || value === 'light') return 'default';
+    return value;
+  };
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -83,7 +87,7 @@ export default function Profile() {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: colorScheme === 'light' ? '#4D94FF' : undefined,
+        backgroundColor: colorScheme === 'default' ? '#4D94FF' : undefined,
         padding: '80px 20px',
         boxSizing: 'border-box',
       }}
@@ -115,7 +119,7 @@ export default function Profile() {
           </select>
           <label style={labelStyle}>Color Scheme</label>
           <select name="colorScheme" value={form.colorScheme} onChange={handleChange} style={selectStyle}>
-            <option value="light" style={{ color: '#000000' }}>Light</option>
+            <option value="default" style={{ color: '#000000' }}>Default</option>
             <option value="dark" style={{ color: '#000000' }}>Dark</option>
           </select>
           <button

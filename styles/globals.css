@@ -26,14 +26,45 @@ body {
     line-height: var(--line-height-text);
 }
 
-body.light {
+body.default {
     background-color: #f5f5f5;
     color: #1f1f1f;
 }
 
 body.dark {
-    background-color: #1f1f1f;
-    color: #f5f5f5;
+    background-color: #000000;
+    color: #ffffff;
+    filter: grayscale(100%) contrast(110%);
+    --nav-button-color: #ffffff;
+    --nav-button-color-hover: #ffffff;
+    --nav-button-border: rgba(255, 255, 255, 0.6);
+    --nav-button-border-hover: rgba(255, 255, 255, 0.85);
+}
+
+body.dark *,
+body.dark *::before,
+body.dark *::after {
+    color: inherit !important;
+}
+
+body.dark a {
+    color: #ffffff !important;
+}
+
+body.dark button,
+body.dark input,
+body.dark select,
+body.dark textarea {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+body.dark img,
+body.dark video,
+body.dark canvas,
+body.dark svg {
+    filter: grayscale(100%) !important;
 }
 
 body.blue {
