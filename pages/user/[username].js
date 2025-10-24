@@ -6,6 +6,7 @@ import Deliberate from '../../models/Deliberate';
 import { Badge } from '../../components/ui/badge';
 import badgeImages from '../../lib/badgeImages';
 import badgeDescriptions from '../../lib/badgeDescriptions';
+import { useColorScheme } from '../../lib/ColorSchemeContext';
 import {
   Select,
   SelectContent,
@@ -29,6 +30,8 @@ export default function UserProfile({ user, debates }) {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [displayedDebates, setDisplayedDebates] = useState([]);
+  const { colorScheme } = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
 
   useEffect(() => {
     const handleResize = () => {
@@ -50,8 +53,18 @@ export default function UserProfile({ user, debates }) {
     return <div style={{ padding: '20px', maxWidth: '800px', margin: '80px auto' }}>User not found.</div>;
   }
 
+  const pageBackground = isDarkMode ? '#000000' : '#4D94FF';
+  const pageTextColor = isDarkMode ? '#f5f5f5' : 'white';
+  const cardBackground = isDarkMode ? '#111111' : 'white';
+  const cardTextColor = isDarkMode ? '#f5f5f5' : '#333';
+  const instigateBubbleBackground = isDarkMode ? '#1f1f1f' : '#FF4D4D';
+  const debateBubbleBackground = isDarkMode ? '#2a2a2a' : '#4D94FF';
+  const bubbleTextColor = isDarkMode ? '#f5f5f5' : 'white';
+  const redVoteColor = isDarkMode ? '#e0e0e0' : '#FF4D4D';
+  const blueVoteColor = isDarkMode ? '#bfbfbf' : '#4D94FF';
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#4D94FF', color: 'white', paddingTop: '80px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: pageBackground, color: pageTextColor, paddingTop: '80px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
           {user.profilePicture && (
@@ -115,8 +128,8 @@ export default function UserProfile({ user, debates }) {
               >
                 <div
                   style={{
-                    backgroundColor: 'white',
-                    color: '#333',
+                    backgroundColor: cardBackground,
+                    color: cardTextColor,
                     padding: '15px',
                     borderRadius: '8px',
                     marginBottom: '25px',
@@ -128,8 +141,8 @@ export default function UserProfile({ user, debates }) {
                       style={{
                         alignSelf: 'flex-start',
                         maxWidth: isMobile ? '80%' : '60%',
-                        backgroundColor: '#FF4D4D',
-                        color: 'white',
+                        backgroundColor: instigateBubbleBackground,
+                        color: bubbleTextColor,
                         padding: '12px 16px',
                         borderRadius: '16px',
                         borderTopLeftRadius: '4px',
@@ -145,8 +158,8 @@ export default function UserProfile({ user, debates }) {
                       style={{
                         alignSelf: 'flex-end',
                         maxWidth: isMobile ? '80%' : '60%',
-                        backgroundColor: '#4D94FF',
-                        color: 'white',
+                        backgroundColor: debateBubbleBackground,
+                        color: bubbleTextColor,
                         padding: '12px 16px',
                         borderRadius: '16px',
                         borderTopRightRadius: '4px',
@@ -160,8 +173,8 @@ export default function UserProfile({ user, debates }) {
                     </div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                    <span style={{ color: '#FF4D4D' }}>Red Votes: {d.votesRed || 0}</span>
-                    <span style={{ color: '#4D94FF' }}>Blue Votes: {d.votesBlue || 0}</span>
+                    <span style={{ color: redVoteColor }}>Red Votes: {d.votesRed || 0}</span>
+                    <span style={{ color: blueVoteColor }}>Blue Votes: {d.votesBlue || 0}</span>
                   </div>
                 </div>
               </Link>

@@ -187,6 +187,22 @@ body.blue {
     font-weight: 500;
 }
 
+body.dark .pagination-link {
+    background: #ffffff;
+    color: #000000;
+    border-color: #000000;
+}
+
+body.dark .pagination-link:hover {
+    background-color: #f0f0f0;
+    color: #000000;
+}
+
+body.dark .pagination-link.active {
+    background-color: #e5e5e5;
+    color: #000000;
+}
+
 .search-results-dropdown {
     scrollbar-width: none;
     -ms-overflow-style: none;

@@ -1,9 +1,12 @@
 // pages/instigate/index.js
 import { useState, useEffect } from 'react';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 
 export default function InstigatePage() {
     const [instigates, setInstigates] = useState([]);
     const [newInstigate, setNewInstigate] = useState('');
+    const { colorScheme } = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
 
     // Disable scrolling on mount
     useEffect(() => {
@@ -58,18 +61,29 @@ export default function InstigatePage() {
         }
     };
 
+    const pageBackground = isDarkMode ? '#000000' : '#ee4343';
+    const headingColor = isDarkMode ? '#ffffff' : '#ffffff';
+    const textareaBackground = isDarkMode ? '#111111' : '#ffffff';
+    const textareaColor = isDarkMode ? '#f5f5f5' : '#000000';
+    const textareaBorder = isDarkMode ? '1px solid #333333' : '1px solid rgba(0, 0, 0, 0.2)';
+    const counterColor = isDarkMode ? '#cccccc' : '#ffffff';
+    const buttonBackground = isDarkMode ? '#ffffff' : '#007BFF';
+    const buttonTextColor = isDarkMode ? '#000000' : '#ffffff';
+    const buttonShadow = isDarkMode ? '10px 12px rgba(255, 255, 255, 0.2)' : '10px 12px black';
+
     return (
         <div
             style={{
                 padding: '70px',
-                backgroundColor: '#ee4343',
+                backgroundColor: pageBackground,
                 minHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                color: isDarkMode ? '#ffffff' : '#000000',
             }}
         >
-            <h1 className="heading-1" style={{ textAlign: 'center', color: '#ffffff', marginBottom: '20px' }}>
+            <h1 className="heading-1" style={{ textAlign: 'center', color: headingColor, marginBottom: '20px' }}>
                 Instigate
             </h1>
 
@@ -96,10 +110,10 @@ export default function InstigatePage() {
                             padding: '10px',
                             fontSize: '36px',
                             borderRadius: '4px',
-                            border: '1px solid rgba(0, 0, 0, 0.2)',
+                            border: textareaBorder,
                             resize: 'none',
-                            backgroundColor: '#ffffff',
-                            color: '#000000',
+                            backgroundColor: textareaBackground,
+                            color: textareaColor,
                         }}
                     />
                     <div
@@ -108,7 +122,7 @@ export default function InstigatePage() {
                             bottom: '15px',
                             right: '15px',
                             fontSize: '14px',
-                            color: '#ffffff',
+                            color: counterColor,
                             pointerEvents: 'none',
                         }}
                     >
@@ -121,13 +135,13 @@ export default function InstigatePage() {
                     style={{
                         width: '50%',
                         padding: '10px',
-                        backgroundColor: '#007BFF',
-                        color: 'white',
+                        backgroundColor: buttonBackground,
+                        color: buttonTextColor,
                         fontSize: '26px',
                         borderRadius: '4px',
                         border: 'none',
                         cursor: 'pointer',
-                        boxShadow: '10px 12px black',
+                        boxShadow: buttonShadow,
                         transition: 'all 0.2s ease',
                         position: 'relative',
                         marginTop: '10px',
@@ -138,7 +152,7 @@ export default function InstigatePage() {
                     }}
                     onMouseLeave={(e) => {
                         e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '10px 12px black';
+                        e.target.style.boxShadow = buttonShadow;
                     }}
                 >
                     Submit Topic
