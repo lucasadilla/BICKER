@@ -34,11 +34,36 @@ body.default {
 body.dark {
     background-color: #000000;
     color: #ffffff;
-    filter: grayscale(100%) contrast(200%);
+    filter: grayscale(100%) contrast(400%);
     --nav-button-color: #ffffff;
     --nav-button-color-hover: #ffffff;
     --nav-button-border: #ffffff;
     --nav-button-border-hover: #ffffff;
+}
+
+body.dark [style*="background-color:#"],
+body.dark [style*="background-color: #"],
+body.dark [style*="background-color:rgb"],
+body.dark [style*="background-color: rgb"],
+body.dark [style*="background-color:rgba"],
+body.dark [style*="background-color: rgba"],
+body.dark [style*="background:#"],
+body.dark [style*="background: #"],
+body.dark [style*="background:rgb"],
+body.dark [style*="background: rgb"],
+body.dark [style*="background:rgba"],
+body.dark [style*="background: rgba"] {
+    background: #000000 !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.dark [style*="border"] {
+    border-color: #ffffff !important;
+}
+
+body.dark [style*="box-shadow"] {
+    box-shadow: none !important;
 }
 
 body.dark *,
