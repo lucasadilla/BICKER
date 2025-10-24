@@ -9,11 +9,12 @@ import { ColorSchemeContext } from '../lib/ColorSchemeContext';
 
 function ThemeProvider({ children }) {
     const { status } = useSession();
-    const [colorScheme, setColorScheme] = useState('light');
+    const [colorScheme, setColorScheme] = useState('default');
 
     const normalizeColorScheme = (scheme) => {
-        if (!scheme) return 'light';
-        return scheme === 'blue' ? 'light' : scheme;
+        if (!scheme) return 'default';
+        if (scheme === 'blue' || scheme === 'light') return 'default';
+        return scheme;
     };
 
     // On initial load, try to use the user's last chosen scheme
@@ -27,7 +28,7 @@ function ThemeProvider({ children }) {
     }, []);
 
     useEffect(() => {
-        document.body.classList.remove('light', 'dark', 'blue');
+        document.body.classList.remove('light', 'default', 'dark', 'blue');
         const nextScheme = normalizeColorScheme(colorScheme);
         document.body.classList.add(nextScheme);
         if (typeof window !== 'undefined') {
@@ -46,7 +47,7 @@ function ThemeProvider({ children }) {
                     } else if (stored) {
                         setColorScheme(normalizeColorScheme(stored));
                     } else {
-                        setColorScheme('light');
+                        setColorScheme('default');
                     }
                 })
                 .catch(() => {
@@ -54,7 +55,7 @@ function ThemeProvider({ children }) {
                     if (stored) {
                         setColorScheme(normalizeColorScheme(stored));
                     } else {
-                        setColorScheme('light');
+                        setColorScheme('default');
                     }
                 });
         } else {
@@ -62,7 +63,7 @@ function ThemeProvider({ children }) {
             if (stored) {
                 setColorScheme(normalizeColorScheme(stored));
             } else {
-                setColorScheme('light');
+                setColorScheme('default');
             }
         }
     }, [status]);

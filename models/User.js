@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema({
     },
     colorScheme: {
         type: String,
-        default: 'light'
+        default: 'default'
     }
 });
 
