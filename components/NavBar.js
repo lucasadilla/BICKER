@@ -637,6 +637,7 @@ export default function NavBar() {
                     <button
                         style={{
                             ...buttonStyle,
+                            position: 'relative',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -675,13 +676,21 @@ export default function NavBar() {
                             <span
                                 style={{
                                     position: 'absolute',
-                                    top: '5px',
-                                    right: '5px',
+                                    top: '-2px',
+                                    right: '-2px',
+                                    transform: 'translate(50%, -50%)',
                                     backgroundColor: 'red',
                                     color: 'white',
-                                    borderRadius: '50%',
+                                    borderRadius: '999px',
                                     padding: '2px 6px',
-                                    fontSize: '12px'
+                                    fontSize: '12px',
+                                    minWidth: '20px',
+                                    height: '20px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    lineHeight: 1,
+                                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)'
                                 }}
                             >
                                 {unreadCount}
