@@ -297,10 +297,10 @@ export default function NavBar() {
 
     useEffect(() => {
         if (session) {
-            fetch('/api/notifications')
+            fetch('/api/notifications?limit=3')
                 .then(res => res.json())
                 .then(data => {
-                    setNotifications(data.notifications);
+                    setNotifications((data.notifications || []).slice(0, 3));
                     setUnreadCount(data.unreadCount);
                 })
                 .catch(() => {});
@@ -706,18 +706,54 @@ export default function NavBar() {
                             {notifications.length === 0 ? (
                                 <div style={{ padding: '10px', color: '#000000' }}>No notifications</div>
                             ) : (
-                                notifications.map((n) => (
-                                    <div
-                                        key={n._id}
-                                        style={{
+                                <>
+                                    {notifications.map((n) => {
+                                        const href = n.debateId
+                                            ? `/deliberate?id=${encodeURIComponent(n.debateId)}`
+                                            : null;
+
+                                        const baseStyle = {
                                             borderBottom: '1px solid #eee',
-                                            padding: '5px 0',
-                                            color: '#000000'
+                                            padding: '8px 0',
+                                            color: '#000000',
+                                            display: 'block',
+                                            textDecoration: 'none'
+                                        };
+
+                                        if (!href) {
+                                            return (
+                                                <div key={n._id} style={baseStyle}>
+                                                    {n.message}
+                                                </div>
+                                            );
+                                        }
+
+                                        return (
+                                            <Link
+                                                key={n._id}
+                                                href={href}
+                                                style={{ ...baseStyle, cursor: 'pointer' }}
+                                                onClick={() => setShowNotifications(false)}
+                                            >
+                                                {n.message}
+                                            </Link>
+                                        );
+                                    })}
+                                    <Link
+                                        href="/notifications"
+                                        style={{
+                                            display: 'block',
+                                            marginTop: '10px',
+                                            textAlign: 'center',
+                                            color: '#1a73e8',
+                                            fontWeight: 600,
+                                            textDecoration: 'none'
                                         }}
+                                        onClick={() => setShowNotifications(false)}
                                     >
-                                        {n.message}
-                                    </div>
-                                ))
+                                        See all notifications
+                                    </Link>
+                                </>
                             )}
                         </div>
                     )}

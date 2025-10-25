@@ -246,6 +246,25 @@ export default async function handler(req, res) {
                     };
 
                     await Deliberate.updateOne({ _id: debateId }, additionUpdates);
+
+                    const recipient =
+                        side === 'red' ? deliberation.instigatedBy : deliberation.createdBy;
+
+                    if (
+                        recipient &&
+                        recipient !== 'anonymous' &&
+                        recipient !== actor &&
+                        normalizedEmoji
+                    ) {
+                        Notification.create({
+                            userId: recipient,
+                            message: `Someone reacted ${normalizedEmoji} to your topic.`,
+                            debateId: deliberation._id,
+                            type: 'reaction'
+                        }).catch(error => {
+                            console.error('Error creating reaction notification:', error);
+                        });
+                    }
                 }
 
                 const updatedDeliberation = await Deliberate.findById(debateId);
@@ -307,11 +326,20 @@ export default async function handler(req, res) {
                 backgroundTasks.push(updateBadges(actor));
             }
 
-            if (deliberation.createdBy && deliberation.createdBy !== actor) {
+            const voteRecipient =
+                vote === 'red' ? deliberation.instigatedBy : deliberation.createdBy;
+
+            if (
+                voteRecipient &&
+                voteRecipient !== 'anonymous' &&
+                voteRecipient !== actor
+            ) {
                 backgroundTasks.push(
                     Notification.create({
-                        userId: deliberation.createdBy,
-                        message: `Your debate received a new ${vote} vote.`
+                        userId: voteRecipient,
+                        message: 'Someone agreed with your topic.',
+                        debateId: deliberation._id,
+                        type: 'vote'
                     })
                 );
             }
