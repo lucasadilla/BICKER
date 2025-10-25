@@ -66,11 +66,37 @@ export default async function handler(req, res) {
                 await updateBadges(creator);
             }
 
-            // Notify the creator that their debate was created
-            await Notification.create({
-                userId: creator,
-                message: 'Your debate has been created.'
-            });
+            const notificationTasks = [];
+
+            if (creator && creator !== 'anonymous') {
+                notificationTasks.push(
+                    Notification.create({
+                        userId: creator,
+                        message: 'Your debate has been created.',
+                        debateId: newDebate._id,
+                        type: 'response'
+                    })
+                );
+            }
+
+            if (
+                instigator &&
+                instigator !== 'anonymous' &&
+                instigator !== creator
+            ) {
+                notificationTasks.push(
+                    Notification.create({
+                        userId: instigator,
+                        message: 'Someone responded to your topic.',
+                        debateId: newDebate._id,
+                        type: 'response'
+                    })
+                );
+            }
+
+            if (notificationTasks.length > 0) {
+                await Promise.allSettled(notificationTasks);
+            }
 
             // 3) Create a Deliberate doc with the same text and reuse the debate's _id
             await Deliberate.create({

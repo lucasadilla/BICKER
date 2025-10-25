@@ -13,9 +13,30 @@ export default async function handler(req, res) {
     const userId = session.user.email;
 
     if (req.method === 'GET') {
-        const notifications = await Notification.find({ userId }).sort({ createdAt: -1 }).limit(3);
-        const unreadCount = await Notification.countDocuments({ userId, read: false });
-        return res.status(200).json({ notifications, unreadCount });
+        const { page = '1', limit = '3' } = req.query || {};
+        const pageNumber = Math.max(parseInt(page, 10) || 1, 1);
+        const limitNumber = Math.min(Math.max(parseInt(limit, 10) || 3, 1), 100);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const [notifications, unreadCount, totalCount] = await Promise.all([
+            Notification.find({ userId })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limitNumber),
+            Notification.countDocuments({ userId, read: false }),
+            Notification.countDocuments({ userId })
+        ]);
+
+        const totalPages = Math.max(Math.ceil(totalCount / limitNumber), 1);
+
+        return res.status(200).json({
+            notifications,
+            unreadCount,
+            totalCount,
+            totalPages,
+            page: pageNumber,
+            limit: limitNumber
+        });
     } else if (req.method === 'POST') {
         const { ids } = req.body;
         if (!ids || !Array.isArray(ids)) {
