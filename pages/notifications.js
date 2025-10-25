@@ -5,6 +5,7 @@ import dbConnect from '../lib/dbConnect';
 import Notification from '../models/Notification';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './api/auth/[...nextauth]';
+import { useColorScheme } from '../lib/ColorSchemeContext';
 
 const formatDate = (value) => {
     if (!value) {
@@ -23,6 +24,21 @@ const formatDate = (value) => {
 };
 
 export default function NotificationsPage({ notifications, page, totalPages }) {
+    const { colorScheme } = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
+    const pageBackground = isDarkMode ? '#000000' : '#4D94FF';
+    const headingColor = isDarkMode ? '#f5f5f5' : '#ffffff';
+    const mutedTextColor = isDarkMode ? '#d1d5db' : '#1f3a6f';
+    const containerBackground = isDarkMode ? '#111111' : 'rgba(255, 255, 255, 0.95)';
+    const containerTextColor = isDarkMode ? '#f5f5f5' : '#1f1f1f';
+    const cardBorderColor = isDarkMode ? '#1f2937' : '#e0e0e0';
+    const cardBackgroundRead = isDarkMode ? '#1a1a1a' : '#f5f7ff';
+    const cardBackgroundUnread = isDarkMode ? '#151515' : '#ffffff';
+    const cardShadow = isDarkMode
+        ? '0 6px 14px rgba(0, 0, 0, 0.4)'
+        : '0 6px 14px rgba(77, 148, 255, 0.15)';
+    const dateColor = isDarkMode ? '#9ca3af' : '#4b5563';
+
     useEffect(() => {
         if (!notifications || notifications.length === 0) {
             return;
@@ -46,94 +62,145 @@ export default function NotificationsPage({ notifications, page, totalPages }) {
     const hasNotifications = useMemo(() => notifications && notifications.length > 0, [notifications]);
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px' }}>
+        <div
+            style={{
+                minHeight: '100vh',
+                backgroundColor: pageBackground,
+                padding: '60px 20px'
+            }}
+        >
             <NextSeo title="Notifications" />
-            <h1 style={{ fontSize: '2rem', marginBottom: '20px', textAlign: 'center' }}>Notifications</h1>
-            {!hasNotifications ? (
-                <p style={{ textAlign: 'center', color: '#555555' }}>You have no notifications yet.</p>
-            ) : (
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {notifications.map((notification) => {
-                        const href = notification.debateId
-                            ? `/deliberate?id=${encodeURIComponent(notification.debateId)}`
-                            : null;
-                        const formattedDate = formatDate(notification.createdAt);
-                        const baseItemStyle = {
-                            padding: '16px',
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            marginBottom: '12px',
-                            backgroundColor: notification.read ? '#f9f9f9' : '#ffffff',
-                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                        };
-
-                        const content = (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <span style={{ fontSize: '1rem', color: '#1f1f1f' }}>{notification.message}</span>
-                                {formattedDate && (
-                                    <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>{formattedDate}</span>
-                                )}
-                            </div>
-                        );
-
-                        return (
-                            <li key={notification._id} style={baseItemStyle}>
-                                {href ? (
-                                    <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                        {content}
-                                    </Link>
-                                ) : (
-                                    content
-                                )}
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
-
-            {totalPages > 1 && (
-                <div
+            <div
+                style={{
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                    padding: '40px 20px',
+                    backgroundColor: containerBackground,
+                    borderRadius: '16px',
+                    boxShadow: isDarkMode
+                        ? '0 12px 30px rgba(0, 0, 0, 0.45)'
+                        : '0 12px 30px rgba(0, 0, 0, 0.12)',
+                    color: containerTextColor
+                }}
+            >
+                <h1
                     style={{
-                        marginTop: '30px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '16px'
+                        fontSize: '2rem',
+                        marginBottom: '20px',
+                        textAlign: 'center',
+                        color: headingColor
                     }}
                 >
-                    {page > 1 && (
-                        <Link
-                            href={`/notifications?page=${page - 1}`}
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: '#1a73e8',
-                                color: '#ffffff',
-                                borderRadius: '999px',
-                                textDecoration: 'none'
-                            }}
-                        >
-                            Previous
-                        </Link>
-                    )}
-                    <span style={{ fontSize: '0.95rem', color: '#4b5563' }}>
-                        Page {page} of {totalPages}
-                    </span>
-                    {page < totalPages && (
-                        <Link
-                            href={`/notifications?page=${page + 1}`}
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: '#1a73e8',
-                                color: '#ffffff',
-                                borderRadius: '999px',
-                                textDecoration: 'none'
-                            }}
-                        >
-                            Next
-                        </Link>
-                    )}
-                </div>
-            )}
+                    Notifications
+                </h1>
+                {!hasNotifications ? (
+                    <p style={{ textAlign: 'center', color: mutedTextColor }}>
+                        You have no notifications yet.
+                    </p>
+                ) : (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {notifications.map((notification) => {
+                            const href = notification.debateId
+                                ? `/deliberate?id=${encodeURIComponent(notification.debateId)}`
+                                : null;
+                            const formattedDate = formatDate(notification.createdAt);
+                            const baseItemStyle = {
+                                padding: '16px',
+                                border: `1px solid ${cardBorderColor}`,
+                                borderRadius: '12px',
+                                marginBottom: '12px',
+                                backgroundColor: notification.read
+                                    ? cardBackgroundRead
+                                    : cardBackgroundUnread,
+                                boxShadow: cardShadow,
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                            };
+
+                            const content = (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <span style={{ fontSize: '1rem', color: containerTextColor }}>
+                                        {notification.message}
+                                    </span>
+                                    {formattedDate && (
+                                        <span style={{ fontSize: '0.875rem', color: dateColor }}>
+                                            {formattedDate}
+                                        </span>
+                                    )}
+                                </div>
+                            );
+
+                            return (
+                                <li
+                                    key={notification._id}
+                                    style={baseItemStyle}
+                                    onMouseEnter={(event) => {
+                                        event.currentTarget.style.transform = 'translateY(-2px)';
+                                        event.currentTarget.style.boxShadow = isDarkMode
+                                            ? '0 10px 24px rgba(0, 0, 0, 0.5)'
+                                            : '0 10px 24px rgba(77, 148, 255, 0.25)';
+                                    }}
+                                    onMouseLeave={(event) => {
+                                        event.currentTarget.style.transform = 'translateY(0)';
+                                        event.currentTarget.style.boxShadow = cardShadow;
+                                    }}
+                                >
+                                    {href ? (
+                                        <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                            {content}
+                                        </Link>
+                                    ) : (
+                                        content
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+
+                {totalPages > 1 && (
+                    <div
+                        style={{
+                            marginTop: '30px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '16px'
+                        }}
+                    >
+                        {page > 1 && (
+                            <Link
+                                href={`/notifications?page=${page - 1}`}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#1a73e8',
+                                    color: '#ffffff',
+                                    borderRadius: '999px',
+                                    textDecoration: 'none'
+                                }}
+                            >
+                                Previous
+                            </Link>
+                        )}
+                        <span style={{ fontSize: '0.95rem', color: mutedTextColor }}>
+                            Page {page} of {totalPages}
+                        </span>
+                        {page < totalPages && (
+                            <Link
+                                href={`/notifications?page=${page + 1}`}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#1a73e8',
+                                    color: '#ffffff',
+                                    borderRadius: '999px',
+                                    textDecoration: 'none'
+                                }}
+                            >
+                                Next
+                            </Link>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
