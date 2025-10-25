@@ -574,25 +574,10 @@ export default function DeliberatePage({ initialDebates }) {
                                 <button
                                     key={`${side}-${emoji}`}
                                     type="button"
+                                    className={`reactionEmojiButton${isSelected ? ' selected' : ''}`}
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         handleReaction(side, emoji);
-                                    }}
-                                    style={{
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: '36px',
-                                        height: '36px',
-                                        borderRadius: '50%',
-                                        border: 'none',
-                                        backgroundColor: 'transparent',
-                                        color: buttonTextColor,
-                                        cursor: 'pointer',
-                                        fontSize: '1.25rem',
-                                        transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                                        transition: 'transform 0.15s ease, background-color 0.15s ease',
-                                        background: isSelected ? selectedEmojiBackground : 'transparent',
                                     }}
                                 >
                                     <span>{emoji}</span>
@@ -601,6 +586,48 @@ export default function DeliberatePage({ initialDebates }) {
                         })}
                     </div>
                 )}
+                <style jsx>{`
+                    .reactionEmojiButton {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 50%;
+                        border: none;
+                        background: transparent;
+                        color: ${buttonTextColor};
+                        cursor: pointer;
+                        font-size: 1.25rem;
+                        transform: scale(1);
+                        transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+                        will-change: transform;
+                        outline: none;
+                    }
+
+                    .reactionEmojiButton:hover,
+                    .reactionEmojiButton:focus-visible {
+                        transform: scale(1.15);
+                        background: ${isLeftSide
+                            ? 'rgba(255, 255, 255, 0.12)'
+                            : isDarkMode
+                                ? 'rgba(0, 0, 0, 0.12)'
+                                : 'rgba(0, 0, 0, 0.12)'};
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    }
+
+                    .reactionEmojiButton.selected {
+                        transform: scale(1.12);
+                        background: ${selectedEmojiBackground};
+                    }
+
+                    .reactionEmojiButton.selected:hover,
+                    .reactionEmojiButton.selected:focus-visible {
+                        transform: scale(1.2);
+                        background: ${selectedEmojiBackground};
+                        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+                    }
+                `}</style>
                 <div
                     style={{
                         display: 'flex',
