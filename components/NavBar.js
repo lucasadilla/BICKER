@@ -1,9 +1,249 @@
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Avatar from './Avatar';
 import { useColorScheme } from '../lib/ColorSchemeContext';
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const parseHexColor = (hex) => {
+    const normalized = hex.replace('#', '').trim();
+    if (![3, 4, 6, 8].includes(normalized.length)) {
+        return null;
+    }
+    const expand = (value) => value.split('').map((char) => `${char}${char}`).join('');
+    const value =
+        normalized.length === 3 || normalized.length === 4
+            ? expand(normalized.slice(0, 3))
+            : normalized.slice(0, 6);
+    const r = parseInt(value.slice(0, 2), 16);
+    const g = parseInt(value.slice(2, 4), 16);
+    const b = parseInt(value.slice(4, 6), 16);
+    return { r, g, b };
+};
+
+const parseRgbColor = (input) => {
+    const match = input
+        .replace(/\s+/g, '')
+        .match(/rgba?\(([-+\d.]+),([-+\d.]+),([-+\d.]+)(?:,([-+\d.]+))?\)/i);
+    if (!match) {
+        return null;
+    }
+    const r = clamp(Math.round(parseFloat(match[1])), 0, 255);
+    const g = clamp(Math.round(parseFloat(match[2])), 0, 255);
+    const b = clamp(Math.round(parseFloat(match[3])), 0, 255);
+    const alpha = match[4] !== undefined ? clamp(parseFloat(match[4]), 0, 1) : 1;
+    return alpha === 1
+        ? { r, g, b }
+        : { r: Math.round(r * alpha), g: Math.round(g * alpha), b: Math.round(b * alpha) };
+};
+
+const hslToRgb = (h, s, l) => {
+    const hueToRgb = (p, q, t) => {
+        let temp = t;
+        if (temp < 0) temp += 1;
+        if (temp > 1) temp -= 1;
+        if (temp < 1 / 6) return p + (q - p) * 6 * temp;
+        if (temp < 1 / 2) return q;
+        if (temp < 2 / 3) return p + (q - p) * (2 / 3 - temp) * 6;
+        return p;
+    };
+
+    const saturation = s / 100;
+    const lightness = l / 100;
+
+    const q =
+        lightness < 0.5
+            ? lightness * (1 + saturation)
+            : lightness + saturation - lightness * saturation;
+    const p = 2 * lightness - q;
+    const hk = (h % 360) / 360;
+
+    const r = Math.round(hueToRgb(p, q, hk + 1 / 3) * 255);
+    const g = Math.round(hueToRgb(p, q, hk) * 255);
+    const b = Math.round(hueToRgb(p, q, hk - 1 / 3) * 255);
+
+    return { r: clamp(r, 0, 255), g: clamp(g, 0, 255), b: clamp(b, 0, 255) };
+};
+
+const parseHslColor = (input) => {
+    const match = input
+        .replace(/\s+/g, '')
+        .match(/hsla?\(([-+\d.]+),([-+\d.]+)%,([-+\d.]+)%(?:,([-+\d.]+))?\)/i);
+    if (!match) {
+        return null;
+    }
+    const h = parseFloat(match[1]);
+    const s = clamp(parseFloat(match[2]), 0, 100);
+    const l = clamp(parseFloat(match[3]), 0, 100);
+    const alpha = match[4] !== undefined ? clamp(parseFloat(match[4]), 0, 1) : 1;
+    const { r, g, b } = hslToRgb(h, s, l);
+    if (alpha === 1) {
+        return { r, g, b };
+    }
+    return {
+        r: Math.round(r * alpha),
+        g: Math.round(g * alpha),
+        b: Math.round(b * alpha),
+    };
+};
+
+const parseColorString = (value) => {
+    if (!value) {
+        return null;
+    }
+    const trimmed = value.trim();
+    if (trimmed.startsWith('#')) {
+        return parseHexColor(trimmed);
+    }
+    if (trimmed.toLowerCase().startsWith('rgb')) {
+        return parseRgbColor(trimmed);
+    }
+    if (trimmed.toLowerCase().startsWith('hsl')) {
+        return parseHslColor(trimmed);
+    }
+    return null;
+};
+
+const splitGradientParts = (input) => {
+    const parts = [];
+    let buffer = '';
+    let depth = 0;
+    for (let i = 0; i < input.length; i += 1) {
+        const char = input[i];
+        if (char === '(') {
+            depth += 1;
+        }
+        if (char === ')') {
+            depth = Math.max(0, depth - 1);
+        }
+        if (char === ',' && depth === 0) {
+            parts.push(buffer.trim());
+            buffer = '';
+            continue;
+        }
+        buffer += char;
+    }
+    if (buffer.trim()) {
+        parts.push(buffer.trim());
+    }
+    return parts;
+};
+
+const parseLinearGradientStops = (gradient) => {
+    if (!gradient) {
+        return null;
+    }
+    const match = gradient.match(/linear-gradient\((.*)\)/i);
+    if (!match) {
+        return null;
+    }
+    const content = match[1];
+    const segments = splitGradientParts(content);
+    if (!segments.length) {
+        return null;
+    }
+
+    const stops = [];
+    const parts = segments[0].toLowerCase().startsWith('to ')
+        ? segments.slice(1)
+        : segments[0].match(/deg|rad|turn/)
+            ? segments.slice(1)
+            : segments;
+
+    parts.forEach((part) => {
+        const colorMatch = part.match(/(rgba?\([^\)]*\)|hsla?\([^\)]*\)|#[0-9a-fA-F]{3,8})/);
+        if (!colorMatch) {
+            return;
+        }
+        const color = parseColorString(colorMatch[1]);
+        if (!color) {
+            return;
+        }
+        const remainder = part.slice(colorMatch.index + colorMatch[0].length);
+        const positionMatch = remainder.match(/([-+]?\d*\.?\d+)%/);
+        stops.push({
+            color,
+            position: positionMatch ? clamp(parseFloat(positionMatch[1]) / 100, 0, 1) : null,
+        });
+    });
+
+    if (!stops.length) {
+        return null;
+    }
+
+    // Fill in missing positions by distributing evenly between known stops.
+    let lastKnownIndex = -1;
+    for (let i = 0; i < stops.length; i += 1) {
+        if (stops[i].position !== null) {
+            if (lastKnownIndex >= 0 && i - lastKnownIndex > 1) {
+                const start = stops[lastKnownIndex].position ?? 0;
+                const end = stops[i].position;
+                const gap = i - lastKnownIndex;
+                for (let j = 1; j < gap; j += 1) {
+                    stops[lastKnownIndex + j].position = start + ((end - start) * j) / gap;
+                }
+            }
+            lastKnownIndex = i;
+        }
+    }
+
+    if (lastKnownIndex === -1) {
+        const step = stops.length === 1 ? 0 : 1 / (stops.length - 1);
+        stops.forEach((stop, index) => {
+            stop.position = index * step;
+        });
+    } else {
+        for (let i = 0; i < stops.length; i += 1) {
+            if (stops[i].position === null) {
+                stops[i].position = stops[Math.max(lastKnownIndex, 0)].position ?? 0;
+            }
+        }
+    }
+
+    return stops.sort((a, b) => a.position - b.position);
+};
+
+const getColorAtPosition = (stops, position) => {
+    if (!stops || !stops.length) {
+        return { r: 0, g: 0, b: 0 };
+    }
+    if (stops.length === 1) {
+        return stops[0].color;
+    }
+    const target = clamp(position, 0, 1);
+    for (let i = 1; i < stops.length; i += 1) {
+        const current = stops[i];
+        const previous = stops[i - 1];
+        if (target <= current.position) {
+            const span = current.position - previous.position;
+            const t = span === 0 ? 0 : (target - previous.position) / span;
+            const r = Math.round(previous.color.r + (current.color.r - previous.color.r) * t);
+            const g = Math.round(previous.color.g + (current.color.g - previous.color.g) * t);
+            const b = Math.round(previous.color.b + (current.color.b - previous.color.b) * t);
+            return { r, g, b };
+        }
+    }
+    return stops[stops.length - 1].color;
+};
+
+const getRelativeLuminance = ({ r, g, b }) => {
+    const srgb = [r, g, b].map((channel) => {
+        const normalized = channel / 255;
+        return normalized <= 0.03928
+            ? normalized / 12.92
+            : Math.pow((normalized + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+};
+
+const pickContrastingColor = (rgb) => (getRelativeLuminance(rgb) > 0.55 ? '#000000' : '#ffffff');
+
+const getCssVariableValue = (styles, name, fallback) => {
+    const value = styles.getPropertyValue(name);
+    return value ? value.trim() : fallback;
+};
 
 export default function NavBar() {
     const { data: session } = useSession();
@@ -19,6 +259,9 @@ export default function NavBar() {
     const userMenuRef = useRef(null);
     const notificationRef = useRef(null);
     const mobileMenuRef = useRef(null);
+    const navRef = useRef(null);
+    const gradientStopsRef = useRef(null);
+    const [isNavBackgroundLight, setIsNavBackgroundLight] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -85,7 +328,6 @@ export default function NavBar() {
 
     const navTextColor = 'var(--nav-button-text, #ffffff)';
     const isDarkMode = colorScheme === 'dark';
-    const isTargetDarkPage = isDarkMode && ['/', '/debate', '/deliberate'].includes(router.pathname);
     const defaultBorderColor = 'var(--nav-button-border, rgba(255, 255, 255, 0.6))';
     const defaultHoverBorderColor = 'var(--nav-button-border-hover, rgba(255, 255, 255, 0.85))';
 
@@ -140,8 +382,131 @@ export default function NavBar() {
         handleMouseLeave(e);
     };
 
+    const updateButtonColors = useCallback(() => {
+        if (typeof window === 'undefined' || !navRef.current) {
+            return;
+        }
+
+        const buttons = navRef.current.querySelectorAll('button[data-uses-dynamic-color="true"]');
+        if (!buttons.length) {
+            return;
+        }
+
+        const rootStyles = getComputedStyle(document.documentElement);
+        const fallbackTextColor = getCssVariableValue(rootStyles, '--nav-button-text', '#ffffff');
+        const fallbackBorderColor = getCssVariableValue(rootStyles, '--nav-button-border', 'rgba(255, 255, 255, 0.6)');
+        const fallbackHoverBorderColor = getCssVariableValue(rootStyles, '--nav-button-border-hover', 'rgba(255, 255, 255, 0.85)');
+
+        const applyFallback = () => {
+            buttons.forEach((button) => {
+                button.style.color = fallbackTextColor;
+                button.dataset.textColor = fallbackTextColor;
+                button.style.borderColor = fallbackBorderColor;
+                button.dataset.borderColor = fallbackBorderColor;
+                button.dataset.hoverBorderColor = fallbackHoverBorderColor;
+                button.dataset.hoverTextColor = fallbackTextColor;
+            });
+        };
+
+        const stops = gradientStopsRef.current;
+
+        if (!isDarkMode || !stops || !stops.length) {
+            applyFallback();
+            return;
+        }
+
+        buttons.forEach((button) => {
+            const rect = button.getBoundingClientRect();
+            if (!rect || (rect.width === 0 && rect.height === 0)) {
+                return;
+            }
+            const centerX = rect.left + rect.width / 2;
+            const ratio = window.innerWidth ? clamp(centerX / window.innerWidth, 0, 1) : 0;
+            const backgroundColor = getColorAtPosition(stops, ratio);
+            const textColor = pickContrastingColor(backgroundColor);
+            const borderColor = textColor === '#000000' ? 'rgba(0, 0, 0, 0.6)' : fallbackBorderColor;
+            const hoverBorderColor = textColor === '#000000' ? 'rgba(0, 0, 0, 0.85)' : fallbackHoverBorderColor;
+
+            button.style.color = textColor;
+            button.dataset.textColor = textColor;
+            button.style.borderColor = borderColor;
+            button.dataset.borderColor = borderColor;
+            button.dataset.hoverBorderColor = hoverBorderColor;
+            button.dataset.hoverTextColor = textColor;
+        });
+    }, [isDarkMode]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
+
+        const root = document.documentElement;
+
+        const updateGradientData = () => {
+            const styles = getComputedStyle(root);
+            const gradientValue = styles.getPropertyValue('--nav-gradient').trim();
+            const parsedStops = gradientValue ? parseLinearGradientStops(gradientValue) : null;
+            gradientStopsRef.current = parsedStops && parsedStops.length ? parsedStops : null;
+
+            if (isDarkMode && gradientStopsRef.current && gradientStopsRef.current.length) {
+                const midColor = getColorAtPosition(gradientStopsRef.current, 0.5);
+                const luminance = getRelativeLuminance(midColor);
+                setIsNavBackgroundLight(luminance > 0.6);
+            } else {
+                setIsNavBackgroundLight(false);
+            }
+        };
+
+        updateGradientData();
+        updateButtonColors();
+
+        let observer;
+        if (typeof MutationObserver !== 'undefined') {
+            observer = new MutationObserver(() => {
+                updateGradientData();
+                updateButtonColors();
+            });
+            observer.observe(root, { attributes: true, attributeFilter: ['style'] });
+        }
+
+        const handleResize = () => {
+            updateGradientData();
+            updateButtonColors();
+        };
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            if (observer) {
+                observer.disconnect();
+            }
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [isDarkMode, router.pathname, updateButtonColors]);
+
+    useEffect(() => {
+        updateButtonColors();
+    }, [
+        updateButtonColors,
+        isMobile,
+        isMobileMenuOpen,
+        showNotifications,
+        showUserMenu,
+        session,
+        notifications.length,
+    ]);
+
+    const mobileMenuBackground = isDarkMode && isNavBackgroundLight
+        ? 'rgba(255, 255, 255, 0.9)'
+        : 'rgba(0, 0, 0, 0.8)';
+    const mobileMenuTextColor = isDarkMode && isNavBackgroundLight ? '#000000' : navTextColor;
+    const mobileMenuBorderColor = isDarkMode && isNavBackgroundLight
+        ? 'rgba(0, 0, 0, 0.6)'
+        : defaultBorderColor;
+
     return (
         <nav
+            ref={navRef}
             style={{
                 display: 'flex',
                 justifyContent: 'center',
@@ -178,6 +543,9 @@ export default function NavBar() {
                     onMouseLeave={handleCircularMouseLeave}
                     data-border-color={defaultBorderColor}
                     data-text-color={navTextColor}
+                    data-hover-border-color={defaultHoverBorderColor}
+                    data-hover-text-color={navTextColor}
+                    data-uses-dynamic-color="true"
                 >
                     <svg 
                         xmlns="http://www.w3.org/2000/svg" 
@@ -277,14 +645,16 @@ export default function NavBar() {
                             height: isMobile ? '54px' : '44px',
                             borderRadius: '50%',
                             backgroundColor: 'transparent',
-                            borderColor: isTargetDarkPage ? '#000000' : 'var(--nav-button-border, rgba(31, 31, 31, 0.4))',
-                            color: isTargetDarkPage ? '#000000' : navTextColor
+                            borderColor: defaultBorderColor,
+                            color: navTextColor
                         }}
                         onMouseEnter={handleCircularMouseEnter}
                         onMouseLeave={handleCircularMouseLeave}
-                        data-border-color={isTargetDarkPage ? '#000000' : 'var(--nav-button-border, rgba(31, 31, 31, 0.4))'}
-                        data-hover-border-color={isTargetDarkPage ? '#000000' : undefined}
-                        data-text-color={isTargetDarkPage ? '#000000' : navTextColor}
+                        data-border-color={defaultBorderColor}
+                        data-hover-border-color={defaultHoverBorderColor}
+                        data-text-color={navTextColor}
+                        data-hover-text-color={navTextColor}
+                        data-uses-dynamic-color="true"
                         onClick={handleBellClick}
                     >
                         <svg
@@ -369,27 +739,23 @@ export default function NavBar() {
             {/* Desktop menu */}
             {!isMobile && (
                 <>
-                    {[
+                    {[ 
                         { label: 'Instigate', path: '/instigate' },
                         { label: 'Debate', path: '/debate' },
                         { label: 'Deliberate', path: '/deliberate' },
                         { label: 'Leaderboard', path: '/leaderboard' }
                     ].map(({ label, path }) => {
-                        const shouldUseDarkDesktop = isTargetDarkPage && (label === 'Deliberate' || label === 'Leaderboard');
-                        const desktopTextColor = shouldUseDarkDesktop ? '#000000' : buttonStyle.color;
-                        const desktopBorderColor = shouldUseDarkDesktop ? '#000000' : buttonStyle.borderColor;
                         return (
                             <Link key={label} href={path} passHref>
                                 <button
                                     style={{
-                                        ...buttonStyle,
-                                        color: desktopTextColor,
-                                        borderColor: desktopBorderColor
+                                        ...buttonStyle
                                     }}
-                                    data-text-color={desktopTextColor}
-                                    data-border-color={desktopBorderColor}
-                                    data-hover-border-color={shouldUseDarkDesktop ? '#000000' : undefined}
-                                    data-hover-text-color={shouldUseDarkDesktop ? '#000000' : undefined}
+                                    data-text-color={navTextColor}
+                                    data-border-color={defaultBorderColor}
+                                    data-hover-border-color={defaultHoverBorderColor}
+                                    data-hover-text-color={navTextColor}
+                                    data-uses-dynamic-color="true"
                                     onMouseEnter={handleMouseEnter}
                                     onMouseLeave={handleMouseLeave}
                                 >
@@ -404,6 +770,11 @@ export default function NavBar() {
                             onMouseEnter={handleMouseEnter}
                             onMouseLeave={handleMouseLeave}
                             onClick={() => signIn('google')}
+                            data-text-color={navTextColor}
+                            data-border-color={defaultBorderColor}
+                            data-hover-border-color={defaultHoverBorderColor}
+                            data-hover-text-color={navTextColor}
+                            data-uses-dynamic-color="true"
                         >
                             Sign In
                         </button>
@@ -420,7 +791,7 @@ export default function NavBar() {
                         top: '74px',
                         left: 0,
                         right: 0,
-                        background: isTargetDarkPage ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)',
+                        background: mobileMenuBackground,
                         padding: '20px',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                         display: 'flex',
@@ -429,14 +800,12 @@ export default function NavBar() {
                         zIndex: 1000
                     }}
                 >
-                    {[
+                    {[ 
                         { label: 'Instigate', path: '/instigate' },
                         { label: 'Debate', path: '/debate' },
                         { label: 'Deliberate', path: '/deliberate' },
                         { label: 'Leaderboard', path: '/leaderboard' }
                     ].map(({ label, path }) => {
-                        const mobileTextColor = isTargetDarkPage ? '#000000' : navTextColor;
-                        const mobileBorderColor = isTargetDarkPage ? '#000000' : 'rgba(255, 255, 255, 0.7)';
                         return (
                             <Link key={label} href={path} passHref>
                                 <button
@@ -447,13 +816,14 @@ export default function NavBar() {
                                         padding: '15px 20px',
                                         fontSize: '18px',
                                         backdropFilter: 'none',
-                                        color: mobileTextColor,
-                                        borderColor: mobileBorderColor
+                                        color: mobileMenuTextColor,
+                                        borderColor: mobileMenuBorderColor
                                     }}
-                                    data-text-color={mobileTextColor}
-                                    data-border-color={mobileBorderColor}
-                                    data-hover-border-color={isTargetDarkPage ? '#000000' : undefined}
-                                    data-hover-text-color={isTargetDarkPage ? '#000000' : undefined}
+                                    data-text-color={mobileMenuTextColor}
+                                    data-border-color={mobileMenuBorderColor}
+                                    data-hover-border-color={defaultHoverBorderColor}
+                                    data-hover-text-color={mobileMenuTextColor}
+                                    data-uses-dynamic-color="true"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     {label}
@@ -470,13 +840,14 @@ export default function NavBar() {
                                 padding: '15px 20px',
                                 fontSize: '18px',
                                 backdropFilter: 'none',
-                                color: isTargetDarkPage ? '#000000' : navTextColor,
-                                borderColor: isTargetDarkPage ? '#000000' : 'rgba(255, 255, 255, 0.7)'
+                                color: mobileMenuTextColor,
+                                borderColor: mobileMenuBorderColor
                             }}
-                            data-text-color={isTargetDarkPage ? '#000000' : navTextColor}
-                            data-border-color={isTargetDarkPage ? '#000000' : 'rgba(255, 255, 255, 0.7)'}
-                            data-hover-border-color={isTargetDarkPage ? '#000000' : undefined}
-                            data-hover-text-color={isTargetDarkPage ? '#000000' : undefined}
+                            data-text-color={mobileMenuTextColor}
+                            data-border-color={mobileMenuBorderColor}
+                            data-hover-border-color={defaultHoverBorderColor}
+                            data-hover-text-color={mobileMenuTextColor}
+                            data-uses-dynamic-color="true"
                             onClick={() => { setIsMobileMenuOpen(false); signIn('google'); }}
                         >
                             Sign In
