@@ -38,6 +38,14 @@ const UserSchema = new mongoose.Schema({
     selectedBadge: {
         type: String
     },
+    supporters: {
+        type: [String],
+        default: []
+    },
+    supports: {
+        type: [String],
+        default: []
+    },
     colorScheme: {
         type: String,
         default: 'default'

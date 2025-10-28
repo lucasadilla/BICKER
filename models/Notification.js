@@ -8,8 +8,12 @@ const NotificationSchema = new mongoose.Schema({
     debateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Deliberate', default: null },
     type: {
         type: String,
-        enum: ['response', 'vote', 'reaction'],
+        enum: ['response', 'vote', 'reaction', 'supporter'],
         default: 'response'
+    },
+    link: {
+        type: String,
+        default: null
     }
 }, { timestamps: true });
 
