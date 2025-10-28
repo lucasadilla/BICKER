@@ -717,8 +717,11 @@ export default function NavBar() {
                             ) : (
                                 <>
                                     {notifications.map((n) => {
-                                        const href = n.link
-                                            ? n.link
+                                        const directUrl = typeof n.url === 'string' && n.url.trim() !== ''
+                                            ? n.url.trim()
+                                            : null;
+                                        const href = directUrl
+                                            ? directUrl
                                             : n.debateId
                                                 ? `/deliberate?id=${encodeURIComponent(n.debateId)}`
                                                 : null;

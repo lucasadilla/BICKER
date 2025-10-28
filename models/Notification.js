@@ -11,7 +11,7 @@ const NotificationSchema = new mongoose.Schema({
         enum: ['response', 'vote', 'reaction', 'supporter'],
         default: 'response'
     },
-    link: {
+    url: {
         type: String,
         default: null
     }
