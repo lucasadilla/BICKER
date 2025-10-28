@@ -100,8 +100,11 @@ export default function NotificationsPage({ notifications, page, totalPages }) {
                 ) : (
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                         {notifications.map((notification) => {
-                            const href = notification.link
-                                ? notification.link
+                            const directUrl = typeof notification.url === 'string' && notification.url.trim() !== ''
+                                ? notification.url.trim()
+                                : null;
+                            const href = directUrl
+                                ? directUrl
                                 : notification.debateId
                                     ? `/deliberate?id=${encodeURIComponent(notification.debateId)}`
                                     : null;
@@ -239,13 +242,33 @@ export async function getServerSideProps(context) {
         Notification.countDocuments({ userId: session.user.email })
     ]);
 
-    const serializedNotifications = notifications.map((notification) => ({
-        _id: notification._id.toString(),
-        message: notification.message,
-        read: notification.read || false,
-        debateId: notification.debateId ? notification.debateId.toString() : null,
-        createdAt: notification.createdAt ? notification.createdAt.toISOString() : null
-    }));
+    const serializedNotifications = notifications.map((notification) => {
+        let createdAt = null;
+        if (notification.createdAt) {
+            const dateValue = notification.createdAt instanceof Date
+                ? notification.createdAt
+                : new Date(notification.createdAt);
+            if (!Number.isNaN(dateValue.getTime())) {
+                createdAt = dateValue.toISOString();
+            }
+        }
+
+        const directUrl = typeof notification.url === 'string' && notification.url.trim() !== ''
+            ? notification.url.trim()
+            : typeof notification.link === 'string' && notification.link.trim() !== ''
+                ? notification.link.trim()
+                : null;
+
+        return {
+            _id: notification._id.toString(),
+            message: notification.message,
+            read: notification.read || false,
+            debateId: notification.debateId ? notification.debateId.toString() : null,
+            createdAt,
+            url: directUrl,
+            type: notification.type || 'response'
+        };
+    });
 
     const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
 

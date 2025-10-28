@@ -146,7 +146,8 @@ export default async function handler(req, res) {
                     userId: targetEmail,
                     message: 'You have a new supporter',
                     type: 'supporter',
-                    link: profileUrl
+                    debateId: null,
+                    url: profileUrl || null
                 });
             } catch (error) {
                 // Swallow notification errors so they do not block the follow action

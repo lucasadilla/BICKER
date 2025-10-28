@@ -22,15 +22,48 @@ export default async function handler(req, res) {
             Notification.find({ userId })
                 .sort({ createdAt: -1 })
                 .skip(skip)
-                .limit(limitNumber),
+                .limit(limitNumber)
+                .lean(),
             Notification.countDocuments({ userId, read: false }),
             Notification.countDocuments({ userId })
         ]);
 
         const totalPages = Math.max(Math.ceil(totalCount / limitNumber), 1);
 
+        const serializedNotifications = notifications.map((notification) => {
+            let createdAt = null;
+            if (notification.createdAt) {
+                const dateValue = notification.createdAt instanceof Date
+                    ? notification.createdAt
+                    : new Date(notification.createdAt);
+                if (!Number.isNaN(dateValue.getTime())) {
+                    createdAt = dateValue.toISOString();
+                }
+            }
+
+            const debateId = notification.debateId
+                ? notification.debateId.toString()
+                : null;
+
+            const directUrl = typeof notification.url === 'string' && notification.url.trim() !== ''
+                ? notification.url.trim()
+                : typeof notification.link === 'string' && notification.link.trim() !== ''
+                    ? notification.link.trim()
+                    : null;
+
+            return {
+                _id: notification._id?.toString?.() || notification._id,
+                message: notification.message,
+                read: Boolean(notification.read),
+                debateId,
+                type: notification.type || 'response',
+                createdAt,
+                url: directUrl
+            };
+        });
+
         return res.status(200).json({
-            notifications,
+            notifications: serializedNotifications,
             unreadCount,
             totalCount,
             totalPages,
