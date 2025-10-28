@@ -23,7 +23,9 @@ export const authOptions = {
                             streak: 0,
                             badges: [],
                             username: user.name || '',
-                            profilePicture: user.image || ''
+                            profilePicture: user.image || '',
+                            supporters: [],
+                            supports: []
                         }
                     },
                     { upsert: true }
@@ -41,6 +43,10 @@ export const authOptions = {
                     session.user.image = dbUser.profilePicture || session.user.image;
                     session.user.badges = dbUser.badges || [];
                     session.user.selectedBadge = dbUser.selectedBadge || '';
+                    session.user.supporters = dbUser.supporters || [];
+                    session.user.supports = dbUser.supports || [];
+                    session.user.supporterCount = session.user.supporters.length;
+                    session.user.supportsCount = session.user.supports.length;
                 }
             }
             return session;

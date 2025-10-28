@@ -100,9 +100,11 @@ export default function NotificationsPage({ notifications, page, totalPages }) {
                 ) : (
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                         {notifications.map((notification) => {
-                            const href = notification.debateId
-                                ? `/deliberate?id=${encodeURIComponent(notification.debateId)}`
-                                : null;
+                            const href = notification.link
+                                ? notification.link
+                                : notification.debateId
+                                    ? `/deliberate?id=${encodeURIComponent(notification.debateId)}`
+                                    : null;
                             const formattedDate = formatDate(notification.createdAt);
                             const baseItemStyle = {
                                 padding: '16px',

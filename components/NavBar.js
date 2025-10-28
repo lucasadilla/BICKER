@@ -717,9 +717,11 @@ export default function NavBar() {
                             ) : (
                                 <>
                                     {notifications.map((n) => {
-                                        const href = n.debateId
-                                            ? `/deliberate?id=${encodeURIComponent(n.debateId)}`
-                                            : null;
+                                        const href = n.link
+                                            ? n.link
+                                            : n.debateId
+                                                ? `/deliberate?id=${encodeURIComponent(n.debateId)}`
+                                                : null;
 
                                         const baseStyle = {
                                             borderBottom: '1px solid #eee',
