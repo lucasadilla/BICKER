@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import dbConnect from '../../lib/dbConnect';
 import User from '../../models/User';
@@ -7,6 +7,8 @@ import { Badge } from '../../components/ui/badge';
 import badgeImages from '../../lib/badgeImages';
 import badgeDescriptions from '../../lib/badgeDescriptions';
 import { useColorScheme } from '../../lib/ColorSchemeContext';
+import { useSession, signIn } from 'next-auth/react';
+import SupporterList from '../../components/SupporterList';
 import {
   Select,
   SelectContent,
@@ -24,12 +26,17 @@ import {
 } from '../../components/ui/pagination';
 import { sortDeliberates } from '../../lib/sortDeliberates';
 
-export default function UserProfile({ user, debates }) {
+export default function UserProfile({ user, debates, requestedIdentifier }) {
+  const { data: session } = useSession();
   const [isMobile, setIsMobile] = useState(false);
   const [sort, setSort] = useState('newest');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [displayedDebates, setDisplayedDebates] = useState([]);
+  const supporterListRef = useRef(null);
+  const [supportSummary, setSupportSummary] = useState(null);
+  const [isUpdatingSupport, setIsUpdatingSupport] = useState(false);
+  const [supportError, setSupportError] = useState('');
   const { colorScheme } = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
@@ -49,6 +56,46 @@ export default function UserProfile({ user, debates }) {
     setTotalPages(Math.ceil(sorted.length / 25) || 1);
   }, [debates, sort, page]);
 
+  const handleSupportData = (payload) => {
+    if (!payload) return;
+    setSupportSummary(payload);
+  };
+
+  const handleToggleSupport = async () => {
+    if (!session) {
+      await signIn('google');
+      return;
+    }
+
+    if (!requestedIdentifier) {
+      return;
+    }
+
+    setSupportError('');
+    setIsUpdatingSupport(true);
+    try {
+      const res = await fetch('/api/user/supports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ identifier: requestedIdentifier }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update support status');
+      }
+
+      const payload = await res.json();
+      supporterListRef.current?.setData(payload);
+    } catch (error) {
+      console.error(error);
+      setSupportError('Unable to update support status. Please try again.');
+    } finally {
+      setIsUpdatingSupport(false);
+    }
+  };
+
   if (!user) {
     return <div style={{ padding: '20px', maxWidth: '800px', margin: '80px auto' }}>User not found.</div>;
   }
@@ -62,6 +109,20 @@ export default function UserProfile({ user, debates }) {
   const bubbleTextColor = isDarkMode ? '#f5f5f5' : 'white';
   const redVoteColor = isDarkMode ? '#e0e0e0' : '#FF4D4D';
   const blueVoteColor = isDarkMode ? '#bfbfbf' : '#4D94FF';
+
+  const supportButtonStyles = {
+    padding: '10px 16px',
+    borderRadius: '999px',
+    border: `1px solid ${isDarkMode ? '#333333' : 'rgba(255, 255, 255, 0.7)'}`,
+    backgroundColor: isDarkMode ? '#111111' : 'rgba(255, 255, 255, 0.2)',
+    color: pageTextColor,
+    fontWeight: 600,
+    cursor: isUpdatingSupport ? 'wait' : 'pointer',
+    alignSelf: 'flex-start',
+  };
+
+  const showSupportToggle = Boolean(session && supportSummary && !supportSummary.isSelf);
+  const showSignInSupport = !session;
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: pageBackground, color: pageTextColor, paddingTop: '80px' }}>
@@ -99,6 +160,36 @@ export default function UserProfile({ user, debates }) {
                 </div>
               </div>
             )}
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {showSupportToggle && (
+                <button
+                  type="button"
+                  style={supportButtonStyles}
+                  onClick={handleToggleSupport}
+                  disabled={isUpdatingSupport}
+                >
+                  {supportSummary?.isSupporting ? 'Supporting' : 'Support'}
+                </button>
+              )}
+              {showSignInSupport && (
+                <button
+                  type="button"
+                  style={supportButtonStyles}
+                  onClick={() => signIn('google')}
+                >
+                  Sign in to support
+                </button>
+              )}
+              <SupporterList
+                ref={supporterListRef}
+                identifier={requestedIdentifier}
+                onDataUpdate={handleSupportData}
+                textColor={pageTextColor}
+                borderColor={isDarkMode ? '#333333' : 'rgba(255, 255, 255, 0.7)'}
+                darkMode={isDarkMode}
+              />
+              {supportError && <span style={{ color: '#f87171', fontSize: '0.85rem' }}>{supportError}</span>}
+            </div>
           </div>
         </div>
         <h2 style={{ marginTop: '20px' }}>Debates Participated</h2>
@@ -256,6 +347,7 @@ export async function getServerSideProps({ params }) {
         selectedBadge: user.selectedBadge || '',
       },
       debates,
+      requestedIdentifier: identifier,
     },
   };
 }

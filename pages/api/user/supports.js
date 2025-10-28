@@ -24,6 +24,37 @@ const buildProfileUrl = (user) => {
     return `/user/${encodeURIComponent(identifier)}`;
 };
 
+const loadUserSummaries = async (emails) => {
+    if (!Array.isArray(emails) || emails.length === 0) {
+        return [];
+    }
+
+    const users = await User.find(
+        { email: { $in: emails } },
+        { email: 1, username: 1, profilePicture: 1 }
+    ).lean();
+
+    const userMap = new Map(
+        users.map((user) => [user.email, user])
+    );
+
+    return emails.map((email) => {
+        const match = userMap.get(email) || {};
+        const username = typeof match.username === 'string' && match.username.trim() !== ''
+            ? match.username.trim()
+            : '';
+        const displayIdentifier = username || email;
+
+        return {
+            email,
+            username,
+            displayName: displayIdentifier,
+            profilePicture: match.profilePicture || '',
+            profilePath: `/user/${encodeURIComponent(displayIdentifier)}`
+        };
+    });
+};
+
 export default async function handler(req, res) {
     await dbConnect();
     const session = await getServerSession(req, res, authOptions);
@@ -63,6 +94,12 @@ export default async function handler(req, res) {
             : await User.findOne({ email: viewerEmail }, { supports: 1 }).lean();
         const viewerSupports = viewerUser?.supports || [];
 
+        const [supporterSummaries, supportSummaries, viewerSupportSummaries] = await Promise.all([
+            loadUserSummaries(supporters),
+            loadUserSummaries(supports),
+            loadUserSummaries(viewerSupports)
+        ]);
+
         return res.status(200).json({
             supporters,
             supports,
@@ -71,7 +108,10 @@ export default async function handler(req, res) {
             isSupporting: supporters.includes(viewerEmail),
             isSelf,
             viewerSupports,
-            viewerSupportsCount: viewerSupports.length
+            viewerSupportsCount: viewerSupports.length,
+            supporterSummaries,
+            supportSummaries,
+            viewerSupportSummaries
         });
     }
 
@@ -122,6 +162,12 @@ export default async function handler(req, res) {
         const supports = updatedTarget?.supports || [];
         const viewerSupports = updatedViewer?.supports || [];
 
+        const [supporterSummaries, supportSummaries, viewerSupportSummaries] = await Promise.all([
+            loadUserSummaries(supporters),
+            loadUserSummaries(supports),
+            loadUserSummaries(viewerSupports)
+        ]);
+
         return res.status(200).json({
             supporters,
             supports,
@@ -129,7 +175,11 @@ export default async function handler(req, res) {
             supportsCount: supports.length,
             isSupporting: supporters.includes(viewerEmail),
             viewerSupports,
-            viewerSupportsCount: viewerSupports.length
+            viewerSupportsCount: viewerSupports.length,
+            supporterSummaries,
+            supportSummaries,
+            viewerSupportSummaries,
+            isSelf
         });
     }
 
