@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/badge';
 import badgeImages from '../lib/badgeImages';
 import badgeDescriptions from '../lib/badgeDescriptions';
 import { useColorScheme } from '../lib/ColorSchemeContext';
+import SupporterList from '../components/SupporterList';
 import {
   Select,
   SelectContent,
@@ -50,6 +51,7 @@ export default function MyStats() {
   const secondaryVoteColor = isDarkMode ? '#d0d0d0' : '#4D94FF';
   const controlBackground = isDarkMode ? '#111111' : 'rgba(255, 255, 255, 0.95)';
   const controlTextColor = isDarkMode ? '#f5f5f5' : '#1f2937';
+  const counterBorderColor = isDarkMode ? '#1f1f1f' : 'rgba(255, 255, 255, 0.6)';
 
   useEffect(() => {
     if (!session) return;
@@ -94,6 +96,16 @@ export default function MyStats() {
     <div style={{ minHeight: '100vh', backgroundColor: pageBackground, paddingTop: '60px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', color: headingColor }}>
         <h1 className="heading-1" style={{ textAlign: 'center', marginBottom: '10px', color: headingColor }}>My Debates</h1>
+        {session?.user?.email && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <SupporterList
+              identifier={session.user.email}
+              textColor={headingColor}
+              borderColor={counterBorderColor}
+              darkMode={isDarkMode}
+            />
+          </div>
+        )}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div
             style={{

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useColorScheme } from '../lib/ColorSchemeContext';
 import badgeDescriptions from '../lib/badgeDescriptions';
 import { useRouter } from 'next/router';
+import SupporterList from '../components/SupporterList';
 
 export default function Profile() {
   const { data: session, status } = useSession();
@@ -100,6 +101,17 @@ export default function Profile() {
     >
       <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', color: textColor }}>
         <h1>Edit Profile</h1>
+        {session?.user?.email && (
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ marginBottom: '12px' }}>Support Network</h2>
+            <SupporterList
+              identifier={session.user.email}
+              textColor={textColor}
+              borderColor={fieldBorderColor}
+              darkMode={isDarkMode}
+            />
+          </div>
+        )}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <label style={labelStyle}>Profile Picture</label>
           <input type="file" accept="image/*" onChange={handleFileChange} style={inputStyle} />
