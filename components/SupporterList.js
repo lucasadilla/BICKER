@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 
 const defaultState = {
@@ -169,12 +169,18 @@ const SupporterList = forwardRef(function SupporterList(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeModal, setActiveModal] = useState(null);
+  const initialLoadRef = useRef(true);
+  const inFlightRef = useRef(false);
 
-  const fetchData = useCallback(async () => {
-    if (!identifier) {
+  const fetchData = useCallback(async ({ showLoader } = {}) => {
+    if (!identifier || inFlightRef.current) {
       return null;
     }
-    setIsLoading(true);
+    const shouldShowLoader = showLoader ?? initialLoadRef.current;
+    if (shouldShowLoader) {
+      setIsLoading(true);
+    }
+    inFlightRef.current = true;
     setError('');
     try {
       const res = await fetch('/api/user/supports?identifier=' + encodeURIComponent(identifier));
@@ -196,9 +202,17 @@ const SupporterList = forwardRef(function SupporterList(
       setError('Unable to load supporter information.');
       return null;
     } finally {
-      setIsLoading(false);
+      inFlightRef.current = false;
+      initialLoadRef.current = false;
+      if (shouldShowLoader) {
+        setIsLoading(false);
+      }
     }
   }, [identifier, onDataUpdate]);
+
+  useEffect(() => {
+    initialLoadRef.current = true;
+  }, [identifier]);
 
   useEffect(() => {
     if (autoFetch) {
@@ -207,7 +221,7 @@ const SupporterList = forwardRef(function SupporterList(
   }, [autoFetch, fetchData]);
 
   useImperativeHandle(ref, () => ({
-    refresh: fetchData,
+    refresh: (options = {}) => fetchData({ showLoader: true, ...options }),
     setData: (next) => {
       setDataState((prev) => {
         const merged = { ...prev, ...next };
