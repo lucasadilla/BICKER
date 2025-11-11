@@ -130,7 +130,7 @@ struct UserDebateCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(debate.instigateText)
+                Text(debate.instigateText ?? "")
                     .font(.system(.body, design: .rounded))
                     .foregroundColor(.white)
                     .padding(12)
@@ -141,7 +141,7 @@ struct UserDebateCard: View {
 
             HStack {
                 Spacer()
-                Text(debate.debateText)
+                Text(debate.debateText ?? "")
                     .font(.system(.body, design: .rounded))
                     .foregroundColor(.white)
                     .padding(12)
@@ -151,10 +151,10 @@ struct UserDebateCard: View {
             }
 
             HStack {
-                Text("Red: \(debate.votesRed)")
+                Text("Red: \(debate.votesRed ?? 0)")
                     .foregroundColor(.white)
                 Spacer()
-                Text("Blue: \(debate.votesBlue)")
+                Text("Blue: \(debate.votesBlue ?? 0)")
                     .foregroundColor(.white)
             }
 
@@ -219,7 +219,10 @@ final class MyStatsViewModel: ObservableObject {
             }
         } catch {
             await MainActor.run {
-                self.error = ViewError(message: error.localizedDescription)
+                let errorMsg = error.localizedDescription.contains("401") || error.localizedDescription.contains("Unauthorized")
+                    ? "Please sign in to view your stats"
+                    : error.localizedDescription
+                self.error = ViewError(message: errorMsg)
             }
         }
     }

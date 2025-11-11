@@ -46,12 +46,22 @@ struct APIService {
         if !(200...299).contains(httpResponse.statusCode) {
             if let error = try? decoder.decode(ServerErrorResponse.self, from: data) {
                 throw APIError.serverError(error.error)
+            } else if let errorString = String(data: data, encoding: .utf8) {
+                throw APIError.serverError("Request failed: \(errorString)")
             } else {
                 throw APIError.serverError("Request failed with status code \(httpResponse.statusCode)")
             }
         }
 
-        return try decoder.decode(T.self, from: data)
+        do {
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            // Log the actual response for debugging
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("Failed to decode response: \(responseString)")
+            }
+            throw APIError.serverError("Failed to decode response: \(error.localizedDescription)")
+        }
     }
 
     private func send(request: URLRequest) async throws {
@@ -110,6 +120,14 @@ extension APIService {
     func fetchDeliberate(id: String) async throws -> Deliberate {
         let request = try request(for: "/api/deliberate/\(id)", method: .get)
         return try await send(Deliberate.self, request: request)
+    }
+    
+    // Helper to make models more flexible with decoding
+    private var flexibleDecoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        // Allow missing fields
+        return decoder
     }
     
     func voteOnDeliberate(id: String, side: String) async throws -> Deliberate {
