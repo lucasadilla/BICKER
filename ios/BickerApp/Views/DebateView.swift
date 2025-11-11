@@ -17,10 +17,10 @@ struct DebateView: View {
                 // Mobile: Stack vertically like web
                 VStack(spacing: 0) {
                     // Top: Red - Instigate Display
-        ZStack {
+                    ZStack {
                         Color(red: 1.0, green: 0.3, blue: 0.3)
-            .ignoresSafeArea()
-
+                            .ignoresSafeArea()
+                        
                         VStack(spacing: 20) {
                             // Search bar at top
                             VStack(spacing: 12) {
@@ -61,13 +61,15 @@ struct DebateView: View {
                             .padding(.horizontal, 20)
                             .padding(.top, 60)
                             
-                            // Current instigate - clickable to go to next
-                            if let instigate = viewModel.currentInstigate {
-                                Button {
-                                    Task { @MainActor in
-                                        viewModel.nextInstigate()
-                                    }
-                                } label: {
+                            // Current instigate - entire area clickable
+                            Spacer()
+                            
+                            Button {
+                                Task { @MainActor in
+                                    viewModel.nextInstigate()
+                                }
+                            } label: {
+                                if let instigate = viewModel.currentInstigate {
                                     VStack(spacing: 16) {
                                         Text(instigate.text)
                                             .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -75,17 +77,17 @@ struct DebateView: View {
                                             .multilineTextAlignment(.center)
                                             .padding(.horizontal, 20)
                                     }
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                } else {
+                                    Text("No topics available")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal, 20)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 }
-                                .buttonStyle(.plain)
-                            } else {
-                                Text("No topics available")
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 20)
                             }
-                            
-                            Spacer()
+                            .buttonStyle(.plain)
                         }
                     }
                     .frame(height: geometry.size.height / 2)
@@ -96,12 +98,8 @@ struct DebateView: View {
                             .ignoresSafeArea()
                         
                         VStack(spacing: 20) {
-                            Text("Your Response")
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(.top, 20)
-                            
                             TextEditor(text: $viewModel.debateText)
+                                .padding(.top, 20)
                                 .font(.system(size: 20, design: .rounded))
                                 .foregroundColor(.black)
                                 .frame(height: 150)
@@ -165,87 +163,89 @@ struct DebateView: View {
                         VStack(spacing: 20) {
                             // Search bar at top
                             VStack(spacing: 12) {
-            HStack {
-                Image(systemName: "magnifyingglass")
+                                HStack {
+                                    Image(systemName: "magnifyingglass")
                                         .foregroundColor(.white.opacity(0.7))
-                TextField("Search prompts", text: $viewModel.searchTerm)
+                                    TextField("Search prompts", text: $viewModel.searchTerm)
                                         .foregroundColor(.white)
-                    .textInputAutocapitalization(.sentences)
-                    .disableAutocorrection(false)
-                    .submitLabel(.search)
-                    .onChange(of: viewModel.searchTerm) { oldValue, newValue in
-                        Task {
-                            await viewModel.loadInstigates(searchTerm: newValue.isEmpty ? nil : newValue)
-                        }
-                    }
-                    .onSubmit {
-                        Task {
-                            await viewModel.loadInstigates(searchTerm: viewModel.searchTerm.isEmpty ? nil : viewModel.searchTerm)
-                        }
-                    }
-                if !viewModel.searchTerm.isEmpty {
-                    Button {
+                                        .textInputAutocapitalization(.sentences)
+                                        .disableAutocorrection(false)
+                                        .submitLabel(.search)
+                                        .onChange(of: viewModel.searchTerm) { oldValue, newValue in
+                                            Task {
+                                                await viewModel.loadInstigates(searchTerm: newValue.isEmpty ? nil : newValue)
+                                            }
+                                        }
+                                        .onSubmit {
+                                            Task {
+                                                await viewModel.loadInstigates(searchTerm: viewModel.searchTerm.isEmpty ? nil : viewModel.searchTerm)
+                                            }
+                                        }
+                                    if !viewModel.searchTerm.isEmpty {
+                                        Button {
                                             Task { @MainActor in
-                        viewModel.searchTerm = ""
-                            await viewModel.loadInstigates()
-                        }
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
+                                                viewModel.searchTerm = ""
+                                                await viewModel.loadInstigates()
+                                            }
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
                                                 .foregroundColor(.white.opacity(0.7))
-                    }
-                }
-            }
-            .padding(14)
+                                        }
+                                    }
+                                }
+                                .padding(14)
                                 .background(.ultraThinMaterial)
                                 .clipShape(RoundedRectangle(cornerRadius: 18))
                             }
                             .padding(.horizontal, 20)
                             .padding(.top, 60)
                             
-                            // Current instigate - clickable to go to next
-                            if let instigate = viewModel.currentInstigate {
-                                Button {
-                                    Task { @MainActor in
-                    viewModel.nextInstigate()
-                }
-                                } label: {
+                            // Current instigate - entire area clickable
+                            Spacer()
+                            
+                            Button {
+                                Task { @MainActor in
+                                    viewModel.nextInstigate()
+                                }
+                            } label: {
+                                if let instigate = viewModel.currentInstigate {
                                     VStack(spacing: 16) {
-                    Text(instigate.text)
+                                        Text(instigate.text)
                                             .font(.system(size: 36, weight: .bold, design: .rounded))
                                             .foregroundColor(.white)
                                             .multilineTextAlignment(.center)
                                             .padding(.horizontal, 20)
                                     }
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                } else {
+                                    Text("No topics available")
+                                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal, 20)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 }
-                                .buttonStyle(.plain)
-            } else {
-                                Text("No topics available")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 20)
                             }
-                            
-                            Spacer()
+                            .buttonStyle(.plain)
                             
                             // Instigate carousel
-            if !viewModel.instigates.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(viewModel.instigates) { instigate in
-                            Button {
+                            if !viewModel.instigates.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(viewModel.instigates) { instigate in
+                                            Button {
                                                 Task { @MainActor in
-                                viewModel.selectInstigate(instigate)
+                                                    viewModel.selectInstigate(instigate)
                                                 }
-                            } label: {
-                                Text(instigate.text)
-                                    .font(.system(.subheadline, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .lineLimit(2)
-                                    .multilineTextAlignment(.leading)
-                                    .padding(12)
+                                            } label: {
+                                                Text(instigate.text)
+                                                    .font(.system(.subheadline, design: .rounded))
+                                                    .foregroundColor(.white)
+                                                    .lineLimit(2)
+                                                    .multilineTextAlignment(.leading)
+                                                    .padding(12)
                                                     .frame(width: 200, alignment: .leading)
-                                    .background(
+                                                    .background(
                                                         RoundedRectangle(cornerRadius: 16)
                                                             .fill(instigate.id == viewModel.currentInstigate?.id ? Color.white.opacity(0.3) : Color.white.opacity(0.15))
                                                     )
@@ -266,12 +266,8 @@ struct DebateView: View {
                             .ignoresSafeArea()
                         
                         VStack(spacing: 20) {
-                            Text("Your Response")
-                                .font(.system(size: 32, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(.top, 60)
-                            
             TextEditor(text: $viewModel.debateText)
+                                .padding(.top, 60)
                                 .font(.system(size: 28, design: .rounded))
                                 .foregroundColor(.black)
                                 .frame(height: 400)
