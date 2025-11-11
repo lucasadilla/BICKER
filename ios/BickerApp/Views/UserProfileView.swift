@@ -84,6 +84,53 @@ struct UserProfileView: View {
                                 }
                             }
                             
+                            // Stats
+                            HStack(spacing: 16) {
+                                VStack(spacing: 4) {
+                                    Text("\(viewModel.debates.count)")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("Debates")
+                                        .font(.system(.caption, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.8))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(.ultraThinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                
+                                if let points = user.points {
+                                    VStack(spacing: 4) {
+                                        Text("\(points)")
+                                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("Points")
+                                            .font(.system(.caption, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
+                                
+                                if let streak = user.streak {
+                                    VStack(spacing: 4) {
+                                        Text("\(streak)")
+                                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("Streak")
+                                            .font(.system(.caption, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                            
                             // Debates
                             if !viewModel.debates.isEmpty {
                                 VStack(alignment: .leading, spacing: 12) {
@@ -135,7 +182,7 @@ struct UserProfileView: View {
 }
 
 struct UserProfileDebateCard: View {
-    let debate: Deliberate
+    let debate: UserProfileDebate
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -184,7 +231,7 @@ struct UserProfileDebateCard: View {
 @MainActor
 final class UserProfileViewModel: ObservableObject {
     @Published var user: User?
-    @Published var debates: [Deliberate] = []
+    @Published var debates: [UserProfileDebate] = []
     @Published var isLoading = false
     @Published var error: ViewError?
     
@@ -202,6 +249,7 @@ final class UserProfileViewModel: ObservableObject {
         guard !isLoading else { return }
         await MainActor.run {
             isLoading = true
+            error = nil
         }
         defer {
             Task { @MainActor in
@@ -216,7 +264,12 @@ final class UserProfileViewModel: ObservableObject {
             }
         } catch {
             await MainActor.run {
-                self.error = ViewError(message: error.localizedDescription)
+                // Check if it's a 404 error
+                if error.localizedDescription.contains("404") || error.localizedDescription.contains("not found") {
+                    self.error = ViewError(message: "User not found")
+                } else {
+                    self.error = ViewError(message: error.localizedDescription)
+                }
             }
         }
     }

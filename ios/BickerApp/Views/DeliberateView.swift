@@ -184,7 +184,7 @@ struct DeliberateCardView: View {
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting || hasVoted)
                     .frame(height: showVotes ? geometry.size.height * redPercent : geometry.size.height / 2)
-                    .animation(.spring(response: 0.8, dampingFraction: 0.8), value: redPercent)
+                    .animation(.spring(response: 1.2, dampingFraction: 0.75), value: redPercent)
                     
                     // Bottom Side: Blue - Debate
                     Button {
@@ -262,7 +262,7 @@ struct DeliberateCardView: View {
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting || hasVoted)
                     .frame(height: showVotes ? geometry.size.height * bluePercent : geometry.size.height / 2)
-                    .animation(.spring(response: 0.8, dampingFraction: 0.8), value: bluePercent)
+                    .animation(.spring(response: 1.2, dampingFraction: 0.75), value: bluePercent)
                 }
             } else {
                 // Desktop: Side by side
@@ -343,7 +343,7 @@ struct DeliberateCardView: View {
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting || hasVoted)
                     .frame(width: showVotes ? geometry.size.width * redPercent : geometry.size.width / 2)
-                    .animation(.spring(response: 0.8, dampingFraction: 0.8), value: redPercent)
+                    .animation(.spring(response: 1.2, dampingFraction: 0.75), value: redPercent)
                     
                     // Right Side: Blue - Debate
                     Button {
@@ -421,7 +421,7 @@ struct DeliberateCardView: View {
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting || hasVoted)
                     .frame(width: showVotes ? geometry.size.width * bluePercent : geometry.size.width / 2)
-                    .animation(.spring(response: 0.8, dampingFraction: 0.8), value: bluePercent)
+                    .animation(.spring(response: 1.2, dampingFraction: 0.75), value: bluePercent)
                 }
             }
         }
@@ -507,9 +507,12 @@ final class DeliberateViewModel: ObservableObject {
                     instigator: optimistic.instigator,
                     votedBy: optimistic.votedBy
                 )
-                deliberates[index] = optimisticDeliberate
-                if index == currentIndex {
-                    currentDeliberate = optimisticDeliberate
+                // Use withAnimation for smooth transition
+                withAnimation(.spring(response: 1.2, dampingFraction: 0.75)) {
+                    deliberates[index] = optimisticDeliberate
+                    if index == currentIndex {
+                        currentDeliberate = optimisticDeliberate
+                    }
                 }
             }
         }
@@ -524,7 +527,7 @@ final class DeliberateViewModel: ObservableObject {
             let updated = try await api.voteOnDeliberate(id: current.id, side: side)
             await MainActor.run {
                 if index < deliberates.count {
-                    // Update with real API response
+                    // Update with real API response (no animation needed, values should be same or very close)
                     deliberates[index] = updated
                     if index == currentIndex {
                         currentDeliberate = updated

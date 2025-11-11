@@ -32,7 +32,27 @@ struct User: Identifiable, Codable, Hashable {
 
 struct UserProfile: Codable {
     let user: User
-    let debates: [Deliberate]
+    let debates: [UserProfileDebate]
     let requestedIdentifier: String
+}
+
+struct UserProfileDebate: Identifiable, Codable {
+    let id: String
+    let instigateText: String?
+    let debateText: String?
+    let votesRed: Int?
+    let votesBlue: Int?
+    let createdAt: Date?
+    let updatedAt: Date?
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case instigateText
+        case debateText
+        case votesRed
+        case votesBlue
+        case createdAt
+        case updatedAt
+    }
 }
 
