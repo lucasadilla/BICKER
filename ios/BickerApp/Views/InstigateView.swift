@@ -22,9 +22,6 @@ struct InstigateView: View {
                 .padding(24)
             }
         }
-        .navigationTitle("Instigate")
-        .toolbarBackground(Color.clear, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
         .task {
             viewModel.updateAPI(appState.apiService)
             await viewModel.loadInstigates()

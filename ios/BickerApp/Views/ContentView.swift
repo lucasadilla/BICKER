@@ -67,126 +67,127 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            GeometryReader { geometry in
-                let isCompact = geometry.size.width < 600
-                VStack(spacing: 0) {
-                    // Banner
-                    if let url = bannerViewModel.bannerURL {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .empty:
-                                ProgressView()
-                                    .tint(.white)
-                                    .frame(maxWidth: .infinity)
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: .infinity)
-                            case .failure:
-                                EmptyView()
-                            @unknown default:
-                                EmptyView()
-                            }
+        GeometryReader { geometry in
+            let isCompact = geometry.size.width < 600
+            VStack(spacing: 0) {
+                // Banner
+                if let url = bannerViewModel.bannerURL {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .tint(.white)
+                                .frame(maxWidth: .infinity)
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                        case .failure:
+                            EmptyView()
+                        @unknown default:
+                            EmptyView()
                         }
-                        .frame(maxHeight: 200)
                     }
-                    
-                    // Split screen
-                    if isCompact {
-                        VStack(spacing: 0) {
-                            // Top: Instigate (Red)
-                            NavigationLink {
-                                InstigateView()
-                            } label: {
-                                ZStack {
-                                    Color(red: 1.0, green: 0.3, blue: 0.3)
-                                    
-                                    VStack(spacing: 12) {
-                                        Text("Instigate")
-                                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        Text("Click to Begin")
-                                            .font(.system(size: 18, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
+                    .frame(maxHeight: 200)
+                }
+                
+                // Split screen
+                if isCompact {
+                    VStack(spacing: 0) {
+                        // Top: Instigate (Red)
+                        NavigationLink {
+                            InstigateView()
+                        } label: {
+                            ZStack {
+                                Color(red: 1.0, green: 0.3, blue: 0.3)
+                                    .ignoresSafeArea()
+                                
+                                VStack(spacing: 12) {
+                                    Text("Instigate")
+                                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("Click to Begin")
+                                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.9))
                                 }
-                                .frame(height: geometry.size.height / 2)
                             }
-                            .buttonStyle(.plain)
-                            
-                            // Bottom: Debate (Blue)
-                            NavigationLink {
-                                DebateView()
-                            } label: {
-                                ZStack {
-                                    Color(red: 0.3, green: 0.58, blue: 1.0)
-                                    
-                                    VStack(spacing: 12) {
-                                        Text("Debate")
-                                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        Text("Click to Join")
-                                            .font(.system(size: 18, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                }
-                                .frame(height: geometry.size.height / 2)
-                            }
-                            .buttonStyle(.plain)
+                            .frame(height: (geometry.size.height - (bannerViewModel.bannerURL != nil ? 200 : 0)) / 2)
                         }
-                    } else {
-                        HStack(spacing: 0) {
-                            // Left: Instigate (Red)
-                            NavigationLink {
-                                InstigateView()
-                            } label: {
-                                ZStack {
-                                    Color(red: 1.0, green: 0.3, blue: 0.3)
-                                    
-                                    VStack(spacing: 12) {
-                                        Text("Instigate")
-                                            .font(.system(size: 40, weight: .bold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        Text("Click to Begin")
-                                            .font(.system(size: 20, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
+                        .buttonStyle(.plain)
+                        
+                        // Bottom: Debate (Blue)
+                        NavigationLink {
+                            DebateView()
+                        } label: {
+                            ZStack {
+                                Color(red: 0.3, green: 0.58, blue: 1.0)
+                                    .ignoresSafeArea()
+                                
+                                VStack(spacing: 12) {
+                                    Text("Debate")
+                                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("Click to Join")
+                                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.9))
                                 }
-                                .frame(width: geometry.size.width / 2)
                             }
-                            .buttonStyle(.plain)
-                            
-                            // Right: Debate (Blue)
-                            NavigationLink {
-                                DebateView()
-                            } label: {
-                                ZStack {
-                                    Color(red: 0.3, green: 0.58, blue: 1.0)
-                                    
-                                    VStack(spacing: 12) {
-                                        Text("Debate")
-                                            .font(.system(size: 40, weight: .bold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        Text("Click to Join")
-                                            .font(.system(size: 20, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                }
-                                .frame(width: geometry.size.width / 2)
-                            }
-                            .buttonStyle(.plain)
+                            .frame(height: (geometry.size.height - (bannerViewModel.bannerURL != nil ? 200 : 0)) / 2)
                         }
+                        .buttonStyle(.plain)
+                    }
+                } else {
+                    HStack(spacing: 0) {
+                        // Left: Instigate (Red)
+                        NavigationLink {
+                            InstigateView()
+                        } label: {
+                            ZStack {
+                                Color(red: 1.0, green: 0.3, blue: 0.3)
+                                    .ignoresSafeArea()
+                                
+                                VStack(spacing: 12) {
+                                    Text("Instigate")
+                                        .font(.system(size: 40, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("Click to Begin")
+                                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.9))
+                                }
+                            }
+                            .frame(width: geometry.size.width / 2)
+                        }
+                        .buttonStyle(.plain)
+                        
+                        // Right: Debate (Blue)
+                        NavigationLink {
+                            DebateView()
+                        } label: {
+                            ZStack {
+                                Color(red: 0.3, green: 0.58, blue: 1.0)
+                                    .ignoresSafeArea()
+                                
+                                VStack(spacing: 12) {
+                                    Text("Debate")
+                                        .font(.system(size: 40, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("Click to Join")
+                                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.9))
+                                }
+                            }
+                            .frame(width: geometry.size.width / 2)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
-            .navigationTitle("Bicker")
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .task {
-                bannerViewModel.api = appState.apiService
-                await bannerViewModel.loadBanner()
-            }
+        }
+        .ignoresSafeArea()
+        .task {
+            bannerViewModel.api = appState.apiService
+            await bannerViewModel.loadBanner()
         }
     }
 
