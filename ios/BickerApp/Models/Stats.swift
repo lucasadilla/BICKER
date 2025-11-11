@@ -13,13 +13,13 @@ struct StatsDebate: Identifiable, Codable, Hashable {
     let updatedAt: Date?
     
     struct Reactions: Codable, Hashable {
-        let red: [String: Int]
-        let blue: [String: Int]
+        let red: [String: Int]?
+        let blue: [String: Int]?
     }
     
     struct ReactionTotals: Codable, Hashable {
-        let red: Int
-        let blue: Int
+        let red: Int?
+        let blue: Int?
     }
     
     enum CodingKeys: String, CodingKey {

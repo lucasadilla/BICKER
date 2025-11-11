@@ -70,78 +70,115 @@ struct HomeView: View {
         NavigationStack {
             GeometryReader { geometry in
                 let isCompact = geometry.size.width < 600
-                ZStack {
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 1.0, green: 0.3, blue: 0.3),
-                            Color(red: 0.3, green: 0.58, blue: 1.0)
-                        ]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .ignoresSafeArea()
-
-                    VStack(spacing: 24) {
-                        if let url = bannerViewModel.bannerURL {
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .empty:
-                                    ProgressView()
-                                        .tint(.white)
-                                        .frame(maxWidth: .infinity)
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(maxWidth: 600)
-                                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                                        .shadow(radius: 10)
-                                case .failure:
-                                    EmptyView()
-                                @unknown default:
-                                    EmptyView()
-                                }
+                VStack(spacing: 0) {
+                    // Banner
+                    if let url = bannerViewModel.bannerURL {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .tint(.white)
+                                    .frame(maxWidth: .infinity)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity)
+                            case .failure:
+                                EmptyView()
+                            @unknown default:
+                                EmptyView()
                             }
-                            .padding(.top, 16)
                         }
-
-                        if isCompact {
-                            VStack(spacing: 16) {
-                                landingOption(
-                                    title: "Instigate",
-                                    subtitle: "Tap to begin",
-                                    color: Color(red: 1.0, green: 0.3, blue: 0.3),
-                                    destination: InstigateView()
-                                )
-                                landingOption(
-                                    title: "Debate",
-                                    subtitle: "Tap to join",
-                                    color: Color(red: 0.3, green: 0.58, blue: 1.0),
-                                    destination: DebateView()
-                                )
+                        .frame(maxHeight: 200)
+                    }
+                    
+                    // Split screen
+                    if isCompact {
+                        VStack(spacing: 0) {
+                            // Top: Instigate (Red)
+                            NavigationLink {
+                                InstigateView()
+                            } label: {
+                                ZStack {
+                                    Color(red: 1.0, green: 0.3, blue: 0.3)
+                                    
+                                    VStack(spacing: 12) {
+                                        Text("Instigate")
+                                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("Click to Begin")
+                                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
+                                }
+                                .frame(height: geometry.size.height / 2)
                             }
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 32)
-                        } else {
-                            HStack(spacing: 20) {
-                                landingOption(
-                                    title: "Instigate",
-                                    subtitle: "Tap to begin",
-                                    color: Color(red: 1.0, green: 0.3, blue: 0.3),
-                                    destination: InstigateView()
-                                )
-                                landingOption(
-                                    title: "Debate",
-                                    subtitle: "Tap to join",
-                                    color: Color(red: 0.3, green: 0.58, blue: 1.0),
-                                    destination: DebateView()
-                                )
+                            .buttonStyle(.plain)
+                            
+                            // Bottom: Debate (Blue)
+                            NavigationLink {
+                                DebateView()
+                            } label: {
+                                ZStack {
+                                    Color(red: 0.3, green: 0.58, blue: 1.0)
+                                    
+                                    VStack(spacing: 12) {
+                                        Text("Debate")
+                                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("Click to Join")
+                                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
+                                }
+                                .frame(height: geometry.size.height / 2)
                             }
-                            .padding(.horizontal, 40)
-                            .frame(maxHeight: .infinity)
+                            .buttonStyle(.plain)
+                        }
+                    } else {
+                        HStack(spacing: 0) {
+                            // Left: Instigate (Red)
+                            NavigationLink {
+                                InstigateView()
+                            } label: {
+                                ZStack {
+                                    Color(red: 1.0, green: 0.3, blue: 0.3)
+                                    
+                                    VStack(spacing: 12) {
+                                        Text("Instigate")
+                                            .font(.system(size: 40, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("Click to Begin")
+                                            .font(.system(size: 20, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
+                                }
+                                .frame(width: geometry.size.width / 2)
+                            }
+                            .buttonStyle(.plain)
+                            
+                            // Right: Debate (Blue)
+                            NavigationLink {
+                                DebateView()
+                            } label: {
+                                ZStack {
+                                    Color(red: 0.3, green: 0.58, blue: 1.0)
+                                    
+                                    VStack(spacing: 12) {
+                                        Text("Debate")
+                                            .font(.system(size: 40, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("Click to Join")
+                                            .font(.system(size: 20, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
+                                }
+                                .frame(width: geometry.size.width / 2)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .navigationTitle("Bicker")
@@ -153,36 +190,6 @@ struct HomeView: View {
         }
     }
 
-    private func landingOption<Destination: View>(
-        title: String,
-        subtitle: String,
-        color: Color,
-        destination: Destination
-    ) -> some View {
-        NavigationLink {
-            destination
-        } label: {
-            ZStack {
-                RoundedRectangle(cornerRadius: 32, style: .continuous)
-                    .fill(color)
-                    .shadow(color: .black.opacity(0.2), radius: 12, x: 0, y: 6)
-
-                VStack(spacing: 12) {
-                    Text(title)
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                    Text(subtitle.uppercased())
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color.white.opacity(0.9))
-                        .tracking(1.5)
-                }
-                .padding(24)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 220)
-        }
-        .buttonStyle(.plain)
-    }
 }
 
 struct ContentView_Previews: PreviewProvider {

@@ -18,8 +18,8 @@ struct Deliberate: Identifiable, Codable, Hashable {
     let votedBy: [Vote]?
     
     struct Reactions: Codable, Hashable {
-        let red: [String: Int]
-        let blue: [String: Int]
+        let red: [String: Int]?
+        let blue: [String: Int]?
     }
     
     struct MyReactions: Codable, Hashable {
@@ -33,7 +33,7 @@ struct Deliberate: Identifiable, Codable, Hashable {
     }
     
     struct Vote: Codable, Hashable {
-        let vote: String
+        let vote: String?
         let timestamp: Date?
     }
     
