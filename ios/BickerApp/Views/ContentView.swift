@@ -13,8 +13,7 @@ struct ContentView: View {
     }
 
     var body: some View {
-        if isSignedIn {
-            TabView(selection: $selectedTab) {
+        TabView(selection: $selectedTab) {
             HomeView(selectedTab: $selectedTab)
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
@@ -57,13 +56,6 @@ struct ContentView: View {
             }
             await bannerViewModel.loadBanner()
             await checkAuthStatus()
-        }
-        } else {
-            SignInView(isSignedIn: $isSignedIn)
-                .environmentObject(appState)
-                .task {
-                    await checkAuthStatus()
-                }
         }
     }
     
@@ -131,6 +123,7 @@ struct SignInView: View {
         }
         
         let baseURL = appState.configuration.baseURL
+        // Use the NextAuth sign-in page directly
         guard let signInURL = URL(string: "\(baseURL.absoluteString)/api/auth/signin/google") else {
             await MainActor.run {
                 error = ViewError(message: "Invalid sign-in URL")
@@ -139,22 +132,39 @@ struct SignInView: View {
         }
         
         // Use ASWebAuthenticationSession for OAuth flow
+        // We'll use the base URL as the callback scheme since NextAuth redirects to the same domain
+        // The session cookies will be stored and shared with URLSession automatically
         await MainActor.run {
+            let callbackScheme = baseURL.scheme ?? "http"
             let session = ASWebAuthenticationSession(
                 url: signInURL,
-                callbackURLScheme: "bicker"
+                callbackURLScheme: callbackScheme
             ) { callbackURL, error in
                 Task { @MainActor in
                     if let error = error {
-                        self.error = ViewError(message: error.localizedDescription)
+                        // Error code 2 usually means user cancelled or callback URL mismatch
+                        let nsError = error as NSError
+                        if nsError.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+                            // User cancelled - don't show error
+                            return
+                        }
+                        // For other errors, try checking auth status anyway since cookies might be set
+                        try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                        await checkAuthStatus()
                     } else if callbackURL != nil {
-                        // Sign in successful - check auth status
+                        // Sign in successful - cookies should be set
+                        // Check auth status after a brief delay to allow cookies to propagate
+                        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                        await checkAuthStatus()
+                    } else {
+                        // No callback but no error - might have succeeded
+                        try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
                         await checkAuthStatus()
                     }
                 }
             }
             session.presentationContextProvider = SignInPresentationContextProvider()
-            session.prefersEphemeralWebBrowserSession = false
+            session.prefersEphemeralWebBrowserSession = false  // Important: allows cookie sharing
             session.start()
         }
     }
@@ -165,9 +175,10 @@ struct SignInView: View {
             await MainActor.run {
                 isSignedIn = true
             }
-        } catch let err {
+        } catch {
+            // Not signed in - this is expected for optional sign-in
             await MainActor.run {
-                error = ViewError(message: "Sign in failed. Please try again.")
+                isSignedIn = false
             }
         }
     }
