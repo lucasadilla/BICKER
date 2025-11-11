@@ -55,10 +55,24 @@ struct APIService {
 
         do {
             return try decoder.decode(T.self, from: data)
-        } catch {
-            // Log the actual response for debugging
+        } catch let decodingError as DecodingError {
+            // Log detailed decoding error
             if let responseString = String(data: data, encoding: .utf8) {
-                print("Failed to decode response: \(responseString)")
+                print("=== DECODING ERROR ===")
+                print("Response: \(responseString.prefix(500))")
+                print("Error: \(decodingError)")
+                if case .keyNotFound(let key, let context) = decodingError {
+                    print("Missing key: \(key.stringValue) at path: \(context.codingPath)")
+                }
+                if case .typeMismatch(let type, let context) = decodingError {
+                    print("Type mismatch: expected \(type) at path: \(context.codingPath)")
+                }
+                print("=====================")
+            }
+            throw APIError.serverError("Failed to decode response: \(decodingError.localizedDescription)")
+        } catch {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("Failed to decode response: \(responseString.prefix(500))")
             }
             throw APIError.serverError("Failed to decode response: \(error.localizedDescription)")
         }

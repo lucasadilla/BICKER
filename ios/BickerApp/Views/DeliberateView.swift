@@ -11,156 +11,185 @@ struct DeliberateView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(red: 1.0, green: 0.3, blue: 0.3),
-                        Color(red: 0.3, green: 0.58, blue: 1.0)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-
+            GeometryReader { geometry in
+                let isCompact = geometry.size.width < 600
+                
                 if viewModel.isLoading {
-                    ProgressView()
-                        .tint(.white)
+                    ZStack {
+                        Color(red: 1.0, green: 0.3, blue: 0.3)
+                            .ignoresSafeArea()
+                        ProgressView()
+                            .tint(.white)
+                    }
                 } else if let current = viewModel.currentDeliberate {
-                    ScrollView {
-                        VStack(spacing: 24) {
-                            // Instigate bubble (red/left)
-                            HStack {
-                                VStack(alignment: .leading, spacing: 12) {
+                    let totalVotes = (current.votesRed ?? 0) + (current.votesBlue ?? 0)
+                    let redPercent = totalVotes > 0 ? Double(current.votesRed ?? 0) / Double(totalVotes) : 0.5
+                    let bluePercent = 1.0 - redPercent
+                    let showVotes = totalVotes > 0
+                    
+                    HStack(spacing: 0) {
+                        // Left Side: Red - Instigate
+                        Button {
+                            Task {
+                                await viewModel.vote(side: "red")
+                            }
+                        } label: {
+                            ZStack {
+                                Color(red: 1.0, green: 0.3, blue: 0.3)
+                                    .ignoresSafeArea()
+                                
+                                VStack(spacing: 20) {
                                     Text(current.instigateText ?? "")
-                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                        .font(.system(size: isCompact ? 24 : 36, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
-                                        .padding(20)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(Color(red: 1.0, green: 0.3, blue: 0.3))
-                                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                                        .shadow(radius: 8)
-                                }
-                                Spacer()
-                            }
-                            .padding(.horizontal, 24)
-
-                            // Debate bubble (blue/right)
-                            HStack {
-                                Spacer()
-                                VStack(alignment: .trailing, spacing: 12) {
-                                    Text(current.debateText ?? "")
-                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .padding(20)
-                                        .frame(maxWidth: .infinity, alignment: .trailing)
-                                        .background(Color(red: 0.3, green: 0.58, blue: 1.0))
-                                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                                        .shadow(radius: 8)
-                                }
-                            }
-                            .padding(.horizontal, 24)
-
-                            // Vote buttons
-                            HStack(spacing: 20) {
-                                Button {
-                                    Task {
-                                        await viewModel.vote(side: "red")
-                                    }
-                                } label: {
-                                    Text("Vote Red")
-                                        .font(.system(.headline, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color(red: 1.0, green: 0.3, blue: 0.3))
-                                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                                }
-                                .disabled(viewModel.isVoting)
-
-                                Button {
-                                    Task {
-                                        await viewModel.vote(side: "blue")
-                                    }
-                                } label: {
-                                    Text("Vote Blue")
-                                        .font(.system(.headline, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color(red: 0.3, green: 0.58, blue: 1.0))
-                                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                                }
-                                .disabled(viewModel.isVoting)
-                            }
-                            .padding(.horizontal, 24)
-
-                            // Vote counts
-                            HStack {
-                                Text("Red: \(current.votesRed ?? 0)")
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Text("Blue: \(current.votesBlue ?? 0)")
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.horizontal, 24)
-
-                            // Reactions
-                            if let reactions = current.reactions {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("Reactions")
-                                        .font(.system(.headline, design: .rounded))
-                                        .foregroundColor(.white)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal, 20)
                                     
-                                    HStack {
-                                        VStack {
-                                            Text("Red")
-                                                .foregroundColor(.white)
-                                            ForEach(Array(reactions.red.keys.sorted()), id: \.self) { emoji in
-                                                Text("\(emoji) \(reactions.red[emoji] ?? 0)")
-                                                    .foregroundColor(.white)
+                                    if let instigator = current.instigator {
+                                        HStack(spacing: 8) {
+                                            if let profilePicture = instigator.profilePicture,
+                                               let url = URL(string: profilePicture) {
+                                                AsyncImage(url: url) { phase in
+                                                    if case .success(let image) = phase {
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 24, height: 24)
+                                                            .clipShape(Circle())
+                                                    }
+                                                }
                                             }
-                                        }
-                                        Spacer()
-                                        VStack {
-                                            Text("Blue")
-                                                .foregroundColor(.white)
-                                            ForEach(Array(reactions.blue.keys.sorted()), id: \.self) { emoji in
-                                                Text("\(emoji) \(reactions.blue[emoji] ?? 0)")
-                                                    .foregroundColor(.white)
+                                            if let username = instigator.username {
+                                                Text(username)
+                                                    .font(.system(.caption, design: .rounded))
+                                                    .foregroundColor(.white.opacity(0.9))
                                             }
                                         }
                                     }
+                                    
+                                    // Reactions
+                                    if let reactions = current.reactions, let redReactions = reactions.red, !redReactions.isEmpty {
+                                        VStack(spacing: 8) {
+                                            ForEach(Array(redReactions.keys.sorted()), id: \.self) { emoji in
+                                                Text("\(emoji) \(redReactions[emoji] ?? 0)")
+                                                    .font(.system(.caption, design: .rounded))
+                                                    .foregroundColor(.white.opacity(0.9))
+                                            }
+                                        }
+                                    }
+                                    
+                                    if showVotes {
+                                        Text("Votes: \(current.votesRed ?? 0)")
+                                            .font(.system(size: isCompact ? 20 : 28, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.white)
+                                    }
+                                    
+                                    Spacer()
                                 }
-                                .padding(20)
-                                .background(.ultraThinMaterial)
-                                .clipShape(RoundedRectangle(cornerRadius: 20))
-                                .padding(.horizontal, 24)
+                                .padding(.top, 60)
                             }
-
-                            // Next button
-                            Button {
-                                Task { @MainActor in
-                                    viewModel.nextDeliberate()
-                                }
-                            } label: {
-                                Text("Next Debate")
-                                    .font(.system(.headline, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(.ultraThinMaterial)
-                                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                            }
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 32)
                         }
-                        .padding(.top, 24)
+                        .buttonStyle(.plain)
+                        .disabled(viewModel.isVoting)
+                        .frame(width: isCompact ? geometry.size.width : (showVotes ? geometry.size.width * redPercent : geometry.size.width / 2))
+                        .animation(.easeInOut(duration: 1.0), value: redPercent)
+                        
+                        // Right Side: Blue - Debate
+                        Button {
+                            Task {
+                                await viewModel.vote(side: "blue")
+                            }
+                        } label: {
+                            ZStack {
+                                Color(red: 0.3, green: 0.58, blue: 1.0)
+                                    .ignoresSafeArea()
+                                
+                                VStack(spacing: 20) {
+                                    Text(current.debateText ?? "")
+                                        .font(.system(size: isCompact ? 24 : 36, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal, 20)
+                                    
+                                    if let creator = current.creator {
+                                        HStack(spacing: 8) {
+                                            if let profilePicture = creator.profilePicture,
+                                               let url = URL(string: profilePicture) {
+                                                AsyncImage(url: url) { phase in
+                                                    if case .success(let image) = phase {
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 24, height: 24)
+                                                            .clipShape(Circle())
+                                                    }
+                                                }
+                                            }
+                                            if let username = creator.username {
+                                                Text(username)
+                                                    .font(.system(.caption, design: .rounded))
+                                                    .foregroundColor(.white.opacity(0.9))
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Reactions
+                                    if let reactions = current.reactions, let blueReactions = reactions.blue, !blueReactions.isEmpty {
+                                        VStack(spacing: 8) {
+                                            ForEach(Array(blueReactions.keys.sorted()), id: \.self) { emoji in
+                                                Text("\(emoji) \(blueReactions[emoji] ?? 0)")
+                                                    .font(.system(.caption, design: .rounded))
+                                                    .foregroundColor(.white.opacity(0.9))
+                                            }
+                                        }
+                                    }
+                                    
+                                    if showVotes {
+                                        Text("Votes: \(current.votesBlue ?? 0)")
+                                            .font(.system(size: isCompact ? 20 : 28, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.white)
+                                    }
+                                    
+                                    Spacer()
+                                }
+                                .padding(.top, 60)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(viewModel.isVoting)
+                        .frame(width: isCompact ? geometry.size.width : (showVotes ? geometry.size.width * bluePercent : geometry.size.width / 2))
+                        .animation(.easeInOut(duration: 1.0), value: bluePercent)
+                    }
+                    .overlay(alignment: .center) {
+                        // Skip button
+                        Button {
+                            Task { @MainActor in
+                                viewModel.nextDeliberate()
+                            }
+                        } label: {
+                            Text("Skip")
+                                .font(.system(.headline, design: .rounded))
+                                .foregroundColor(.primary)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(.ultraThinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        .position(
+                            x: isCompact ? geometry.size.width / 2 : (showVotes ? geometry.size.width * redPercent : geometry.size.width / 2),
+                            y: isCompact ? (showVotes ? geometry.size.height * redPercent : geometry.size.height / 2) : geometry.size.height / 2
+                        )
+                        .animation(.easeInOut(duration: 1.0), value: redPercent)
                     }
                 } else {
-                    VStack {
-                        Text("No debates available")
-                            .foregroundColor(.white)
-                            .font(.system(.title2, design: .rounded))
+                    ZStack {
+                        Color(red: 1.0, green: 0.3, blue: 0.3)
+                            .ignoresSafeArea()
+                        VStack {
+                            Text("No debates available")
+                                .foregroundColor(.white)
+                                .font(.system(.title2, design: .rounded))
+                        }
                     }
                 }
             }
