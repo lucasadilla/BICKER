@@ -54,7 +54,6 @@ struct APIService {
         return try decoder.decode(T.self, from: data)
     }
 
-    @discardableResult
     private func send(request: URLRequest) async throws {
         let (_, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
@@ -101,6 +100,102 @@ extension APIService {
         let request = try request(for: "/api/debate", method: .post, body: payload)
         let response = try await send(DebateResponse.self, request: request)
         return response.debate
+    }
+    
+    func fetchDeliberates() async throws -> [Deliberate] {
+        let request = try request(for: "/api/deliberate", method: .get)
+        return try await send([Deliberate].self, request: request)
+    }
+    
+    func fetchDeliberate(id: String) async throws -> Deliberate {
+        let request = try request(for: "/api/deliberate/\(id)", method: .get)
+        let response = try await send(DeliberateResponse.self, request: request)
+        return response.deliberation
+    }
+    
+    func voteOnDeliberate(id: String, side: String) async throws -> Deliberate {
+        let payload = try JSONEncoder().encode(["side": side])
+        let request = try request(for: "/api/deliberate/\(id)", method: .post, body: payload)
+        let response = try await send(DeliberateResponse.self, request: request)
+        return response.deliberation
+    }
+    
+    func reactToDeliberate(id: String, side: String, emoji: String) async throws -> Deliberate {
+        let payload = try JSONEncoder().encode([
+            "side": side,
+            "emoji": emoji
+        ])
+        let request = try request(for: "/api/deliberate/\(id)", method: .post, body: payload)
+        let response = try await send(DeliberateResponse.self, request: request)
+        return response.deliberation
+    }
+    
+    func fetchStats(sort: String = "newest") async throws -> StatsResponse {
+        let items = [URLQueryItem(name: "sort", value: sort)]
+        let request = try request(for: "/api/stats", method: .get, queryItems: items)
+        return try await send(StatsResponse.self, request: request)
+    }
+    
+    func fetchTopPlayers() async throws -> TopPlayersResponse {
+        let request = try request(for: "/api/topplayers", method: .get)
+        return try await send(TopPlayersResponse.self, request: request)
+    }
+    
+    func fetchUserDebates(sort: String = "newest", page: Int = 1) async throws -> UserDebatesResponse {
+        let items = [
+            URLQueryItem(name: "sort", value: sort),
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "limit", value: "25")
+        ]
+        let request = try request(for: "/api/user/debates", method: .get, queryItems: items)
+        return try await send(UserDebatesResponse.self, request: request)
+    }
+    
+    func fetchProfile() async throws -> User {
+        let request = try request(for: "/api/profile", method: .get)
+        return try await send(User.self, request: request)
+    }
+    
+    func updateProfile(username: String?, bio: String?, profilePicture: String?, selectedBadge: String?, colorScheme: String?) async throws -> User {
+        var payloadDict: [String: Any] = [:]
+        if let username = username { payloadDict["username"] = username }
+        if let bio = bio { payloadDict["bio"] = bio }
+        if let profilePicture = profilePicture { payloadDict["profilePicture"] = profilePicture }
+        if let selectedBadge = selectedBadge { payloadDict["selectedBadge"] = selectedBadge }
+        if let colorScheme = colorScheme { payloadDict["colorScheme"] = colorScheme }
+        let payload = try JSONSerialization.data(withJSONObject: payloadDict)
+        let request = try request(for: "/api/profile", method: .post, body: payload)
+        return try await send(User.self, request: request)
+    }
+    
+    func fetchNotifications(page: Int = 1) async throws -> NotificationsResponse {
+        let items = [URLQueryItem(name: "page", value: String(page))]
+        let request = try request(for: "/api/notifications", method: .get, queryItems: items)
+        let response = try await send([Notification].self, request: request)
+        // Note: The API doesn't return pagination info, so we'll handle it client-side
+        return NotificationsResponse(notifications: response, page: page, totalPages: 1)
+    }
+    
+    func markNotificationsRead(ids: [String]) async throws {
+        let payload = try JSONEncoder().encode(["ids": ids])
+        let request = try request(for: "/api/notifications", method: .post, body: payload)
+        try await send(request: request)
+    }
+    
+    func fetchUserProfile(username: String) async throws -> UserProfile {
+        let encodedUsername = username.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? username
+        let request = try request(for: "/api/user/\(encodedUsername)", method: .get)
+        return try await send(UserProfile.self, request: request)
+    }
+    
+    func toggleSupport(identifier: String) async throws -> [String: Any] {
+        let payload = try JSONEncoder().encode(["identifier": identifier])
+        let request = try request(for: "/api/user/supports", method: .post, body: payload)
+        let data = try await session.data(for: request).0
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw APIError.invalidResponse
+        }
+        return json
     }
 }
 

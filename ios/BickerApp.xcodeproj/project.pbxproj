@@ -21,6 +21,15 @@
 		403D0CDCA17448A79AE57CDE /* DebateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403D0CDBA17448A79AE57CDE /* DebateViewModel.swift */; };
 		51EF0966E0EE444E8D7B7105 /* BannerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EF0965E0EE444E8D7B7105 /* BannerViewModel.swift */; };
 		9D89D8282F0E410E92929CCC /* ViewError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D89D8272F0E410E92929CCC /* ViewError.swift */; };
+		F983E62F917C40FE9D0D012A /* Deliberate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F983E62E917C40FE9D0D012A /* Deliberate.swift */; };
+		676442C0DE1B4A0584C5A151 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 676442BFDE1B4A0584C5A151 /* User.swift */; };
+		E51109B47081465F97A17AA5 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51109B37081465F97A17AA5 /* Notification.swift */; };
+		10E8845CFF0F4FC590DAC8B1 /* Stats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E8845BFF0F4FC590DAC8B1 /* Stats.swift */; };
+		31837E95ADE648389682A4B6 /* DeliberateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31837E94ADE648389682A4B6 /* DeliberateView.swift */; };
+		4D9FFE2531594E22B2CE4768 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D9FFE2431594E22B2CE4768 /* LeaderboardView.swift */; };
+		E731D94D6E12493993F7C539 /* MyStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E731D94C6E12493993F7C539 /* MyStatsView.swift */; };
+		5D228AECD40D43A9AA8184AD /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D228AEBD40D43A9AA8184AD /* NotificationsView.swift */; };
+		25B2F4D48DC748BC93BFB3AF /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B2F4D38DC748BC93BFB3AF /* ProfileView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +49,15 @@
 		403D0CDBA17448A79AE57CDE /* DebateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebateViewModel.swift; sourceTree = "<group>"; };
 		51EF0965E0EE444E8D7B7105 /* BannerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerViewModel.swift; sourceTree = "<group>"; };
 		9D89D8272F0E410E92929CCC /* ViewError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewError.swift; sourceTree = "<group>"; };
+		F983E62E917C40FE9D0D012A /* Deliberate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deliberate.swift; sourceTree = "<group>"; };
+		676442BFDE1B4A0584C5A151 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		E51109B37081465F97A17AA5 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
+		10E8845BFF0F4FC590DAC8B1 /* Stats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stats.swift; sourceTree = "<group>"; };
+		31837E94ADE648389682A4B6 /* DeliberateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliberateView.swift; sourceTree = "<group>"; };
+		4D9FFE2431594E22B2CE4768 /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+		E731D94C6E12493993F7C539 /* MyStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyStatsView.swift; sourceTree = "<group>"; };
+		5D228AEBD40D43A9AA8184AD /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
+		25B2F4D38DC748BC93BFB3AF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +92,10 @@
 				BFDCD0621A9A46CF9DB24CA4 /* Instigate.swift */,
 				27897D3B6AC64DBEBF6419ED /* Debate.swift */,
 				8178D4B5E4524F6E95CC632B /* Banner.swift */,
+				F983E62E917C40FE9D0D012A /* Deliberate.swift */,
+				676442BFDE1B4A0584C5A151 /* User.swift */,
+				E51109B37081465F97A17AA5 /* Notification.swift */,
+				10E8845BFF0F4FC590DAC8B1 /* Stats.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -103,6 +125,11 @@
 				E44B59F65D7B48C78051E5B7 /* ContentView.swift */,
 				9614ED6E7B794AD58F7B3740 /* InstigateView.swift */,
 				01006EDBD755417AB786A0B3 /* DebateView.swift */,
+				31837E94ADE648389682A4B6 /* DeliberateView.swift */,
+				4D9FFE2431594E22B2CE4768 /* LeaderboardView.swift */,
+				E731D94C6E12493993F7C539 /* MyStatsView.swift */,
+				5D228AEBD40D43A9AA8184AD /* NotificationsView.swift */,
+				25B2F4D38DC748BC93BFB3AF /* ProfileView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -200,6 +227,15 @@
 				403D0CDCA17448A79AE57CDE /* DebateViewModel.swift in Sources */,
 				51EF0966E0EE444E8D7B7105 /* BannerViewModel.swift in Sources */,
 				9D89D8282F0E410E92929CCC /* ViewError.swift in Sources */,
+				F983E62F917C40FE9D0D012A /* Deliberate.swift in Sources */,
+				676442C0DE1B4A0584C5A151 /* User.swift in Sources */,
+				E51109B47081465F97A17AA5 /* Notification.swift in Sources */,
+				10E8845CFF0F4FC590DAC8B1 /* Stats.swift in Sources */,
+				31837E95ADE648389682A4B6 /* DeliberateView.swift in Sources */,
+				4D9FFE2531594E22B2CE4768 /* LeaderboardView.swift in Sources */,
+				E731D94D6E12493993F7C539 /* MyStatsView.swift in Sources */,
+				5D228AECD40D43A9AA8184AD /* NotificationsView.swift in Sources */,
+				25B2F4D48DC748BC93BFB3AF /* ProfileView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
