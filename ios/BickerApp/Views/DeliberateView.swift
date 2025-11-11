@@ -19,18 +19,31 @@ struct DeliberateView: View {
                         .tint(.white)
                 }
             } else if !viewModel.deliberates.isEmpty {
-                TabView(selection: $viewModel.currentIndex) {
-                    ForEach(Array(viewModel.deliberates.enumerated()), id: \.element.id) { index, current in
-                        DeliberateCardView(
-                            deliberate: current,
-                            viewModel: viewModel,
-                            index: index
-                        )
-                        .tag(index)
+                GeometryReader { geometry in
+                    ScrollViewReader { proxy in
+                        ScrollView(.vertical, showsIndicators: false) {
+                            VStack(spacing: 0) {
+                                ForEach(Array(viewModel.deliberates.enumerated()), id: \.element.id) { index, current in
+                                    DeliberateCardView(
+                                        deliberate: current,
+                                        viewModel: viewModel,
+                                        index: index
+                                    )
+                                    .frame(height: geometry.size.height)
+                                    .id(index)
+                                }
+                            }
+                        }
+                        .onChange(of: viewModel.currentIndex) { oldValue, newValue in
+                            withAnimation {
+                                proxy.scrollTo(newValue, anchor: .top)
+                            }
+                        }
+                        .onAppear {
+                            proxy.scrollTo(viewModel.currentIndex, anchor: .top)
+                        }
                     }
                 }
-                .tabViewStyle(.page)
-                .indexViewStyle(.page(backgroundDisplayMode: .never))
                 .ignoresSafeArea()
             } else {
                 ZStack {
@@ -66,10 +79,11 @@ struct DeliberateCardView: View {
     var body: some View {
         GeometryReader { geometry in
             let isCompact = geometry.size.width < 600
+            let hasVoted = deliberate.myVote != nil
             let totalVotes = (deliberate.votesRed ?? 0) + (deliberate.votesBlue ?? 0)
             let redPercent = totalVotes > 0 ? Double(deliberate.votesRed ?? 0) / Double(totalVotes) : 0.5
             let bluePercent = 1.0 - redPercent
-            let showVotes = totalVotes > 0
+            let showVotes = hasVoted && totalVotes > 0
             
             if isCompact {
                 // Mobile: Stack vertically
@@ -125,9 +139,14 @@ struct DeliberateCardView: View {
                                 }
                                 
                                 if showVotes {
-                                    Text("Votes: \(deliberate.votesRed ?? 0)")
-                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
+                                    VStack(spacing: 4) {
+                                        Text("Votes: \(deliberate.votesRed ?? 0)")
+                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("\(Int(redPercent * 100))%")
+                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
                                 }
                                 
                                 Spacer()
@@ -136,9 +155,9 @@ struct DeliberateCardView: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    .disabled(viewModel.isVoting)
-                    .frame(height: max(geometry.size.height * 0.3, showVotes ? geometry.size.height * redPercent : geometry.size.height / 2))
-                    .animation(.easeInOut(duration: 1.0), value: redPercent)
+                    .disabled(viewModel.isVoting || hasVoted)
+                    .frame(height: showVotes ? geometry.size.height * redPercent : geometry.size.height / 2)
+                    .animation(showVotes ? .easeInOut(duration: 1.0) : .none, value: redPercent)
                     
                     // Bottom Side: Blue - Debate
                     Button {
@@ -191,9 +210,14 @@ struct DeliberateCardView: View {
                                 }
                                 
                                 if showVotes {
-                                    Text("Votes: \(deliberate.votesBlue ?? 0)")
-                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
+                                    VStack(spacing: 4) {
+                                        Text("Votes: \(deliberate.votesBlue ?? 0)")
+                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("\(Int(bluePercent * 100))%")
+                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
                                 }
                                 
                                 Spacer()
@@ -202,9 +226,9 @@ struct DeliberateCardView: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    .disabled(viewModel.isVoting)
-                    .frame(height: max(geometry.size.height * 0.3, showVotes ? geometry.size.height * bluePercent : geometry.size.height / 2))
-                    .animation(.easeInOut(duration: 1.0), value: bluePercent)
+                    .disabled(viewModel.isVoting || hasVoted)
+                    .frame(height: showVotes ? geometry.size.height * bluePercent : geometry.size.height / 2)
+                    .animation(showVotes ? .easeInOut(duration: 1.0) : .none, value: bluePercent)
                 }
             } else {
                 // Desktop: Side by side
@@ -260,9 +284,14 @@ struct DeliberateCardView: View {
                                 }
                                 
                                 if showVotes {
-                                    Text("Votes: \(deliberate.votesRed ?? 0)")
-                                        .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
+                                    VStack(spacing: 4) {
+                                        Text("Votes: \(deliberate.votesRed ?? 0)")
+                                            .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("\(Int(redPercent * 100))%")
+                                            .font(.system(size: 20, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
                                 }
                                 
                                 Spacer()
@@ -271,9 +300,9 @@ struct DeliberateCardView: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    .disabled(viewModel.isVoting)
-                    .frame(width: max(geometry.size.width * 0.3, showVotes ? geometry.size.width * redPercent : geometry.size.width / 2))
-                    .animation(.easeInOut(duration: 1.0), value: redPercent)
+                    .disabled(viewModel.isVoting || hasVoted)
+                    .frame(width: showVotes ? geometry.size.width * redPercent : geometry.size.width / 2)
+                    .animation(showVotes ? .easeInOut(duration: 1.0) : .none, value: redPercent)
                     
                     // Right Side: Blue - Debate
                     Button {
@@ -326,9 +355,14 @@ struct DeliberateCardView: View {
                                 }
                                 
                                 if showVotes {
-                                    Text("Votes: \(deliberate.votesBlue ?? 0)")
-                                        .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
+                                    VStack(spacing: 4) {
+                                        Text("Votes: \(deliberate.votesBlue ?? 0)")
+                                            .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        Text("\(Int(bluePercent * 100))%")
+                                            .font(.system(size: 20, weight: .medium, design: .rounded))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
                                 }
                                 
                                 Spacer()
@@ -337,9 +371,9 @@ struct DeliberateCardView: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    .disabled(viewModel.isVoting)
-                    .frame(width: max(geometry.size.width * 0.3, showVotes ? geometry.size.width * bluePercent : geometry.size.width / 2))
-                    .animation(.easeInOut(duration: 1.0), value: bluePercent)
+                    .disabled(viewModel.isVoting || hasVoted)
+                    .frame(width: showVotes ? geometry.size.width * bluePercent : geometry.size.width / 2)
+                    .animation(showVotes ? .easeInOut(duration: 1.0) : .none, value: bluePercent)
                 }
             }
         }
@@ -394,6 +428,7 @@ final class DeliberateViewModel: ObservableObject {
     func vote(side: String, index: Int) async {
         guard !isVoting, index < deliberates.count else { return }
         let current = deliberates[index]
+        guard current.myVote == nil else { return } // Already voted
         await MainActor.run {
             isVoting = true
         }
@@ -409,6 +444,13 @@ final class DeliberateViewModel: ObservableObject {
                     deliberates[index] = updated
                     if index == currentIndex {
                         currentDeliberate = updated
+                    }
+                    // Auto-advance to next after voting (after animation completes)
+                    Task { @MainActor in
+                        try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+                        if index == self.currentIndex {
+                            self.nextDeliberate()
+                        }
                     }
                 }
             }

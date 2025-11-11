@@ -65,6 +65,15 @@
 	</dict>
 	<key>BickerAPIBaseURL</key>
 	<string>http://localhost:3000</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bicker</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
 

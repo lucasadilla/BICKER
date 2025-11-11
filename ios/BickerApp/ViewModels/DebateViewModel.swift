@@ -28,14 +28,24 @@ final class DebateViewModel: ObservableObject {
 
     func loadInstigates(searchTerm: String? = nil) async {
         guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
+        await MainActor.run {
+            isLoading = true
+        }
+        defer {
+            Task { @MainActor in
+                isLoading = false
+            }
+        }
         do {
             let fetched = try await api.fetchInstigates(searchTerm: searchTerm)
-            instigates = fetched.shuffled()
-            currentInstigate = instigates.first
+            await MainActor.run {
+                instigates = fetched.shuffled()
+                currentInstigate = instigates.first
+            }
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            await MainActor.run {
+                self.error = ViewError(message: error.localizedDescription)
+            }
         }
     }
 
