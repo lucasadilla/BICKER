@@ -32,9 +32,14 @@ struct DebateView: View {
                                         .textInputAutocapitalization(.sentences)
                                         .disableAutocorrection(false)
                                         .submitLabel(.search)
+                                        .onChange(of: viewModel.searchTerm) { oldValue, newValue in
+                                            Task {
+                                                await viewModel.loadInstigates(searchTerm: newValue.isEmpty ? nil : newValue)
+                                            }
+                                        }
                                         .onSubmit {
                                             Task {
-                                                await viewModel.loadInstigates(searchTerm: viewModel.searchTerm)
+                                                await viewModel.loadInstigates(searchTerm: viewModel.searchTerm.isEmpty ? nil : viewModel.searchTerm)
                                             }
                                         }
                                     if !viewModel.searchTerm.isEmpty {
@@ -56,25 +61,22 @@ struct DebateView: View {
                             .padding(.horizontal, 20)
                             .padding(.top, 60)
                             
-                            // Current instigate
+                            // Current instigate - clickable to go to next
                             if let instigate = viewModel.currentInstigate {
-                                VStack(spacing: 16) {
-                                    Text(instigate.text)
-                                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal, 20)
-                                    
-                                    Button("Next") {
-                                        Task { @MainActor in
-                                            viewModel.nextInstigate()
-                                        }
+                                Button {
+                                    Task { @MainActor in
+                                        viewModel.nextInstigate()
                                     }
-                                    .buttonStyle(.borderedProminent)
-                                    .tint(.white.opacity(0.3))
-                                    .foregroundColor(.white)
-                                    .disabled(viewModel.instigates.count <= 1)
+                                } label: {
+                                    VStack(spacing: 16) {
+                                        Text(instigate.text)
+                                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                            .multilineTextAlignment(.center)
+                                            .padding(.horizontal, 20)
+                                    }
                                 }
+                                .buttonStyle(.plain)
                             } else {
                                 Text("No topics available")
                                     .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -171,9 +173,14 @@ struct DebateView: View {
                     .textInputAutocapitalization(.sentences)
                     .disableAutocorrection(false)
                     .submitLabel(.search)
+                    .onChange(of: viewModel.searchTerm) { oldValue, newValue in
+                        Task {
+                            await viewModel.loadInstigates(searchTerm: newValue.isEmpty ? nil : newValue)
+                        }
+                    }
                     .onSubmit {
                         Task {
-                            await viewModel.loadInstigates(searchTerm: viewModel.searchTerm)
+                            await viewModel.loadInstigates(searchTerm: viewModel.searchTerm.isEmpty ? nil : viewModel.searchTerm)
                         }
                     }
                 if !viewModel.searchTerm.isEmpty {
@@ -195,25 +202,22 @@ struct DebateView: View {
                             .padding(.horizontal, 20)
                             .padding(.top, 60)
                             
-                            // Current instigate
+                            // Current instigate - clickable to go to next
                             if let instigate = viewModel.currentInstigate {
-                                VStack(spacing: 16) {
-                                    Text(instigate.text)
-                                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal, 20)
-                                    
-                Button("Next") {
-                                        Task { @MainActor in
+                                Button {
+                                    Task { @MainActor in
                     viewModel.nextInstigate()
-                                        }
                 }
-                .buttonStyle(.borderedProminent)
-                                    .tint(.white.opacity(0.3))
-                                    .foregroundColor(.white)
-                .disabled(viewModel.instigates.count <= 1)
-            }
+                                } label: {
+                                    VStack(spacing: 16) {
+                    Text(instigate.text)
+                                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                            .multilineTextAlignment(.center)
+                                            .padding(.horizontal, 20)
+                                    }
+                                }
+                                .buttonStyle(.plain)
             } else {
                                 Text("No topics available")
                                     .font(.system(size: 36, weight: .bold, design: .rounded))
