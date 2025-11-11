@@ -10,21 +10,139 @@ struct InstigateView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color(red: 0.93, green: 0.26, blue: 0.26)
-                .ignoresSafeArea()
-            ScrollView {
-                VStack(spacing: 24) {
-                    header
-                    entryCard
-                    historySection
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                // Top: Input Section (50%)
+                ZStack {
+                    Color(red: 0.93, green: 0.26, blue: 0.26)
+                        .ignoresSafeArea()
+                    
+                    VStack(spacing: 20) {
+                        Text("Instigate")
+                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.top, 60)
+                        
+                        ZStack(alignment: .topLeading) {
+                            TextEditor(text: $viewModel.text)
+                                .font(.system(size: 24, design: .rounded))
+                                .foregroundColor(.black)
+                                .padding(12)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .onChange(of: viewModel.text) { oldValue, newValue in
+                                    if newValue.count > 200 {
+                                        Task { @MainActor in
+                                            viewModel.text = String(newValue.prefix(200))
+                                        }
+                                    }
+                                }
+                            
+                            if viewModel.text.isEmpty {
+                                Text("Write your opinion here (max 200 characters)")
+                                    .font(.system(size: 24, design: .rounded))
+                                    .foregroundColor(.gray.opacity(0.5))
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 20)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                        .frame(height: 300)
+                        .padding(.horizontal, 20)
+                        
+                        HStack {
+                            Text("\(viewModel.text.count)/200")
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundColor(.white.opacity(0.8))
+                            Spacer()
+                        }
+                        .padding(.horizontal, 20)
+                        
+                        Button(action: submit) {
+                            if viewModel.isSubmitting {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .frame(maxWidth: .infinity)
+                            } else {
+                                Text("Submit Topic")
+                                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                            }
+                        }
+                        .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
+                        .disabled(viewModel.isSubmitting)
+                        .padding(.horizontal, 20)
+                        
+                        Spacer()
+                    }
                 }
-                .padding(24)
+                .frame(height: geometry.size.height / 2)
+                
+                // Bottom: Debates Split View (50%)
+                if let currentDebate = viewModel.currentDebate {
+                    HStack(spacing: 0) {
+                        // Left: Red - Instigate
+                        ZStack {
+                            Color(red: 1.0, green: 0.3, blue: 0.3)
+                                .ignoresSafeArea()
+                            
+                            VStack(spacing: 20) {
+                                Text(currentDebate.instigateText)
+                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, 40)
+                                
+                                Spacer()
+                            }
+                        }
+                        .frame(width: geometry.size.width / 2)
+                        
+                        // Right: Blue - Debate
+                        ZStack {
+                            Color(red: 0.3, green: 0.58, blue: 1.0)
+                                .ignoresSafeArea()
+                            
+                            VStack(spacing: 20) {
+                                Text(currentDebate.debateText)
+                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, 40)
+                                
+                                Spacer()
+                            }
+                        }
+                        .frame(width: geometry.size.width / 2)
+                    }
+                    .frame(height: geometry.size.height / 2)
+                } else {
+                    ZStack {
+                        Color(red: 0.3, green: 0.58, blue: 1.0)
+                            .ignoresSafeArea()
+                        
+                        VStack {
+                            Text("No debates yet")
+                                .font(.system(size: 24, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                    }
+                    .frame(height: geometry.size.height / 2)
+                }
             }
         }
+        .ignoresSafeArea()
         .task {
             viewModel.updateAPI(appState.apiService)
             await viewModel.loadInstigates()
+            await viewModel.loadRecentDebate()
         }
         .alert(item: $viewModel.error) { error in
             Alert(
@@ -35,120 +153,10 @@ struct InstigateView: View {
         }
     }
 
-    private var header: some View {
-        VStack(spacing: 12) {
-            Text("Start the conversation")
-                .font(.system(.title2, design: .rounded))
-                .fontWeight(.semibold)
-                .foregroundStyle(.white.opacity(0.9))
-            Text("Share a 200 character prompt to kick off a new debate.")
-                .font(.system(.body, design: .rounded))
-                .foregroundStyle(.white.opacity(0.8))
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical)
-    }
-
-    private var entryCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Your prompt")
-                .font(.system(.headline, design: .rounded))
-            TextEditor(text: $viewModel.text)
-                .frame(height: 220)
-                .padding(12)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.black.opacity(0.15), lineWidth: 1)
-                )
-                .font(.system(size: 20, weight: .regular, design: .rounded))
-                .onChange(of: viewModel.text) { newValue in
-                    if newValue.count > 200 {
-                        Task { @MainActor in
-                            viewModel.text = String(newValue.prefix(200))
-                        }
-                    }
-                }
-
-            HStack {
-                Text("\(viewModel.text.count)/200")
-                    .font(.system(.caption, design: .rounded))
-                    .foregroundColor(.secondary)
-                Spacer()
-                Button(action: submit) {
-                    if viewModel.isSubmitting {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .frame(maxWidth: .infinity)
-                    } else {
-                        Text("Submit topic")
-                            .font(.system(.headline, design: .rounded))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity)
-                .background(Color.blue)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
-                .disabled(viewModel.isSubmitting)
-            }
-        }
-        .padding(20)
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-    }
-
-    private var historySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Recent instigates")
-                    .font(.system(.headline, design: .rounded))
-                Spacer()
-                if viewModel.isLoading {
-                    ProgressView()
-                        .tint(.white)
-                }
-            }
-
-            if viewModel.instigates.isEmpty {
-                Text("Instigates you create will appear here after they are posted.")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
-                    .multilineTextAlignment(.leading)
-            } else {
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(viewModel.instigates.prefix(10)) { instigate in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(instigate.text)
-                                .font(.system(.body, design: .rounded))
-                                .foregroundColor(.primary)
-                            if let author = instigate.createdBy {
-                                Text(author)
-                                    .font(.system(.caption, design: .rounded))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 4)
-                    }
-                }
-            }
-        }
-        .padding(20)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-    }
-
     private func submit() {
         Task {
             await viewModel.submitInstigate()
+            await viewModel.loadRecentDebate()
         }
     }
 }

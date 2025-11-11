@@ -7,6 +7,7 @@ final class InstigateViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var isSubmitting = false
     @Published var error: ViewError?
+    @Published var currentDebate: Debate?
 
     private var api: APIService
 
@@ -26,6 +27,15 @@ final class InstigateViewModel: ObservableObject {
             instigates = try await api.fetchInstigates()
         } catch {
             self.error = ViewError(message: error.localizedDescription)
+        }
+    }
+
+    func loadRecentDebate() async {
+        do {
+            let debates = try await api.fetchDebates()
+            currentDebate = debates.first
+        } catch {
+            // Silently fail - not critical
         }
     }
 
