@@ -76,8 +76,8 @@ struct DebateView: View {
                     }
                 if !viewModel.searchTerm.isEmpty {
                     Button {
-                        viewModel.searchTerm = ""
-                        Task {
+                        Task { @MainActor in
+                            viewModel.searchTerm = ""
                             await viewModel.loadInstigates()
                         }
                     } label: {
@@ -99,7 +99,9 @@ struct DebateView: View {
                     .font(.system(.headline, design: .rounded))
                 Spacer()
                 Button("Next") {
-                    viewModel.nextInstigate()
+                    Task { @MainActor in
+                        viewModel.nextInstigate()
+                    }
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color(red: 1.0, green: 0.45, blue: 0.45))
@@ -133,7 +135,9 @@ struct DebateView: View {
                     HStack(spacing: 12) {
                         ForEach(viewModel.instigates) { instigate in
                             Button {
-                                viewModel.selectInstigate(instigate)
+                                Task { @MainActor in
+                                    viewModel.selectInstigate(instigate)
+                                }
                             } label: {
                                 Text(instigate.text)
                                     .font(.system(.subheadline, design: .rounded))
@@ -172,7 +176,9 @@ struct DebateView: View {
                 )
                 .onChange(of: viewModel.debateText) { newValue in
                     if newValue.count > 200 {
-                        viewModel.debateText = String(newValue.prefix(200))
+                        Task { @MainActor in
+                            viewModel.debateText = String(newValue.prefix(200))
+                        }
                     }
                 }
             HStack {

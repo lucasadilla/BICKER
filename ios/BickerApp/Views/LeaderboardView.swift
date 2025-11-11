@@ -65,9 +65,9 @@ struct LeaderboardView: View {
 
                         // Top Players button
                         Button {
-                            viewModel.showTopPlayers.toggle()
-                            if viewModel.showTopPlayers && viewModel.topPlayers == nil {
-                                Task {
+                            Task { @MainActor in
+                                viewModel.showTopPlayers.toggle()
+                                if viewModel.showTopPlayers && viewModel.topPlayers == nil {
                                     await viewModel.loadTopPlayers()
                                 }
                             }

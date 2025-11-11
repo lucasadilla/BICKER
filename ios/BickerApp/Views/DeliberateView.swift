@@ -139,7 +139,9 @@ struct DeliberateView: View {
 
                             // Next button
                             Button {
-                                viewModel.nextDeliberate()
+                                Task { @MainActor in
+                                    viewModel.nextDeliberate()
+                                }
                             } label: {
                                 Text("Next Debate")
                                     .font(.system(.headline, design: .rounded))

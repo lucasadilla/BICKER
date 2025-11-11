@@ -69,7 +69,9 @@ struct InstigateView: View {
                 .font(.system(size: 20, weight: .regular, design: .rounded))
                 .onChange(of: viewModel.text) { newValue in
                     if newValue.count > 200 {
-                        viewModel.text = String(newValue.prefix(200))
+                        Task { @MainActor in
+                            viewModel.text = String(newValue.prefix(200))
+                        }
                     }
                 }
 
