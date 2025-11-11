@@ -153,7 +153,10 @@ final class ProfileViewModel: ObservableObject {
             colorScheme = user.colorScheme ?? "default"
             badges = user.badges
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            let errorMsg = error.localizedDescription.contains("401") || error.localizedDescription.contains("Unauthorized")
+                ? "Please sign in to edit your profile"
+                : error.localizedDescription
+            self.error = ViewError(message: errorMsg)
         }
     }
 
@@ -170,7 +173,10 @@ final class ProfileViewModel: ObservableObject {
                 colorScheme: colorScheme
             )
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            let errorMsg = error.localizedDescription.contains("401") || error.localizedDescription.contains("Unauthorized")
+                ? "Please sign in to save your profile"
+                : error.localizedDescription
+            self.error = ViewError(message: errorMsg)
         }
     }
 }

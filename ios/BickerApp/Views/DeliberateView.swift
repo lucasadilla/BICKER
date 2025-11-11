@@ -96,10 +96,10 @@ struct DeliberateView: View {
 
                             // Vote counts
                             HStack {
-                                Text("Red: \(current.votesRed)")
+                                Text("Red: \(current.votesRed ?? 0)")
                                     .foregroundColor(.white)
                                 Spacer()
-                                Text("Blue: \(current.votesBlue)")
+                                Text("Blue: \(current.votesBlue ?? 0)")
                                     .foregroundColor(.white)
                             }
                             .padding(.horizontal, 24)

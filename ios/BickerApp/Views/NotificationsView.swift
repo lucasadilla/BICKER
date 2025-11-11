@@ -110,7 +110,10 @@ final class NotificationsViewModel: ObservableObject {
                 try? await api.markNotificationsRead(ids: unreadIds)
             }
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            let errorMsg = error.localizedDescription.contains("401") || error.localizedDescription.contains("Unauthorized")
+                ? "Please sign in to view notifications"
+                : error.localizedDescription
+            self.error = ViewError(message: errorMsg)
         }
     }
 }

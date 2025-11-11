@@ -2,16 +2,24 @@ import Foundation
 
 struct StatsDebate: Identifiable, Codable, Hashable {
     let id: String
-    let instigateText: String
-    let debateText: String
-    let votesRed: Int
-    let votesBlue: Int
-    let reactions: Reactions?
+    let instigateText: String?
+    let debateText: String?
+    let votesRed: Int?
+    let votesBlue: Int?
+    let reactionCounts: Reactions?
+    let reactionTotals: ReactionTotals?
+    let totalReactions: Int?
     let createdAt: Date?
+    let updatedAt: Date?
     
     struct Reactions: Codable, Hashable {
         let red: [String: Int]
         let blue: [String: Int]
+    }
+    
+    struct ReactionTotals: Codable, Hashable {
+        let red: Int
+        let blue: Int
     }
     
     enum CodingKeys: String, CodingKey {
@@ -20,15 +28,19 @@ struct StatsDebate: Identifiable, Codable, Hashable {
         case debateText
         case votesRed
         case votesBlue
-        case reactions
+        case reactionCounts
+        case reactionTotals
+        case totalReactions
         case createdAt
+        case updatedAt
     }
 }
 
 struct StatsResponse: Codable {
     let debates: [StatsDebate]
-    let totalDebates: Int
-    let totalVotes: Int
+    let totalDebates: Int?
+    let totalVotes: Int?
+    let totalReactions: Int?
 }
 
 struct TopPlayersResponse: Codable {
@@ -49,6 +61,8 @@ struct UserDebatesResponse: Codable {
     let debates: [UserDebate]
     let totalDebates: Int
     let wins: Int
+    let winRate: Int?
+    let instigateCount: Int?
     let points: Int
     let streak: Int
     let badges: [String]
@@ -56,12 +70,13 @@ struct UserDebatesResponse: Codable {
 
 struct UserDebate: Identifiable, Codable, Hashable {
     let id: String
-    let instigateText: String
-    let debateText: String
-    let votesRed: Int
-    let votesBlue: Int
+    let instigateText: String?
+    let debateText: String?
+    let votesRed: Int?
+    let votesBlue: Int?
     let userWroteSide: String?
     let createdAt: Date?
+    let updatedAt: Date?
     
     enum CodingKeys: String, CodingKey {
         case id = "_id"
@@ -71,6 +86,7 @@ struct UserDebate: Identifiable, Codable, Hashable {
         case votesBlue
         case userWroteSide
         case createdAt
+        case updatedAt
     }
 }
 

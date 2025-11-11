@@ -177,7 +177,7 @@ struct DebateCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(debate.instigateText)
+                Text(debate.instigateText ?? "")
                     .font(.system(.body, design: .rounded))
                     .foregroundColor(.white)
                     .padding(12)
@@ -188,7 +188,7 @@ struct DebateCard: View {
 
             HStack {
                 Spacer()
-                Text(debate.debateText)
+                Text(debate.debateText ?? "")
                     .font(.system(.body, design: .rounded))
                     .foregroundColor(.white)
                     .padding(12)
@@ -198,10 +198,10 @@ struct DebateCard: View {
             }
 
             HStack {
-                Text("Red: \(debate.votesRed)")
+                Text("Red: \(debate.votesRed ?? 0)")
                     .foregroundColor(.white)
                 Spacer()
-                Text("Blue: \(debate.votesBlue)")
+                Text("Blue: \(debate.votesBlue ?? 0)")
                     .foregroundColor(.white)
             }
         }
@@ -246,8 +246,8 @@ final class LeaderboardViewModel: ObservableObject {
             let response = try await api.fetchStats(sort: sort)
             await MainActor.run {
                 debates = response.debates
-                totalDebates = response.totalDebates
-                totalVotes = response.totalVotes
+                totalDebates = response.totalDebates ?? response.debates.count
+                totalVotes = response.totalVotes ?? 0
             }
         } catch {
             await MainActor.run {

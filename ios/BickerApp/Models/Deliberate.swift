@@ -6,13 +6,16 @@ struct Deliberate: Identifiable, Codable, Hashable {
     let debateText: String?
     let createdBy: String?
     let instigatedBy: String?
-    let votesRed: Int
-    let votesBlue: Int
+    let votesRed: Int?
+    let votesBlue: Int?
     let reactions: Reactions?
     let myVote: String?
     let myReactions: MyReactions?
     let createdAt: Date?
     let updatedAt: Date?
+    let creator: Creator?
+    let instigator: Creator?
+    let votedBy: [Vote]?
     
     struct Reactions: Codable, Hashable {
         let red: [String: Int]
@@ -22,6 +25,16 @@ struct Deliberate: Identifiable, Codable, Hashable {
     struct MyReactions: Codable, Hashable {
         let red: String?
         let blue: String?
+    }
+    
+    struct Creator: Codable, Hashable {
+        let username: String?
+        let profilePicture: String?
+    }
+    
+    struct Vote: Codable, Hashable {
+        let vote: String
+        let timestamp: Date?
     }
     
     enum CodingKeys: String, CodingKey {
@@ -37,6 +50,9 @@ struct Deliberate: Identifiable, Codable, Hashable {
         case myReactions
         case createdAt
         case updatedAt
+        case creator
+        case instigator
+        case votedBy
     }
 }
 
