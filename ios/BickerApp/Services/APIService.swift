@@ -9,9 +9,38 @@ struct APIService {
         self.session = session
     }
 
+    private static let iso8601Formatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    private static let iso8601FormatterNoFraction: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+
     private var decoder: JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let stringValue = try container.decode(String.self)
+
+            if let date = APIService.iso8601Formatter.date(from: stringValue) {
+                return date
+            }
+
+            if let date = APIService.iso8601FormatterNoFraction.date(from: stringValue) {
+                return date
+            }
+
+            if let milliseconds = Double(stringValue) {
+                return Date(timeIntervalSince1970: milliseconds / 1000)
+            }
+
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date format: \(stringValue)")
+        }
         return decoder
     }
 
