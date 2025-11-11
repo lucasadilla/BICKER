@@ -49,7 +49,9 @@ struct ContentView: View {
                 .tag(5)
         }
         .task {
-            bannerViewModel.api = appState.apiService
+            await MainActor.run {
+                bannerViewModel.api = appState.apiService
+            }
             await bannerViewModel.loadBanner()
         }
     }
