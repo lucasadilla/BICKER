@@ -3,7 +3,7 @@ import SwiftUI
 struct DeliberateView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel: DeliberateViewModel
-    @State private var selectedUsername: String?
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         let placeholderService = APIService(configuration: AppConfiguration())
@@ -62,6 +62,14 @@ struct DeliberateView: View {
         .task {
             viewModel.updateAPI(appState.apiService)
             await viewModel.loadDeliberates()
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            // Reload when app becomes active to ensure fresh data
+            if newPhase == .active {
+                Task {
+                    await viewModel.loadDeliberates()
+                }
+            }
         }
         .sheet(item: $viewModel.selectedUsername) { username in
             UserProfileView(username: username.value)
@@ -463,7 +471,16 @@ final class DeliberateViewModel: ObservableObject {
         do {
             let fetched = try await api.fetchDeliberates()
             // Filter out debates the user has already voted on
-            let unvoted = fetched.filter { $0.myVote == nil }
+            // The API should already filter these, but we double-check on the client side
+            let unvoted = fetched.filter { debate in
+                // If myVote is set and not empty, user has voted - exclude it
+                guard let myVote = debate.myVote else {
+                    // myVote is nil, so user hasn't voted - include it
+                    return true
+                }
+                // If myVote is an empty string, treat it as no vote
+                return myVote.isEmpty
+            }
             await MainActor.run {
                 deliberates = unvoted.shuffled()
                 currentIndex = 0
@@ -535,7 +552,7 @@ final class DeliberateViewModel: ObservableObject {
                     // After animation, remove this debate and move to next
                     Task { @MainActor in
                         try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds for animation
-                        // Remove the voted debate from the list
+                        // Remove the voted debate from the list immediately
                         deliberates.removeAll { $0.id == current.id }
                         // Adjust current index if needed
                         if currentIndex >= deliberates.count && !deliberates.isEmpty {
@@ -547,6 +564,10 @@ final class DeliberateViewModel: ObservableObject {
                             currentDeliberate = deliberates[currentIndex]
                         } else {
                             currentDeliberate = nil
+                            // If no more debates, try reloading to get new ones
+                            if deliberates.isEmpty {
+                                await loadDeliberates()
+                            }
                         }
                     }
                 }

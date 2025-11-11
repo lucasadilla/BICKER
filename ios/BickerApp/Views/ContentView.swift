@@ -50,15 +50,20 @@ struct ContentView: View {
                 }
                 .tag(5)
         }
-        .tint(.white)
         .onAppear {
-            // Make unselected tab items white
+            // Make tab bar transparent with white icons/text, black for selected
             let appearance = UITabBarAppearance()
-            appearance.configureWithOpaqueBackground()
+            appearance.configureWithTransparentBackground()
+            appearance.backgroundColor = .clear
+            
+            // Unselected items: white
             appearance.stackedLayoutAppearance.normal.iconColor = .white
             appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.white]
-            appearance.stackedLayoutAppearance.selected.iconColor = .white
-            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.white]
+            
+            // Selected item: black
+            appearance.stackedLayoutAppearance.selected.iconColor = .black
+            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.black]
+            
             UITabBar.appearance().standardAppearance = appearance
             UITabBar.appearance().scrollEdgeAppearance = appearance
         }
