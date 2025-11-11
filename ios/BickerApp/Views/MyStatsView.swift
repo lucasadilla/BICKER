@@ -1,8 +1,11 @@
 import SwiftUI
+import AuthenticationServices
 
 struct MyStatsView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel: MyStatsViewModel
+    @State private var showSignIn = false
+    @State private var isSignedIn = false
 
     init() {
         let placeholderService = APIService(configuration: AppConfiguration())
@@ -17,6 +20,31 @@ struct MyStatsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // Sign in section
+                        if !isSignedIn {
+                            VStack(spacing: 16) {
+                                Text("Sign in to track your stats")
+                                    .font(.system(.headline, design: .rounded))
+                                    .foregroundColor(.white)
+                                
+                                Button {
+                                    showSignIn = true
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "globe")
+                                        Text("Sign in with Google")
+                                    }
+                                    .font(.system(.body, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue.opacity(0.8))
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                            .padding(.vertical, 24)
+                        }
                         // Stats summary
                         HStack(spacing: 16) {
                             StatCard(title: "Debates", value: "\(viewModel.totalDebates)")
@@ -91,7 +119,14 @@ struct MyStatsView: View {
             .toolbarBackground(.hidden, for: .navigationBar)
             .task {
                 viewModel.updateAPI(appState.apiService)
-                await viewModel.loadDebates()
+                await checkAuthStatus()
+                if isSignedIn {
+                    await viewModel.loadDebates()
+                }
+            }
+            .sheet(isPresented: $showSignIn) {
+                SignInSheet(isSignedIn: $isSignedIn)
+                    .environmentObject(appState)
             }
             .alert(item: $viewModel.error) { error in
                 Alert(
@@ -99,6 +134,146 @@ struct MyStatsView: View {
                     message: Text(error.message),
                     dismissButton: .default(Text("OK"))
                 )
+            }
+        }
+    }
+    
+    private func checkAuthStatus() async {
+        do {
+            let _ = try await appState.apiService.fetchProfile()
+            await MainActor.run {
+                isSignedIn = true
+            }
+        } catch {
+            await MainActor.run {
+                isSignedIn = false
+            }
+        }
+    }
+}
+
+struct SignInSheet: View {
+    @EnvironmentObject private var appState: AppState
+    @Binding var isSignedIn: Bool
+    @Environment(\.dismiss) private var dismiss
+    @State private var isSigningIn = false
+    @State private var error: ViewError?
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 30) {
+                Text("Sign in to Bicker")
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundColor(.primary)
+                
+                Text("Sign in to track your stats, participate in debates, and more")
+                    .font(.system(size: 16, design: .rounded))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                
+                Button {
+                    Task {
+                        await signInWithGoogle()
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "globe")
+                            .font(.title2)
+                        Text("Sign in with Google")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .disabled(isSigningIn)
+                .padding(.horizontal)
+                
+                if isSigningIn {
+                    ProgressView()
+                        .padding()
+                }
+            }
+            .padding()
+            .navigationTitle("Sign In")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert(item: $error) { error in
+                Alert(
+                    title: Text("Sign In Error"),
+                    message: Text(error.message),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+        }
+    }
+    
+    private func signInWithGoogle() async {
+        await MainActor.run {
+            isSigningIn = true
+        }
+        defer {
+            Task { @MainActor in
+                isSigningIn = false
+            }
+        }
+        
+        let baseURL = appState.configuration.baseURL
+        guard let signInURL = URL(string: "\(baseURL.absoluteString)/api/auth/signin/google") else {
+            await MainActor.run {
+                error = ViewError(message: "Invalid sign-in URL")
+            }
+            return
+        }
+        
+        await MainActor.run {
+            let callbackScheme = baseURL.scheme ?? "http"
+            let session = ASWebAuthenticationSession(
+                url: signInURL,
+                callbackURLScheme: callbackScheme
+            ) { callbackURL, error in
+                Task { @MainActor in
+                    if let error = error {
+                        let nsError = error as NSError
+                        if nsError.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+                            return
+                        }
+                        try? await Task.sleep(nanoseconds: 1_000_000_000)
+                        await checkAuthStatus()
+                    } else if callbackURL != nil {
+                        try? await Task.sleep(nanoseconds: 500_000_000)
+                        await checkAuthStatus()
+                    } else {
+                        try? await Task.sleep(nanoseconds: 1_000_000_000)
+                        await checkAuthStatus()
+                    }
+                }
+            }
+            session.presentationContextProvider = SignInPresentationContextProvider()
+            session.prefersEphemeralWebBrowserSession = false
+            session.start()
+        }
+    }
+    
+    private func checkAuthStatus() async {
+        do {
+            let _ = try await appState.apiService.fetchProfile()
+            await MainActor.run {
+                isSignedIn = true
+                dismiss()
+            }
+        } catch {
+            await MainActor.run {
+                self.error = ViewError(message: "Sign in failed. Please try again.")
             }
         }
     }
