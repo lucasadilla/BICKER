@@ -135,30 +135,27 @@ struct SignInView: View {
         // We'll use the base URL as the callback scheme since NextAuth redirects to the same domain
         // The session cookies will be stored and shared with URLSession automatically
         await MainActor.run {
+            // Use the base URL scheme for callback since NextAuth redirects to the same domain
             let callbackScheme = baseURL.scheme ?? "http"
             let session = ASWebAuthenticationSession(
                 url: signInURL,
                 callbackURLScheme: callbackScheme
-            ) { callbackURL, error in
+            ) { callbackURL, authError in
                 Task { @MainActor in
-                    if let error = error {
-                        // Error code 2 usually means user cancelled or callback URL mismatch
-                        let nsError = error as NSError
-                        if nsError.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+                    if let authError = authError {
+                        let nsError = authError as NSError
+                        if nsError.domain == ASWebAuthenticationSessionError.errorDomain,
+                           nsError.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
                             // User cancelled - don't show error
                             return
                         }
-                        // For other errors, try checking auth status anyway since cookies might be set
-                        try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
-                        await checkAuthStatus()
-                    } else if callbackURL != nil {
-                        // Sign in successful - cookies should be set
-                        // Check auth status after a brief delay to allow cookies to propagate
-                        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                        // For other errors (like error code 2 - callback URL mismatch)
+                        // Wait and check if cookies were set anyway
+                        try? await Task.sleep(nanoseconds: 1_000_000_000)
                         await checkAuthStatus()
                     } else {
-                        // No callback but no error - might have succeeded
-                        try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                        // Success - cookies should be set
+                        try? await Task.sleep(nanoseconds: 1_000_000_000)
                         await checkAuthStatus()
                     }
                 }

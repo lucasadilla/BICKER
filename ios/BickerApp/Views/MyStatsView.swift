@@ -236,30 +236,34 @@ struct SignInSheet: View {
         }
         
         await MainActor.run {
+            // Use SFSafariViewController approach for better cookie sharing
+            // NextAuth redirects to the same domain, so we'll use the base URL scheme
             let callbackScheme = baseURL.scheme ?? "http"
             let session = ASWebAuthenticationSession(
                 url: signInURL,
                 callbackURLScheme: callbackScheme
-            ) { callbackURL, error in
+            ) { callbackURL, authError in
                 Task { @MainActor in
-                    if let error = error {
-                        let nsError = error as NSError
-                        if nsError.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+                    if let authError = authError {
+                        let nsError = authError as NSError
+                        if nsError.domain == ASWebAuthenticationSessionError.errorDomain,
+                           nsError.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+                            // User cancelled - don't show error
                             return
                         }
+                        // For other errors, wait a bit and check if cookies were set anyway
                         try? await Task.sleep(nanoseconds: 1_000_000_000)
                         await checkAuthStatus()
-                    } else if callbackURL != nil {
-                        try? await Task.sleep(nanoseconds: 500_000_000)
-                        await checkAuthStatus()
                     } else {
+                        // Success - cookies should be set
+                        // Wait a moment for cookies to propagate
                         try? await Task.sleep(nanoseconds: 1_000_000_000)
                         await checkAuthStatus()
                     }
                 }
             }
             session.presentationContextProvider = SignInPresentationContextProvider()
-            session.prefersEphemeralWebBrowserSession = false
+            session.prefersEphemeralWebBrowserSession = false  // Important: allows cookie sharing
             session.start()
         }
     }
