@@ -60,8 +60,8 @@ struct MyStatsView: View {
                         }
                         .pickerStyle(.segmented)
                         .padding(.horizontal, 24)
-                        .onChange(of: viewModel.sort) { _ in
-                            Task {
+                        .onChange(of: viewModel.sort) {
+                            Task { @MainActor in
                                 await viewModel.loadDebates()
                             }
                         }
@@ -199,18 +199,28 @@ final class MyStatsViewModel: ObservableObject {
 
     func loadDebates() async {
         guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
+        await MainActor.run {
+            isLoading = true
+        }
+        defer {
+            Task { @MainActor in
+                isLoading = false
+            }
+        }
         do {
             let response = try await api.fetchUserDebates(sort: sort, page: page)
-            debates = response.debates
-            totalDebates = response.totalDebates
-            wins = response.wins
-            points = response.points
-            streak = response.streak
-            badges = response.badges
+            await MainActor.run {
+                debates = response.debates
+                totalDebates = response.totalDebates
+                wins = response.wins
+                points = response.points
+                streak = response.streak
+                badges = response.badges
+            }
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            await MainActor.run {
+                self.error = ViewError(message: error.localizedDescription)
+            }
         }
     }
 }
