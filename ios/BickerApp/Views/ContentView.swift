@@ -12,7 +12,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView()
+            HomeView(selectedTab: $selectedTab)
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
@@ -60,8 +60,10 @@ struct ContentView: View {
 struct HomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var bannerViewModel: BannerViewModel
+    @Binding var selectedTab: Int
 
-    init() {
+    init(selectedTab: Binding<Int>) {
+        self._selectedTab = selectedTab
         let placeholderService = APIService(configuration: AppConfiguration())
         _bannerViewModel = StateObject(wrappedValue: BannerViewModel(api: placeholderService))
     }
@@ -95,30 +97,9 @@ struct HomeView: View {
                 // Split screen
                 if isCompact {
                     VStack(spacing: 0) {
-                        // Top: Instigate (Red)
-                        NavigationLink {
-                            InstigateView()
-                        } label: {
-                            ZStack {
-                                Color(red: 1.0, green: 0.3, blue: 0.3)
-                                    .ignoresSafeArea()
-                                
-                                VStack(spacing: 12) {
-                                    Text("Instigate")
-                                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                    Text("Click to Begin")
-                                        .font(.system(size: 18, weight: .medium, design: .rounded))
-                                        .foregroundColor(.white.opacity(0.9))
-                                }
-                            }
-                            .frame(height: (geometry.size.height - (bannerViewModel.bannerURL != nil ? 200 : 0)) / 2)
-                        }
-                        .buttonStyle(.plain)
-                        
-                        // Bottom: Debate (Blue)
-                        NavigationLink {
-                            DebateView()
+                        // Top: Debate (Blue)
+                        Button {
+                            selectedTab = 2
                         } label: {
                             ZStack {
                                 Color(red: 0.3, green: 0.58, blue: 1.0)
@@ -129,6 +110,27 @@ struct HomeView: View {
                                         .font(.system(size: 32, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
                                     Text("Click to Join")
+                                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.9))
+                                }
+                            }
+                            .frame(height: (geometry.size.height - (bannerViewModel.bannerURL != nil ? 200 : 0)) / 2)
+                        }
+                        .buttonStyle(.plain)
+                        
+                        // Bottom: Deliberate (Red)
+                        Button {
+                            selectedTab = 3
+                        } label: {
+                            ZStack {
+                                Color(red: 1.0, green: 0.3, blue: 0.3)
+                                    .ignoresSafeArea()
+                                
+                                VStack(spacing: 12) {
+                                    Text("Deliberate")
+                                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("Click to Vote")
                                         .font(.system(size: 18, weight: .medium, design: .rounded))
                                         .foregroundColor(.white.opacity(0.9))
                                 }
@@ -139,30 +141,9 @@ struct HomeView: View {
                     }
                 } else {
                     HStack(spacing: 0) {
-                        // Left: Instigate (Red)
-                        NavigationLink {
-                            InstigateView()
-                        } label: {
-                            ZStack {
-                                Color(red: 1.0, green: 0.3, blue: 0.3)
-                                    .ignoresSafeArea()
-                                
-                                VStack(spacing: 12) {
-                                    Text("Instigate")
-                                        .font(.system(size: 40, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                    Text("Click to Begin")
-                                        .font(.system(size: 20, weight: .medium, design: .rounded))
-                                        .foregroundColor(.white.opacity(0.9))
-                                }
-                            }
-                            .frame(width: geometry.size.width / 2)
-                        }
-                        .buttonStyle(.plain)
-                        
-                        // Right: Debate (Blue)
-                        NavigationLink {
-                            DebateView()
+                        // Left: Debate (Blue)
+                        Button {
+                            selectedTab = 2
                         } label: {
                             ZStack {
                                 Color(red: 0.3, green: 0.58, blue: 1.0)
@@ -173,6 +154,27 @@ struct HomeView: View {
                                         .font(.system(size: 40, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
                                     Text("Click to Join")
+                                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.9))
+                                }
+                            }
+                            .frame(width: geometry.size.width / 2)
+                        }
+                        .buttonStyle(.plain)
+                        
+                        // Right: Deliberate (Red)
+                        Button {
+                            selectedTab = 3
+                        } label: {
+                            ZStack {
+                                Color(red: 1.0, green: 0.3, blue: 0.3)
+                                    .ignoresSafeArea()
+                                
+                                VStack(spacing: 12) {
+                                    Text("Deliberate")
+                                        .font(.system(size: 40, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("Click to Vote")
                                         .font(.system(size: 20, weight: .medium, design: .rounded))
                                         .foregroundColor(.white.opacity(0.9))
                                 }
