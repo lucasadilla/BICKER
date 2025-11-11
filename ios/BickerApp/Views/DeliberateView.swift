@@ -34,8 +34,9 @@ struct DeliberateView: View {
                                 }
                             }
                         }
+                        .scrollTargetBehavior(.paging)
                         .onChange(of: viewModel.currentIndex) { oldValue, newValue in
-                            withAnimation {
+                            withAnimation(.easeOut(duration: 0.3)) {
                                 proxy.scrollTo(newValue, anchor: .top)
                             }
                         }
@@ -413,8 +414,10 @@ final class DeliberateViewModel: ObservableObject {
         }
         do {
             let fetched = try await api.fetchDeliberates()
+            // Filter out debates the user has already voted on
+            let unvoted = fetched.filter { $0.myVote == nil }
             await MainActor.run {
-                deliberates = fetched.shuffled()
+                deliberates = unvoted.shuffled()
                 currentIndex = 0
                 currentDeliberate = deliberates.first
             }
@@ -441,15 +444,26 @@ final class DeliberateViewModel: ObservableObject {
             let updated = try await api.voteOnDeliberate(id: current.id, side: side)
             await MainActor.run {
                 if index < deliberates.count {
+                    // Update the debate with vote results
                     deliberates[index] = updated
                     if index == currentIndex {
                         currentDeliberate = updated
                     }
-                    // Auto-advance to next after voting (after animation completes)
+                    // After animation, remove this debate and move to next
                     Task { @MainActor in
-                        try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
-                        if index == self.currentIndex {
-                            self.nextDeliberate()
+                        try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds for animation
+                        // Remove the voted debate from the list
+                        deliberates.removeAll { $0.id == current.id }
+                        // Adjust current index if needed
+                        if currentIndex >= deliberates.count && !deliberates.isEmpty {
+                            currentIndex = deliberates.count - 1
+                        } else if currentIndex >= deliberates.count {
+                            currentIndex = 0
+                        }
+                        if currentIndex < deliberates.count {
+                            currentDeliberate = deliberates[currentIndex]
+                        } else {
+                            currentDeliberate = nil
                         }
                     }
                 }
