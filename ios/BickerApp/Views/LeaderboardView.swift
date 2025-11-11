@@ -57,8 +57,8 @@ struct LeaderboardView: View {
                         }
                         .pickerStyle(.segmented)
                         .padding(.horizontal, 24)
-                        .onChange(of: viewModel.sort) { _ in
-                            Task {
+                        .onChange(of: viewModel.sort) {
+                            Task { @MainActor in
                                 await viewModel.loadStats()
                             }
                         }
@@ -234,23 +234,38 @@ final class LeaderboardViewModel: ObservableObject {
 
     func loadStats() async {
         guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
+        await MainActor.run {
+            isLoading = true
+        }
+        defer {
+            Task { @MainActor in
+                isLoading = false
+            }
+        }
         do {
             let response = try await api.fetchStats(sort: sort)
-            debates = response.debates
-            totalDebates = response.totalDebates
-            totalVotes = response.totalVotes
+            await MainActor.run {
+                debates = response.debates
+                totalDebates = response.totalDebates
+                totalVotes = response.totalVotes
+            }
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            await MainActor.run {
+                self.error = ViewError(message: error.localizedDescription)
+            }
         }
     }
 
     func loadTopPlayers() async {
         do {
-            topPlayers = try await api.fetchTopPlayers()
+            let players = try await api.fetchTopPlayers()
+            await MainActor.run {
+                topPlayers = players
+            }
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            await MainActor.run {
+                self.error = ViewError(message: error.localizedDescription)
+            }
         }
     }
 }

@@ -109,25 +109,28 @@ extension APIService {
     
     func fetchDeliberate(id: String) async throws -> Deliberate {
         let request = try request(for: "/api/deliberate/\(id)", method: .get)
-        let response = try await send(DeliberateResponse.self, request: request)
-        return response.deliberation
+        return try await send(Deliberate.self, request: request)
     }
     
     func voteOnDeliberate(id: String, side: String) async throws -> Deliberate {
-        let payload = try JSONEncoder().encode(["side": side])
-        let request = try request(for: "/api/deliberate/\(id)", method: .post, body: payload)
-        let response = try await send(DeliberateResponse.self, request: request)
-        return response.deliberation
+        // API expects "vote" not "side", and "debateId" not just id in path
+        let payload = try JSONEncoder().encode([
+            "debateId": id,
+            "vote": side
+        ])
+        let request = try request(for: "/api/deliberate", method: .post, body: payload)
+        return try await send(Deliberate.self, request: request)
     }
     
     func reactToDeliberate(id: String, side: String, emoji: String) async throws -> Deliberate {
         let payload = try JSONEncoder().encode([
+            "debateId": id,
             "side": side,
-            "emoji": emoji
+            "emoji": emoji,
+            "type": "reaction"
         ])
-        let request = try request(for: "/api/deliberate/\(id)", method: .post, body: payload)
-        let response = try await send(DeliberateResponse.self, request: request)
-        return response.deliberation
+        let request = try request(for: "/api/deliberate", method: .post, body: payload)
+        return try await send(Deliberate.self, request: request)
     }
     
     func fetchStats(sort: String = "newest") async throws -> StatsResponse {

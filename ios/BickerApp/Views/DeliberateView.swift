@@ -31,7 +31,7 @@ struct DeliberateView: View {
                             // Instigate bubble (red/left)
                             HStack {
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text(current.instigateText)
+                                    Text(current.instigateText ?? "")
                                         .font(.system(size: 20, weight: .semibold, design: .rounded))
                                         .foregroundColor(.white)
                                         .padding(20)
@@ -48,7 +48,7 @@ struct DeliberateView: View {
                             HStack {
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 12) {
-                                    Text(current.debateText)
+                                    Text(current.debateText ?? "")
                                         .font(.system(size: 20, weight: .semibold, design: .rounded))
                                         .foregroundColor(.white)
                                         .padding(20)
@@ -200,30 +200,50 @@ final class DeliberateViewModel: ObservableObject {
 
     func loadDeliberates() async {
         guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
+        await MainActor.run {
+            isLoading = true
+        }
+        defer {
+            Task { @MainActor in
+                isLoading = false
+            }
+        }
         do {
-            deliberates = try await api.fetchDeliberates()
-            deliberates.shuffle()
-            currentIndex = 0
-            currentDeliberate = deliberates.first
+            let fetched = try await api.fetchDeliberates()
+            await MainActor.run {
+                deliberates = fetched.shuffled()
+                currentIndex = 0
+                currentDeliberate = deliberates.first
+            }
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            await MainActor.run {
+                self.error = ViewError(message: error.localizedDescription)
+            }
         }
     }
 
     func vote(side: String) async {
         guard !isVoting, let current = currentDeliberate else { return }
-        isVoting = true
-        defer { isVoting = false }
+        await MainActor.run {
+            isVoting = true
+        }
+        defer {
+            Task { @MainActor in
+                isVoting = false
+            }
+        }
         do {
             let updated = try await api.voteOnDeliberate(id: current.id, side: side)
-            if let index = deliberates.firstIndex(where: { $0.id == updated.id }) {
-                deliberates[index] = updated
+            await MainActor.run {
+                if let index = deliberates.firstIndex(where: { $0.id == updated.id }) {
+                    deliberates[index] = updated
+                }
+                currentDeliberate = updated
             }
-            currentDeliberate = updated
         } catch {
-            self.error = ViewError(message: error.localizedDescription)
+            await MainActor.run {
+                self.error = ViewError(message: error.localizedDescription)
+            }
         }
     }
 

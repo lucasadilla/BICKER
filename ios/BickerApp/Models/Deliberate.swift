@@ -2,8 +2,8 @@ import Foundation
 
 struct Deliberate: Identifiable, Codable, Hashable {
     let id: String
-    let instigateText: String
-    let debateText: String
+    let instigateText: String?
+    let debateText: String?
     let createdBy: String?
     let instigatedBy: String?
     let votesRed: Int
