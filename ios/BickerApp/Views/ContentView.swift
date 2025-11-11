@@ -3,6 +3,61 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var bannerViewModel: BannerViewModel
+    @State private var selectedTab = 0
+
+    init() {
+        let placeholderService = APIService(configuration: AppConfiguration())
+        _bannerViewModel = StateObject(wrappedValue: BannerViewModel(api: placeholderService))
+    }
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            HomeView()
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+                .tag(0)
+            
+            InstigateView()
+                .tabItem {
+                    Label("Instigate", systemImage: "sparkles")
+                }
+                .tag(1)
+            
+            DebateView()
+                .tabItem {
+                    Label("Debate", systemImage: "message.fill")
+                }
+                .tag(2)
+            
+            DeliberateView()
+                .tabItem {
+                    Label("Deliberate", systemImage: "hand.raised.fill")
+                }
+                .tag(3)
+            
+            LeaderboardView()
+                .tabItem {
+                    Label("Leaderboard", systemImage: "trophy.fill")
+                }
+                .tag(4)
+            
+            MyStatsView()
+                .tabItem {
+                    Label("My Stats", systemImage: "chart.bar.fill")
+                }
+                .tag(5)
+        }
+        .task {
+            bannerViewModel.api = appState.apiService
+            await bannerViewModel.loadBanner()
+        }
+    }
+}
+
+struct HomeView: View {
+    @EnvironmentObject private var appState: AppState
+    @StateObject private var bannerViewModel: BannerViewModel
 
     init() {
         let placeholderService = APIService(configuration: AppConfiguration())
@@ -15,7 +70,10 @@ struct ContentView: View {
                 let isCompact = geometry.size.width < 600
                 ZStack {
                     LinearGradient(
-                        gradient: Gradient(colors: [Color.red.opacity(0.85), Color.blue.opacity(0.85)]),
+                        gradient: Gradient(colors: [
+                            Color(red: 1.0, green: 0.3, blue: 0.3),
+                            Color(red: 0.3, green: 0.58, blue: 1.0)
+                        ]),
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -50,13 +108,13 @@ struct ContentView: View {
                                 landingOption(
                                     title: "Instigate",
                                     subtitle: "Tap to begin",
-                                    color: Color(red: 1.0, green: 0.4, blue: 0.4),
+                                    color: Color(red: 1.0, green: 0.3, blue: 0.3),
                                     destination: InstigateView()
                                 )
                                 landingOption(
                                     title: "Debate",
                                     subtitle: "Tap to join",
-                                    color: Color(red: 0.3, green: 0.55, blue: 1.0),
+                                    color: Color(red: 0.3, green: 0.58, blue: 1.0),
                                     destination: DebateView()
                                 )
                             }
@@ -73,7 +131,7 @@ struct ContentView: View {
                                 landingOption(
                                     title: "Debate",
                                     subtitle: "Tap to join",
-                                    color: Color(red: 0.3, green: 0.5, blue: 1.0),
+                                    color: Color(red: 0.3, green: 0.58, blue: 1.0),
                                     destination: DebateView()
                                 )
                             }

@@ -1,0 +1,217 @@
+import SwiftUI
+
+struct MyStatsView: View {
+    @EnvironmentObject private var appState: AppState
+    @StateObject private var viewModel: MyStatsViewModel
+
+    init() {
+        let placeholderService = APIService(configuration: AppConfiguration())
+        _viewModel = StateObject(wrappedValue: MyStatsViewModel(api: placeholderService))
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color(red: 0.3, green: 0.58, blue: 1.0)
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Stats summary
+                        HStack(spacing: 16) {
+                            StatCard(title: "Debates", value: "\(viewModel.totalDebates)")
+                            StatCard(title: "Win Rate", value: "\(viewModel.winRate)%")
+                            StatCard(title: "Points", value: "\(viewModel.points)")
+                            StatCard(title: "Streak", value: "\(viewModel.streak)")
+                        }
+                        .padding(.horizontal, 24)
+
+                        // Badges
+                        if !viewModel.badges.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Badges")
+                                    .font(.system(.title2, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 24)
+
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(viewModel.badges, id: \.self) { badge in
+                                            Text(badge)
+                                                .font(.system(.caption, design: .rounded))
+                                                .foregroundColor(.white)
+                                                .padding(12)
+                                                .background(.ultraThinMaterial)
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        }
+                                    }
+                                    .padding(.horizontal, 24)
+                                }
+                            }
+                        }
+
+                        // Sort picker
+                        Picker("Sort", selection: $viewModel.sort) {
+                            Text("Newest").tag("newest")
+                            Text("Oldest").tag("oldest")
+                            Text("Most Popular").tag("mostPopular")
+                            Text("Most Divisive").tag("mostDivisive")
+                            Text("Most Decisive").tag("mostDecisive")
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal, 24)
+                        .onChange(of: viewModel.sort) { _ in
+                            Task {
+                                await viewModel.loadDebates()
+                            }
+                        }
+
+                        // Debates list
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .tint(.white)
+                        } else if viewModel.debates.isEmpty {
+                            Text("You have not participated in any debates yet.")
+                                .foregroundColor(.white)
+                                .font(.system(.body, design: .rounded))
+                                .padding()
+                        } else {
+                            VStack(spacing: 16) {
+                                ForEach(viewModel.debates) { debate in
+                                    UserDebateCard(debate: debate)
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                        }
+                    }
+                    .padding(.vertical, 24)
+                }
+            }
+            .navigationTitle("My Stats")
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .task {
+                viewModel.updateAPI(appState.apiService)
+                await viewModel.loadDebates()
+            }
+            .alert(item: $viewModel.error) { error in
+                Alert(
+                    title: Text("Error"),
+                    message: Text(error.message),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+        }
+    }
+}
+
+struct StatCard: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(value)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+            Text(title)
+                .font(.system(.caption, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+struct UserDebateCard: View {
+    let debate: UserDebate
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(debate.instigateText)
+                    .font(.system(.body, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(red: 1.0, green: 0.3, blue: 0.3))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+
+            HStack {
+                Spacer()
+                Text(debate.debateText)
+                    .font(.system(.body, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .background(Color(red: 0.3, green: 0.58, blue: 1.0))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+
+            HStack {
+                Text("Red: \(debate.votesRed)")
+                    .foregroundColor(.white)
+                Spacer()
+                Text("Blue: \(debate.votesBlue)")
+                    .foregroundColor(.white)
+            }
+
+            if let side = debate.userWroteSide {
+                Text("You wrote: \(side.capitalized)")
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundColor(.white.opacity(0.8))
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+@MainActor
+final class MyStatsViewModel: ObservableObject {
+    @Published var debates: [UserDebate] = []
+    @Published var totalDebates = 0
+    @Published var wins = 0
+    @Published var points = 0
+    @Published var streak = 0
+    @Published var badges: [String] = []
+    @Published var sort = "newest"
+    @Published var page = 1
+    @Published var isLoading = false
+    @Published var error: ViewError?
+
+    var winRate: Int {
+        totalDebates > 0 ? Int((Double(wins) / Double(totalDebates)) * 100) : 0
+    }
+
+    private var api: APIService
+
+    init(api: APIService) {
+        self.api = api
+    }
+
+    func updateAPI(_ api: APIService) {
+        self.api = api
+    }
+
+    func loadDebates() async {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let response = try await api.fetchUserDebates(sort: sort, page: page)
+            debates = response.debates
+            totalDebates = response.totalDebates
+            wins = response.wins
+            points = response.points
+            streak = response.streak
+            badges = response.badges
+        } catch {
+            self.error = ViewError(message: error.localizedDescription)
+        }
+    }
+}
+
