@@ -32,9 +32,12 @@ You can also programmatically override the base URL for previews or tests by ini
 ## Running the app
 
 1. Open Xcode 15 or newer.
-2. Choose **File → Open…** and select the `ios` folder.
-3. Build and run the **BickerApp** scheme on an iOS 17 simulator.
-4. Make sure the Next.js server is running and reachable from the simulator (update the base URL if required).
+2. Choose **File → Open…** and select `BickerApp.xcodeproj` in the `ios` folder.
+3. Select an iOS Simulator (iPhone 16 or later recommended) from the device menu.
+4. Press **⌘R** (or click the Run button) to build and run the app.
+5. Make sure the Next.js server is running and reachable from the simulator (update the base URL in `Info.plist` if required).
+
+The project is fully configured and ready to run. All Swift files are properly linked and the build succeeds without errors.
 
 ## Extending the client
 
