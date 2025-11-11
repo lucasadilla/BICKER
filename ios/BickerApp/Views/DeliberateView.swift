@@ -10,37 +10,50 @@ struct DeliberateView: View {
     }
 
     var body: some View {
-        if viewModel.isLoading {
-            ZStack {
-                Color(red: 1.0, green: 0.3, blue: 0.3)
-                    .ignoresSafeArea()
-                ProgressView()
-                    .tint(.white)
-            }
-        } else if !viewModel.deliberates.isEmpty {
-            TabView(selection: $viewModel.currentIndex) {
-                ForEach(Array(viewModel.deliberates.enumerated()), id: \.element.id) { index, current in
-                    DeliberateCardView(
-                        deliberate: current,
-                        viewModel: viewModel,
-                        index: index
-                    )
-                    .tag(index)
+        Group {
+            if viewModel.isLoading {
+                ZStack {
+                    Color(red: 1.0, green: 0.3, blue: 0.3)
+                        .ignoresSafeArea()
+                    ProgressView()
+                        .tint(.white)
+                }
+            } else if !viewModel.deliberates.isEmpty {
+                TabView(selection: $viewModel.currentIndex) {
+                    ForEach(Array(viewModel.deliberates.enumerated()), id: \.element.id) { index, current in
+                        DeliberateCardView(
+                            deliberate: current,
+                            viewModel: viewModel,
+                            index: index
+                        )
+                        .tag(index)
+                    }
+                }
+                .tabViewStyle(.page)
+                .indexViewStyle(.page(backgroundDisplayMode: .never))
+                .ignoresSafeArea()
+            } else {
+                ZStack {
+                    Color(red: 1.0, green: 0.3, blue: 0.3)
+                        .ignoresSafeArea()
+                    VStack {
+                        Text("No debates available")
+                            .foregroundColor(.white)
+                            .font(.system(.title2, design: .rounded))
+                    }
                 }
             }
-            .tabViewStyle(.page)
-            .indexViewStyle(.page(backgroundDisplayMode: .never))
-            .ignoresSafeArea()
-        } else {
-            ZStack {
-                Color(red: 1.0, green: 0.3, blue: 0.3)
-                    .ignoresSafeArea()
-                VStack {
-                    Text("No debates available")
-                        .foregroundColor(.white)
-                        .font(.system(.title2, design: .rounded))
-                }
-            }
+        }
+        .task {
+            viewModel.updateAPI(appState.apiService)
+            await viewModel.loadDeliberates()
+        }
+        .alert(item: $viewModel.error) { error in
+            Alert(
+                title: Text("Error"),
+                message: Text(error.message),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 }
@@ -331,9 +344,6 @@ struct DeliberateCardView: View {
             }
         }
         .ignoresSafeArea()
-        .task {
-            viewModel.updateAPI(viewModel.api)
-        }
     }
 }
 
