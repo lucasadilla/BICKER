@@ -61,31 +61,31 @@ struct DebateView: View {
                             .padding(.horizontal, 20)
                             .padding(.top, 60)
                             
-                            // Current instigate - entire area clickable
-                            Spacer()
-                            
+                            // Current instigate - entire area below search bar is clickable
                             Button {
                                 Task { @MainActor in
                                     viewModel.nextInstigate()
                                 }
                             } label: {
-                                if let instigate = viewModel.currentInstigate {
-                                    VStack(spacing: 16) {
-                                        Text(instigate.text)
+                                ZStack {
+                                    Color.clear
+                                    if let instigate = viewModel.currentInstigate {
+                                        VStack(spacing: 16) {
+                                            Text(instigate.text)
+                                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                                .foregroundColor(.white)
+                                                .multilineTextAlignment(.center)
+                                                .padding(.horizontal, 20)
+                                        }
+                                    } else {
+                                        Text("No topics available")
                                             .font(.system(size: 24, weight: .bold, design: .rounded))
                                             .foregroundColor(.white)
                                             .multilineTextAlignment(.center)
                                             .padding(.horizontal, 20)
                                     }
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                } else {
-                                    Text("No topics available")
-                                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal, 20)
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
                             }
                             .buttonStyle(.plain)
                         }
@@ -98,8 +98,10 @@ struct DebateView: View {
                             .ignoresSafeArea()
                         
                         VStack(spacing: 20) {
+                            Spacer()
+                                .frame(height: 40)
+                            
                             TextEditor(text: $viewModel.debateText)
-                                .padding(.top, 20)
                                 .font(.system(size: 20, design: .rounded))
                                 .foregroundColor(.black)
                                 .frame(height: 150)
@@ -200,31 +202,31 @@ struct DebateView: View {
                             .padding(.horizontal, 20)
                             .padding(.top, 60)
                             
-                            // Current instigate - entire area clickable
-                            Spacer()
-                            
+                            // Current instigate - entire area below search bar is clickable
                             Button {
                                 Task { @MainActor in
                                     viewModel.nextInstigate()
                                 }
                             } label: {
-                                if let instigate = viewModel.currentInstigate {
-                                    VStack(spacing: 16) {
-                                        Text(instigate.text)
+                                ZStack {
+                                    Color.clear
+                                    if let instigate = viewModel.currentInstigate {
+                                        VStack(spacing: 16) {
+                                            Text(instigate.text)
+                                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                                .foregroundColor(.white)
+                                                .multilineTextAlignment(.center)
+                                                .padding(.horizontal, 20)
+                                        }
+                                    } else {
+                                        Text("No topics available")
                                             .font(.system(size: 36, weight: .bold, design: .rounded))
                                             .foregroundColor(.white)
                                             .multilineTextAlignment(.center)
                                             .padding(.horizontal, 20)
                                     }
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                } else {
-                                    Text("No topics available")
-                                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal, 20)
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
                             }
                             .buttonStyle(.plain)
                             
@@ -266,8 +268,10 @@ struct DebateView: View {
                             .ignoresSafeArea()
                         
                         VStack(spacing: 20) {
+                            Spacer()
+                                .frame(height: 80)
+                            
             TextEditor(text: $viewModel.debateText)
-                                .padding(.top, 60)
                                 .font(.system(size: 28, design: .rounded))
                                 .foregroundColor(.black)
                                 .frame(height: 400)
