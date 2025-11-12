@@ -546,12 +546,17 @@ final class DeliberateViewModel: ObservableObject {
                     currentDeliberate = current
                 }
             }
-            self.error = ViewError(message: error.localizedDescription)
 
+            var shouldDisplayError = true
             if case let APIError.serverError(message) = error,
                message.localizedCaseInsensitiveContains("already voted") {
                 await voteStore.markVoted(id: current.id)
                 removeDebate(withId: current.id, delayedAdvance: false)
+                shouldDisplayError = false
+            }
+
+            if shouldDisplayError {
+                self.error = ViewError(message: error.localizedDescription)
             }
         }
     }
