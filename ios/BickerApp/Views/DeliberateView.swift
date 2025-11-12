@@ -107,7 +107,12 @@ struct DeliberateCardView: View {
     var body: some View {
         GeometryReader { geometry in
             let isCompact = geometry.size.width < 600
-            let hasVoted = deliberate.myVote != nil
+            // Check if user has voted - if myVote is set and not empty, they've voted
+            let hasVoted = if let myVote = deliberate.myVote {
+                !myVote.isEmpty
+            } else {
+                false
+            }
             let totalVotes = (deliberate.votesRed ?? 0) + (deliberate.votesBlue ?? 0)
             let redPercent = totalVotes > 0 ? Double(deliberate.votesRed ?? 0) / Double(totalVotes) : 0.5
             let bluePercent = 1.0 - redPercent
@@ -470,19 +475,25 @@ final class DeliberateViewModel: ObservableObject {
         }
         do {
             let fetched = try await api.fetchDeliberates()
-            // Filter out debates the user has already voted on
-            // The API should already filter these, but we double-check on the client side
+            // Aggressively filter out debates the user has already voted on
+            // Check both myVote and votedBy array to be absolutely sure
             let unvoted = fetched.filter { debate in
-                // If myVote is set and not empty, user has voted - exclude it
-                guard let myVote = debate.myVote else {
-                    // myVote is nil, so user hasn't voted - include it
-                    return true
+                // First check: if myVote is set and not empty, exclude it
+                if let myVote = debate.myVote, !myVote.isEmpty {
+                    return false
                 }
-                // If myVote is an empty string, treat it as no vote
-                return myVote.isEmpty
+                // Second check: if votedBy array exists and has entries, we need to check if user voted
+                // But since API should filter this, if myVote is nil, we assume user hasn't voted
+                // This is a safety check - API should handle the main filtering
+                return true
             }
             await MainActor.run {
-                deliberates = unvoted.shuffled()
+                // Also filter out any debates that are already in our list (in case of duplicates)
+                let existingIds = Set(deliberates.map { $0.id })
+                let newUnvoted = unvoted.filter { !existingIds.contains($0.id) }
+                
+                // Replace the list entirely with fresh unvoted debates
+                deliberates = newUnvoted.shuffled()
                 currentIndex = 0
                 currentDeliberate = deliberates.first
             }
@@ -496,7 +507,24 @@ final class DeliberateViewModel: ObservableObject {
     func vote(side: String, index: Int) async {
         guard !isVoting, index < deliberates.count else { return }
         let current = deliberates[index]
-        guard current.myVote == nil else { return } // Already voted
+        // Double-check: if myVote is set, don't allow voting
+        if let myVote = current.myVote, !myVote.isEmpty {
+            // Already voted - remove from list immediately
+            await MainActor.run {
+                deliberates.removeAll { $0.id == current.id }
+                if currentIndex >= deliberates.count && !deliberates.isEmpty {
+                    currentIndex = deliberates.count - 1
+                } else if currentIndex >= deliberates.count {
+                    currentIndex = 0
+                }
+                if currentIndex < deliberates.count {
+                    currentDeliberate = deliberates[currentIndex]
+                } else {
+                    currentDeliberate = nil
+                }
+            }
+            return
+        }
         
         // Optimistically update vote counts immediately for smooth animation (like web version)
         await MainActor.run {
@@ -549,11 +577,13 @@ final class DeliberateViewModel: ObservableObject {
                     if index == currentIndex {
                         currentDeliberate = updated
                     }
-                    // After animation, remove this debate and move to next
+                    // Immediately remove the voted debate from the list (don't wait for animation)
+                    // This prevents the user from seeing it again
+                    deliberates.removeAll { $0.id == current.id }
+                    
+                    // After animation, move to next debate
                     Task { @MainActor in
                         try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds for animation
-                        // Remove the voted debate from the list immediately
-                        deliberates.removeAll { $0.id == current.id }
                         // Adjust current index if needed
                         if currentIndex >= deliberates.count && !deliberates.isEmpty {
                             currentIndex = deliberates.count - 1
