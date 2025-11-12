@@ -60,7 +60,7 @@ struct DeliberateView: View {
             }
         }
         .task {
-            viewModel.updateAPI(appState.apiService)
+            await viewModel.updateAPI(appState.apiService)
             await viewModel.loadDeliberates()
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
@@ -454,164 +454,104 @@ final class DeliberateViewModel: ObservableObject {
     @Published var selectedUsername: UsernameWrapper?
 
     var api: APIService
+    private let voteStore: DeliberateVoteStore
 
-    init(api: APIService) {
+    init(api: APIService, voteStore: DeliberateVoteStore = DeliberateVoteStore()) {
         self.api = api
+        self.voteStore = voteStore
     }
 
-    func updateAPI(_ api: APIService) {
+    func updateAPI(_ api: APIService) async {
         self.api = api
+        await voteStore.updateUserIdentifier(baseURL: api.configuration.baseURL)
     }
 
     func loadDeliberates() async {
         guard !isLoading else { return }
-        await MainActor.run {
-            isLoading = true
-        }
-        defer {
-            Task { @MainActor in
-                isLoading = false
-            }
-        }
+        await voteStore.updateUserIdentifier(baseURL: api.configuration.baseURL)
+        isLoading = true
+        defer { isLoading = false }
         do {
             let fetched = try await api.fetchDeliberates()
-            // Aggressively filter out debates the user has already voted on
-            // Check both myVote and votedBy array to be absolutely sure
-            let unvoted = fetched.filter { debate in
-                // First check: if myVote is set and not empty, exclude it
-                if let myVote = debate.myVote, !myVote.isEmpty {
-                    return false
-                }
-                // Second check: if votedBy array exists and has entries, we need to check if user voted
-                // But since API should filter this, if myVote is nil, we assume user hasn't voted
-                // This is a safety check - API should handle the main filtering
-                return true
-            }
-            await MainActor.run {
-                // Also filter out any debates that are already in our list (in case of duplicates)
-                let existingIds = Set(deliberates.map { $0.id })
-                let newUnvoted = unvoted.filter { !existingIds.contains($0.id) }
-                
-                // Replace the list entirely with fresh unvoted debates
-                deliberates = newUnvoted.shuffled()
-                currentIndex = 0
-                currentDeliberate = deliberates.first
-            }
+            let filtered = await voteStore.filterUnvotedDebates(fetched)
+            let existingIds = Set(deliberates.map { $0.id })
+            let newUnvoted = filtered.filter { !existingIds.contains($0.id) }
+
+            deliberates = newUnvoted.shuffled()
+            currentIndex = 0
+            currentDeliberate = deliberates.first
         } catch {
-            await MainActor.run {
-                self.error = ViewError(message: error.localizedDescription)
-            }
+            self.error = ViewError(message: error.localizedDescription)
         }
     }
 
     func vote(side: String, index: Int) async {
         guard !isVoting, index < deliberates.count else { return }
         let current = deliberates[index]
-        // Double-check: if myVote is set, don't allow voting
-        if let myVote = current.myVote, !myVote.isEmpty {
-            // Already voted - remove from list immediately
-            await MainActor.run {
-                deliberates.removeAll { $0.id == current.id }
-                if currentIndex >= deliberates.count && !deliberates.isEmpty {
-                    currentIndex = deliberates.count - 1
-                } else if currentIndex >= deliberates.count {
-                    currentIndex = 0
-                }
-                if currentIndex < deliberates.count {
-                    currentDeliberate = deliberates[currentIndex]
-                } else {
-                    currentDeliberate = nil
-                }
-            }
+        // Double-check: if we've already recorded this debate as voted, remove it immediately
+        if await voteStore.hasVoted(id: current.id) || !(current.myVote?.isEmpty ?? true) {
+            await voteStore.markVoted(id: current.id)
+            removeDebate(withId: current.id, delayedAdvance: false)
             return
         }
-        
-        // Optimistically update vote counts immediately for smooth animation (like web version)
-        await MainActor.run {
-            isVoting = true
-            if index < deliberates.count {
-                var optimistic = deliberates[index]
-                // Create updated vote counts
-                let newVotesRed = side == "red" ? (optimistic.votesRed ?? 0) + 1 : (optimistic.votesRed ?? 0)
-                let newVotesBlue = side == "blue" ? (optimistic.votesBlue ?? 0) + 1 : (optimistic.votesBlue ?? 0)
-                // Create a new Deliberate with optimistic vote counts and myVote set
-                let optimisticDeliberate = Deliberate(
-                    id: optimistic.id,
-                    instigateText: optimistic.instigateText,
-                    debateText: optimistic.debateText,
-                    createdBy: optimistic.createdBy,
-                    instigatedBy: optimistic.instigatedBy,
-                    votesRed: newVotesRed,
-                    votesBlue: newVotesBlue,
-                    reactions: optimistic.reactions,
-                    myVote: side,
-                    myReactions: optimistic.myReactions,
-                    createdAt: optimistic.createdAt,
-                    updatedAt: optimistic.updatedAt,
-                    creator: optimistic.creator,
-                    instigator: optimistic.instigator,
-                    votedBy: optimistic.votedBy
-                )
-                // Use withAnimation for smooth transition
-                withAnimation(.spring(response: 1.2, dampingFraction: 0.75)) {
-                    deliberates[index] = optimisticDeliberate
-                    if index == currentIndex {
-                        currentDeliberate = optimisticDeliberate
-                    }
+
+        isVoting = true
+        defer { isVoting = false }
+
+        if index < deliberates.count {
+            let optimistic = deliberates[index]
+            let newVotesRed = side == "red" ? (optimistic.votesRed ?? 0) + 1 : (optimistic.votesRed ?? 0)
+            let newVotesBlue = side == "blue" ? (optimistic.votesBlue ?? 0) + 1 : (optimistic.votesBlue ?? 0)
+
+            let optimisticDeliberate = Deliberate(
+                id: optimistic.id,
+                instigateText: optimistic.instigateText,
+                debateText: optimistic.debateText,
+                createdBy: optimistic.createdBy,
+                instigatedBy: optimistic.instigatedBy,
+                votesRed: newVotesRed,
+                votesBlue: newVotesBlue,
+                reactions: optimistic.reactions,
+                myVote: side,
+                myReactions: optimistic.myReactions,
+                createdAt: optimistic.createdAt,
+                updatedAt: optimistic.updatedAt,
+                creator: optimistic.creator,
+                instigator: optimistic.instigator,
+                votedBy: optimistic.votedBy
+            )
+
+            withAnimation(.spring(response: 1.2, dampingFraction: 0.75)) {
+                deliberates[index] = optimisticDeliberate
+                if index == currentIndex {
+                    currentDeliberate = optimisticDeliberate
                 }
             }
         }
-        
-        defer {
-            Task { @MainActor in
-                isVoting = false
-            }
-        }
-        
+
         do {
             let updated = try await api.voteOnDeliberate(id: current.id, side: side)
-            await MainActor.run {
-                if index < deliberates.count {
-                    // Update with real API response (no animation needed, values should be same or very close)
-                    deliberates[index] = updated
-                    if index == currentIndex {
-                        currentDeliberate = updated
-                    }
-                    // Immediately remove the voted debate from the list (don't wait for animation)
-                    // This prevents the user from seeing it again
-                    deliberates.removeAll { $0.id == current.id }
-                    
-                    // After animation, move to next debate
-                    Task { @MainActor in
-                        try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds for animation
-                        // Adjust current index if needed
-                        if currentIndex >= deliberates.count && !deliberates.isEmpty {
-                            currentIndex = deliberates.count - 1
-                        } else if currentIndex >= deliberates.count {
-                            currentIndex = 0
-                        }
-                        if currentIndex < deliberates.count {
-                            currentDeliberate = deliberates[currentIndex]
-                        } else {
-                            currentDeliberate = nil
-                            // If no more debates, try reloading to get new ones
-                            if deliberates.isEmpty {
-                                await loadDeliberates()
-                            }
-                        }
-                    }
+            if index < deliberates.count {
+                deliberates[index] = updated
+                if index == currentIndex {
+                    currentDeliberate = updated
                 }
             }
+            await voteStore.markVoted(id: current.id)
+            removeDebate(withId: current.id, delayedAdvance: true)
         } catch {
-            // On error, revert optimistic update
-            await MainActor.run {
-                if index < deliberates.count {
-                    deliberates[index] = current
-                    if index == currentIndex {
-                        currentDeliberate = current
-                    }
+            if index < deliberates.count {
+                deliberates[index] = current
+                if index == currentIndex {
+                    currentDeliberate = current
                 }
-                self.error = ViewError(message: error.localizedDescription)
+            }
+            self.error = ViewError(message: error.localizedDescription)
+
+            if case let APIError.serverError(message) = error,
+               message.localizedCaseInsensitiveContains("already voted") {
+                await voteStore.markVoted(id: current.id)
+                removeDebate(withId: current.id, delayedAdvance: false)
             }
         }
     }
@@ -620,6 +560,35 @@ final class DeliberateViewModel: ObservableObject {
         guard !deliberates.isEmpty else { return }
         currentIndex = (currentIndex + 1) % deliberates.count
         currentDeliberate = deliberates[currentIndex]
+    }
+
+    private func removeDebate(withId id: String, delayedAdvance: Bool) {
+        deliberates.removeAll { $0.id == id }
+
+        let delay: UInt64 = delayedAdvance ? 2_000_000_000 : 0
+
+        Task { @MainActor in
+            if delay > 0 {
+                try? await Task.sleep(nanoseconds: delay)
+            }
+
+            if deliberates.isEmpty {
+                currentIndex = 0
+                currentDeliberate = nil
+                await loadDeliberates()
+                return
+            }
+
+            if currentIndex >= deliberates.count {
+                currentIndex = deliberates.count - 1
+            }
+
+            if currentIndex < deliberates.count {
+                currentDeliberate = deliberates[currentIndex]
+            } else {
+                currentDeliberate = nil
+            }
+        }
     }
 }
 

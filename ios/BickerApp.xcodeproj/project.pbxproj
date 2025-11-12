@@ -24,9 +24,10 @@
 		F983E62F917C40FE9D0D012A /* Deliberate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F983E62E917C40FE9D0D012A /* Deliberate.swift */; };
 		676442C0DE1B4A0584C5A151 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 676442BFDE1B4A0584C5A151 /* User.swift */; };
 		E51109B47081465F97A17AA5 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51109B37081465F97A17AA5 /* Notification.swift */; };
-		10E8845CFF0F4FC590DAC8B1 /* Stats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E8845BFF0F4FC590DAC8B1 /* Stats.swift */; };
-		31837E95ADE648389682A4B6 /* DeliberateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31837E94ADE648389682A4B6 /* DeliberateView.swift */; };
-		4D9FFE2531594E22B2CE4768 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D9FFE2431594E22B2CE4768 /* LeaderboardView.swift */; };
+                10E8845CFF0F4FC590DAC8B1 /* Stats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E8845BFF0F4FC590DAC8B1 /* Stats.swift */; };
+                31837E95ADE648389682A4B6 /* DeliberateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31837E94ADE648389682A4B6 /* DeliberateView.swift */; };
+                C4F8B2B2E5AB4F92B6C77E8C /* DeliberateVoteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F8B2B1E5AB4F92B6C77E8C /* DeliberateVoteStore.swift */; };
+                4D9FFE2531594E22B2CE4768 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D9FFE2431594E22B2CE4768 /* LeaderboardView.swift */; };
 		E731D94D6E12493993F7C539 /* MyStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E731D94C6E12493993F7C539 /* MyStatsView.swift */; };
 		5D228AECD40D43A9AA8184AD /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D228AEBD40D43A9AA8184AD /* NotificationsView.swift */; };
 		25B2F4D48DC748BC93BFB3AF /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B2F4D38DC748BC93BFB3AF /* ProfileView.swift */; };
@@ -53,9 +54,10 @@
 		F983E62E917C40FE9D0D012A /* Deliberate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deliberate.swift; sourceTree = "<group>"; };
 		676442BFDE1B4A0584C5A151 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		E51109B37081465F97A17AA5 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
-		10E8845BFF0F4FC590DAC8B1 /* Stats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stats.swift; sourceTree = "<group>"; };
-		31837E94ADE648389682A4B6 /* DeliberateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliberateView.swift; sourceTree = "<group>"; };
-		4D9FFE2431594E22B2CE4768 /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+                10E8845BFF0F4FC590DAC8B1 /* Stats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stats.swift; sourceTree = "<group>"; };
+                31837E94ADE648389682A4B6 /* DeliberateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliberateView.swift; sourceTree = "<group>"; };
+                C4F8B2B1E5AB4F92B6C77E8C /* DeliberateVoteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliberateVoteStore.swift; sourceTree = "<group>"; };
+                4D9FFE2431594E22B2CE4768 /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
 		E731D94C6E12493993F7C539 /* MyStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyStatsView.swift; sourceTree = "<group>"; };
 		5D228AEBD40D43A9AA8184AD /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		25B2F4D38DC748BC93BFB3AF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -102,14 +104,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		B31ABE5BA63C44808A7D72A7 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				D6E947000E9942AABAF9D655 /* APIService.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
+                B31ABE5BA63C44808A7D72A7 /* Services */ = {
+                        isa = PBXGroup;
+                        children = (
+                                D6E947000E9942AABAF9D655 /* APIService.swift */,
+                                C4F8B2B1E5AB4F92B6C77E8C /* DeliberateVoteStore.swift */,
+                        );
+                        path = Services;
+                        sourceTree = "<group>";
+                };
 		942196A8B6234EF5B3FFFE26 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
@@ -212,32 +215,33 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		8AA22D6E0EEF42EE99FAC568 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3BFE5F49DF6549EA8B4F4AB5 /* BickerApp.swift in Sources */,
-				FAAE80B7792B44BE9B7480A1 /* AppState.swift in Sources */,
-				D12998A2F8804E6C85AC70CC /* AppConfiguration.swift in Sources */,
-				E44B59F75D7B48C78051E5B7 /* ContentView.swift in Sources */,
-				9614ED6F7B794AD58F7B3740 /* InstigateView.swift in Sources */,
-				01006EDCD755417AB786A0B3 /* DebateView.swift in Sources */,
-				D6E947010E9942AABAF9D655 /* APIService.swift in Sources */,
-				BFDCD0631A9A46CF9DB24CA4 /* Instigate.swift in Sources */,
-				27897D3C6AC64DBEBF6419ED /* Debate.swift in Sources */,
-				8178D4B6E4524F6E95CC632B /* Banner.swift in Sources */,
-				031BAEAEF4CF41B2AB915924 /* InstigateViewModel.swift in Sources */,
-				403D0CDCA17448A79AE57CDE /* DebateViewModel.swift in Sources */,
-				51EF0966E0EE444E8D7B7105 /* BannerViewModel.swift in Sources */,
-				9D89D8282F0E410E92929CCC /* ViewError.swift in Sources */,
-				F983E62F917C40FE9D0D012A /* Deliberate.swift in Sources */,
-				676442C0DE1B4A0584C5A151 /* User.swift in Sources */,
-				E51109B47081465F97A17AA5 /* Notification.swift in Sources */,
-				10E8845CFF0F4FC590DAC8B1 /* Stats.swift in Sources */,
-				31837E95ADE648389682A4B6 /* DeliberateView.swift in Sources */,
-				4D9FFE2531594E22B2CE4768 /* LeaderboardView.swift in Sources */,
-				E731D94D6E12493993F7C539 /* MyStatsView.swift in Sources */,
-				5D228AECD40D43A9AA8184AD /* NotificationsView.swift in Sources */,
+                8AA22D6E0EEF42EE99FAC568 /* Sources */ = {
+                        isa = PBXSourcesBuildPhase;
+                        buildActionMask = 2147483647;
+                        files = (
+                                3BFE5F49DF6549EA8B4F4AB5 /* BickerApp.swift in Sources */,
+                                FAAE80B7792B44BE9B7480A1 /* AppState.swift in Sources */,
+                                D12998A2F8804E6C85AC70CC /* AppConfiguration.swift in Sources */,
+                                E44B59F75D7B48C78051E5B7 /* ContentView.swift in Sources */,
+                                9614ED6F7B794AD58F7B3740 /* InstigateView.swift in Sources */,
+                                01006EDCD755417AB786A0B3 /* DebateView.swift in Sources */,
+                                D6E947010E9942AABAF9D655 /* APIService.swift in Sources */,
+                                BFDCD0631A9A46CF9DB24CA4 /* Instigate.swift in Sources */,
+                                27897D3C6AC64DBEBF6419ED /* Debate.swift in Sources */,
+                                8178D4B6E4524F6E95CC632B /* Banner.swift in Sources */,
+                                031BAEAEF4CF41B2AB915924 /* InstigateViewModel.swift in Sources */,
+                                403D0CDCA17448A79AE57CDE /* DebateViewModel.swift in Sources */,
+                                51EF0966E0EE444E8D7B7105 /* BannerViewModel.swift in Sources */,
+                                9D89D8282F0E410E92929CCC /* ViewError.swift in Sources */,
+                                F983E62F917C40FE9D0D012A /* Deliberate.swift in Sources */,
+                                676442C0DE1B4A0584C5A151 /* User.swift in Sources */,
+                                E51109B47081465F97A17AA5 /* Notification.swift in Sources */,
+                                10E8845CFF0F4FC590DAC8B1 /* Stats.swift in Sources */,
+                                31837E95ADE648389682A4B6 /* DeliberateView.swift in Sources */,
+                                C4F8B2B2E5AB4F92B6C77E8C /* DeliberateVoteStore.swift in Sources */,
+                                4D9FFE2531594E22B2CE4768 /* LeaderboardView.swift in Sources */,
+                                E731D94D6E12493993F7C539 /* MyStatsView.swift in Sources */,
+                                5D228AECD40D43A9AA8184AD /* NotificationsView.swift in Sources */,
 				25B2F4D48DC748BC93BFB3AF /* ProfileView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* UserProfileView.swift in Sources */,
 			);
