@@ -157,253 +157,51 @@ struct DeliberateCardView: View {
             let clampedRedFill = max(0.0, min(1.0, redFill))
             let clampedBlueFill = max(0.0, min(1.0, blueFill))
 
-            if isCompact {
-                // Mobile: Stack vertically
-                VStack(spacing: 0) {
-                    // Top Side: Red - Instigate
-                    Button {
+            ProportionalSplitLayout(
+                axis: isCompact ? .vertical : .horizontal,
+                leadingFraction: clampedRedFill,
+                trailingFraction: clampedBlueFill
+            ) {
+                voteButton(
+                    color: Color(red: 1.0, green: 0.3, blue: 0.3),
+                    title: deliberate.instigateText ?? "",
+                    profile: deliberate.instigator,
+                    reactions: deliberate.reactions?.red,
+                    votes: deliberate.votesRed ?? 0,
+                    percent: redPercent,
+                    fontSize: isCompact ? 24 : 36,
+                    voteCountFontSize: isCompact ? 20 : 28,
+                    percentFontSize: isCompact ? 16 : 20,
+                    showVotes: showVotes,
+                    showVoteDetails: showVoteDetails,
+                    isInteractionDisabled: viewModel.isVoting || hasVoted,
+                    action: {
                         guard !hasVoted, !viewModel.isVoting else { return }
-                        Task {
-                            await viewModel.vote(side: "red", index: index)
-                        }
-                    } label: {
-                        ZStack {
-                            Color(red: 1.0, green: 0.3, blue: 0.3)
-                                .ignoresSafeArea()
-                            
-                            VStack(spacing: 20) {
-                                Text(deliberate.instigateText ?? "")
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 20)
-                                
-                                ProfilePreview(
-                                    user: deliberate.instigator,
-                                    textColor: .white.opacity(0.9)
-                                ) { username in
-                                    viewModel.selectedUsername = UsernameWrapper(value: username)
-                                }
-                                
-                                // Reactions
-                                if let reactions = deliberate.reactions, let redReactions = reactions.red, !redReactions.isEmpty {
-                                    VStack(spacing: 8) {
-                                        ForEach(Array(redReactions.keys.sorted()), id: \.self) { emoji in
-                                            Text("\(emoji) \(redReactions[emoji] ?? 0)")
-                                                .font(.system(.caption, design: .rounded))
-                                                .foregroundColor(.white.opacity(0.9))
-                                        }
-                                    }
-                                }
-                                
-                                if showVotes {
-                                    VStack(spacing: 4) {
-                                        Text("Votes: \(deliberate.votesRed ?? 0)")
-                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        Text("\(Int(redPercent * 100))%")
-                                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                    .opacity(showVoteDetails ? 1 : 0)
-                                    .scaleEffect(showVoteDetails ? 1 : 0.96)
-                                    .animation(.easeOut(duration: 0.35), value: showVoteDetails)
-                                }
-
-                                Spacer()
-                            }
-                            .padding(.top, 60)
-                        }
+                        Task { await viewModel.vote(side: "red", index: index) }
                     }
-                    .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
-                    .disabled(viewModel.isVoting)
-                    .frame(height: geometry.size.height * clampedRedFill)
-                    .animation(VoteRevealTiming.fillAnimation, value: redFill)
-                    
-                    // Bottom Side: Blue - Debate
-                    Button {
+                )
+
+                voteButton(
+                    color: Color(red: 0.3, green: 0.58, blue: 1.0),
+                    title: deliberate.debateText ?? "",
+                    profile: deliberate.creator,
+                    reactions: deliberate.reactions?.blue,
+                    votes: deliberate.votesBlue ?? 0,
+                    percent: bluePercent,
+                    fontSize: isCompact ? 24 : 36,
+                    voteCountFontSize: isCompact ? 20 : 28,
+                    percentFontSize: isCompact ? 16 : 20,
+                    showVotes: showVotes,
+                    showVoteDetails: showVoteDetails,
+                    isInteractionDisabled: viewModel.isVoting || hasVoted,
+                    action: {
                         guard !hasVoted, !viewModel.isVoting else { return }
-                        Task {
-                            await viewModel.vote(side: "blue", index: index)
-                        }
-                    } label: {
-                        ZStack {
-                            Color(red: 0.3, green: 0.58, blue: 1.0)
-                                .ignoresSafeArea()
-                            
-                            VStack(spacing: 20) {
-                                Text(deliberate.debateText ?? "")
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 20)
-                                
-                                ProfilePreview(
-                                    user: deliberate.creator,
-                                    textColor: .white.opacity(0.9)
-                                ) { username in
-                                    viewModel.selectedUsername = UsernameWrapper(value: username)
-                                }
-                                
-                                // Reactions
-                                if let reactions = deliberate.reactions, let blueReactions = reactions.blue, !blueReactions.isEmpty {
-                                    VStack(spacing: 8) {
-                                        ForEach(Array(blueReactions.keys.sorted()), id: \.self) { emoji in
-                                            Text("\(emoji) \(blueReactions[emoji] ?? 0)")
-                                                .font(.system(.caption, design: .rounded))
-                                                .foregroundColor(.white.opacity(0.9))
-                                        }
-                                    }
-                                }
-                                
-                                if showVotes {
-                                    VStack(spacing: 4) {
-                                        Text("Votes: \(deliberate.votesBlue ?? 0)")
-                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        Text("\(Int(bluePercent * 100))%")
-                                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                    .opacity(showVoteDetails ? 1 : 0)
-                                    .scaleEffect(showVoteDetails ? 1 : 0.96)
-                                    .animation(.easeOut(duration: 0.35), value: showVoteDetails)
-                                }
-
-                                Spacer()
-                            }
-                            .padding(.top, 60)
-                        }
+                        Task { await viewModel.vote(side: "blue", index: index) }
                     }
-                    .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
-                    .disabled(viewModel.isVoting)
-                    .frame(height: geometry.size.height * clampedBlueFill)
-                    .animation(VoteRevealTiming.fillAnimation, value: blueFill)
-                }
-            } else {
-                // Desktop: Side by side
-                HStack(spacing: 0) {
-                    // Left Side: Red - Instigate
-                    Button {
-                        guard !hasVoted, !viewModel.isVoting else { return }
-                        Task {
-                            await viewModel.vote(side: "red", index: index)
-                        }
-                    } label: {
-                        ZStack {
-                            Color(red: 1.0, green: 0.3, blue: 0.3)
-                                .ignoresSafeArea()
-                            
-                            VStack(spacing: 20) {
-                                Text(deliberate.instigateText ?? "")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 20)
-                                
-                                ProfilePreview(
-                                    user: deliberate.instigator,
-                                    textColor: .white.opacity(0.9)
-                                ) { username in
-                                    viewModel.selectedUsername = UsernameWrapper(value: username)
-                                }
-                                
-                                // Reactions
-                                if let reactions = deliberate.reactions, let redReactions = reactions.red, !redReactions.isEmpty {
-                                    VStack(spacing: 8) {
-                                        ForEach(Array(redReactions.keys.sorted()), id: \.self) { emoji in
-                                            Text("\(emoji) \(redReactions[emoji] ?? 0)")
-                                                .font(.system(.caption, design: .rounded))
-                                                .foregroundColor(.white.opacity(0.9))
-                                        }
-                                    }
-                                }
-                                
-                                if showVotes {
-                                    VStack(spacing: 4) {
-                                        Text("Votes: \(deliberate.votesRed ?? 0)")
-                                            .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        Text("\(Int(redPercent * 100))%")
-                                            .font(.system(size: 20, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                    .opacity(showVoteDetails ? 1 : 0)
-                                    .scaleEffect(showVoteDetails ? 1 : 0.96)
-                                    .animation(.easeOut(duration: 0.35), value: showVoteDetails)
-                                }
-
-                                Spacer()
-                            }
-                            .padding(.top, 60)
-                        }
-                    }
-                    .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
-                    .disabled(viewModel.isVoting)
-                    .frame(width: geometry.size.width * clampedRedFill)
-                    .animation(VoteRevealTiming.fillAnimation, value: redFill)
-
-                    // Right Side: Blue - Debate
-                    Button {
-                        guard !hasVoted, !viewModel.isVoting else { return }
-                        Task {
-                            await viewModel.vote(side: "blue", index: index)
-                        }
-                    } label: {
-                        ZStack {
-                            Color(red: 0.3, green: 0.58, blue: 1.0)
-                                .ignoresSafeArea()
-                            
-                            VStack(spacing: 20) {
-                                Text(deliberate.debateText ?? "")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 20)
-                                
-                                ProfilePreview(
-                                    user: deliberate.creator,
-                                    textColor: .white.opacity(0.9)
-                                ) { username in
-                                    viewModel.selectedUsername = UsernameWrapper(value: username)
-                                }
-                                
-                                // Reactions
-                                if let reactions = deliberate.reactions, let blueReactions = reactions.blue, !blueReactions.isEmpty {
-                                    VStack(spacing: 8) {
-                                        ForEach(Array(blueReactions.keys.sorted()), id: \.self) { emoji in
-                                            Text("\(emoji) \(blueReactions[emoji] ?? 0)")
-                                                .font(.system(.caption, design: .rounded))
-                                                .foregroundColor(.white.opacity(0.9))
-                                        }
-                                    }
-                                }
-                                
-                                if showVotes {
-                                    VStack(spacing: 4) {
-                                        Text("Votes: \(deliberate.votesBlue ?? 0)")
-                                            .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        Text("\(Int(bluePercent * 100))%")
-                                            .font(.system(size: 20, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                    .opacity(showVoteDetails ? 1 : 0)
-                                    .scaleEffect(showVoteDetails ? 1 : 0.96)
-                                    .animation(.easeOut(duration: 0.35), value: showVoteDetails)
-                                }
-
-                                Spacer()
-                            }
-                            .padding(.top, 60)
-                        }
-                    }
-                    .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
-                    .disabled(viewModel.isVoting)
-                    .frame(width: geometry.size.width * clampedBlueFill)
-                    .animation(VoteRevealTiming.fillAnimation, value: blueFill)
-                }
+                )
             }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .ignoresSafeArea()
         }
         .onAppear {
             hasAnimatedReveal = false
@@ -503,6 +301,81 @@ struct DeliberateCardView: View {
             showVoteDetails = false
         }
         hasAnimatedReveal = false
+    }
+
+    @ViewBuilder
+    private func voteButton(
+        color: Color,
+        title: String,
+        profile: Deliberate.Creator?,
+        reactions: [String: Int]?,
+        votes: Int,
+        percent: Double,
+        fontSize: CGFloat,
+        voteCountFontSize: CGFloat,
+        percentFontSize: CGFloat,
+        showVotes: Bool,
+        showVoteDetails: Bool,
+        isInteractionDisabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            ZStack {
+                color
+
+                VStack(spacing: 20) {
+                    Text(title)
+                        .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+
+                    ProfilePreview(
+                        user: profile,
+                        textColor: .white.opacity(0.9)
+                    ) { username in
+                        viewModel.selectedUsername = UsernameWrapper(value: username)
+                    }
+
+                    if let reactions, !reactions.isEmpty {
+                        VStack(spacing: 8) {
+                            ForEach(Array(reactions.keys.sorted()), id: \.self) { emoji in
+                                Text("\(emoji) \(reactions[emoji] ?? 0)")
+                                    .font(.system(.caption, design: .rounded))
+                                    .foregroundColor(.white.opacity(0.9))
+                            }
+                        }
+                    }
+
+                    if showVotes {
+                        VStack(spacing: 4) {
+                            Text("Votes: \(votes)")
+                                .font(.system(size: voteCountFontSize, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                            Text("\(Int(percent * 100))%")
+                                .font(.system(size: percentFontSize, weight: .medium, design: .rounded))
+                                .foregroundColor(.white.opacity(0.9))
+                        }
+                        .opacity(showVoteDetails ? 1 : 0)
+                        .scaleEffect(showVoteDetails ? 1 : 0.96)
+                        .animation(.easeOut(duration: 0.35), value: showVoteDetails)
+                    }
+
+                    Spacer(minLength: 0)
+                }
+                .padding(.top, 60)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(VibrantButtonStyle(isDisabled: isInteractionDisabled))
+        .disabled(isInteractionDisabled)
+        .transaction { transaction in
+            if transaction.animation == nil {
+                transaction.animation = VoteRevealTiming.fillAnimation
+            }
+        }
     }
 }
 
