@@ -92,10 +92,42 @@ struct UsernameWrapper: Identifiable {
 
 struct VibrantButtonStyle: ButtonStyle {
     let isDisabled: Bool
-    
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .opacity(isDisabled ? 0.7 : (configuration.isPressed ? 0.9 : 1.0))
+    }
+}
+
+enum VoteRevealTiming {
+    static let neutralFill: Double = 0.5
+    static let fillResponse: Double = 1.6
+    static let fillDamping: Double = 0.78
+    static let fillBlend: Double = 0.4
+    static let revealDelay: Double = 1.65
+    static let revealDuration: Double = 0.55
+    static let resetDuration: Double = 0.45
+    static let postRevealPause: Double = 3.0
+
+    private static func secondsToNanoseconds(_ seconds: Double) -> UInt64 {
+        UInt64((seconds * 1_000_000_000).rounded())
+    }
+
+    static var revealDelayNanoseconds: UInt64 { secondsToNanoseconds(revealDelay) }
+    static var advanceDelayNanoseconds: UInt64 {
+        secondsToNanoseconds(revealDelay + revealDuration + postRevealPause)
+    }
+
+    static var fillAnimation: Animation {
+        .spring(response: fillResponse, dampingFraction: fillDamping, blendDuration: fillBlend)
+    }
+
+    static var revealAnimation: Animation {
+        .easeOut(duration: revealDuration)
+    }
+
+    static var resetAnimation: Animation {
+        .easeInOut(duration: resetDuration)
     }
 }
 
@@ -103,9 +135,10 @@ struct DeliberateCardView: View {
     let deliberate: Deliberate
     @ObservedObject var viewModel: DeliberateViewModel
     let index: Int
-    @State private var redFill: Double = 0.5
-    @State private var blueFill: Double = 0.5
+    @State private var redFill: Double = VoteRevealTiming.neutralFill
+    @State private var blueFill: Double = VoteRevealTiming.neutralFill
     @State private var showVoteDetails = false
+    @State private var revealTask: Task<Void, Never>?
 
     var body: some View {
         let hasVoted = if let myVote = deliberate.myVote {
@@ -128,6 +161,7 @@ struct DeliberateCardView: View {
                 VStack(spacing: 0) {
                     // Top Side: Red - Instigate
                     Button {
+                        guard !hasVoted, !viewModel.isVoting else { return }
                         Task {
                             await viewModel.vote(side: "red", index: index)
                         }
@@ -143,33 +177,11 @@ struct DeliberateCardView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 20)
                                 
-                                if let instigator = deliberate.instigator {
-                                    Button {
-                                        if let username = instigator.username {
-                                            viewModel.selectedUsername = UsernameWrapper(value: username)
-                                        }
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            if let profilePicture = instigator.profilePicture,
-                                               let url = URL(string: profilePicture) {
-                                                AsyncImage(url: url) { phase in
-                                                    if case .success(let image) = phase {
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 24, height: 24)
-                                                            .clipShape(Circle())
-                                                    }
-                                                }
-                                            }
-                                            if let username = instigator.username {
-                                                Text(username)
-                                                    .font(.system(.caption, design: .rounded))
-                                                    .foregroundColor(.white.opacity(0.9))
-                                            }
-                                        }
-                                    }
-                                    .buttonStyle(.plain)
+                                ProfilePreview(
+                                    user: deliberate.instigator,
+                                    textColor: .white.opacity(0.9)
+                                ) { username in
+                                    viewModel.selectedUsername = UsernameWrapper(value: username)
                                 }
                                 
                                 // Reactions
@@ -203,11 +215,12 @@ struct DeliberateCardView: View {
                         }
                     }
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
-                    .disabled(viewModel.isVoting || hasVoted)
+                    .disabled(viewModel.isVoting)
                     .frame(height: geometry.size.height * clampedRedFill)
                     
                     // Bottom Side: Blue - Debate
                     Button {
+                        guard !hasVoted, !viewModel.isVoting else { return }
                         Task {
                             await viewModel.vote(side: "blue", index: index)
                         }
@@ -223,33 +236,11 @@ struct DeliberateCardView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 20)
                                 
-                                if let creator = deliberate.creator {
-                                    Button {
-                                        if let username = creator.username {
-                                            viewModel.selectedUsername = UsernameWrapper(value: username)
-                                        }
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            if let profilePicture = creator.profilePicture,
-                                               let url = URL(string: profilePicture) {
-                                                AsyncImage(url: url) { phase in
-                                                    if case .success(let image) = phase {
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 24, height: 24)
-                                                            .clipShape(Circle())
-                                                    }
-                                                }
-                                            }
-                                            if let username = creator.username {
-                                                Text(username)
-                                                    .font(.system(.caption, design: .rounded))
-                                                    .foregroundColor(.white.opacity(0.9))
-                                            }
-                                        }
-                                    }
-                                    .buttonStyle(.plain)
+                                ProfilePreview(
+                                    user: deliberate.creator,
+                                    textColor: .white.opacity(0.9)
+                                ) { username in
+                                    viewModel.selectedUsername = UsernameWrapper(value: username)
                                 }
                                 
                                 // Reactions
@@ -283,7 +274,7 @@ struct DeliberateCardView: View {
                         }
                     }
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
-                    .disabled(viewModel.isVoting || hasVoted)
+                    .disabled(viewModel.isVoting)
                     .frame(height: geometry.size.height * clampedBlueFill)
                 }
             } else {
@@ -291,6 +282,7 @@ struct DeliberateCardView: View {
                 HStack(spacing: 0) {
                     // Left Side: Red - Instigate
                     Button {
+                        guard !hasVoted, !viewModel.isVoting else { return }
                         Task {
                             await viewModel.vote(side: "red", index: index)
                         }
@@ -306,33 +298,11 @@ struct DeliberateCardView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 20)
                                 
-                                if let instigator = deliberate.instigator {
-                                    Button {
-                                        if let username = instigator.username {
-                                            viewModel.selectedUsername = UsernameWrapper(value: username)
-                                        }
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            if let profilePicture = instigator.profilePicture,
-                                               let url = URL(string: profilePicture) {
-                                                AsyncImage(url: url) { phase in
-                                                    if case .success(let image) = phase {
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 24, height: 24)
-                                                            .clipShape(Circle())
-                                                    }
-                                                }
-                                            }
-                                            if let username = instigator.username {
-                                                Text(username)
-                                                    .font(.system(.caption, design: .rounded))
-                                                    .foregroundColor(.white.opacity(0.9))
-                                            }
-                                        }
-                                    }
-                                    .buttonStyle(.plain)
+                                ProfilePreview(
+                                    user: deliberate.instigator,
+                                    textColor: .white.opacity(0.9)
+                                ) { username in
+                                    viewModel.selectedUsername = UsernameWrapper(value: username)
                                 }
                                 
                                 // Reactions
@@ -366,11 +336,12 @@ struct DeliberateCardView: View {
                         }
                     }
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
-                    .disabled(viewModel.isVoting || hasVoted)
+                    .disabled(viewModel.isVoting)
                     .frame(width: geometry.size.width * clampedRedFill)
 
                     // Right Side: Blue - Debate
                     Button {
+                        guard !hasVoted, !viewModel.isVoting else { return }
                         Task {
                             await viewModel.vote(side: "blue", index: index)
                         }
@@ -386,33 +357,11 @@ struct DeliberateCardView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 20)
                                 
-                                if let creator = deliberate.creator {
-                                    Button {
-                                        if let username = creator.username {
-                                            viewModel.selectedUsername = UsernameWrapper(value: username)
-                                        }
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            if let profilePicture = creator.profilePicture,
-                                               let url = URL(string: profilePicture) {
-                                                AsyncImage(url: url) { phase in
-                                                    if case .success(let image) = phase {
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 24, height: 24)
-                                                            .clipShape(Circle())
-                                                    }
-                                                }
-                                            }
-                                            if let username = creator.username {
-                                                Text(username)
-                                                    .font(.system(.caption, design: .rounded))
-                                                    .foregroundColor(.white.opacity(0.9))
-                                            }
-                                        }
-                                    }
-                                    .buttonStyle(.plain)
+                                ProfilePreview(
+                                    user: deliberate.creator,
+                                    textColor: .white.opacity(0.9)
+                                ) { username in
+                                    viewModel.selectedUsername = UsernameWrapper(value: username)
                                 }
                                 
                                 // Reactions
@@ -446,63 +395,149 @@ struct DeliberateCardView: View {
                         }
                     }
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
-                    .disabled(viewModel.isVoting || hasVoted)
+                    .disabled(viewModel.isVoting)
                     .frame(width: geometry.size.width * clampedBlueFill)
                 }
             }
         }
         .onAppear {
-            if showVotes {
-                redFill = redPercent
-                blueFill = bluePercent
-                showVoteDetails = true
-            } else {
-                redFill = 0.5
-                blueFill = 0.5
-                showVoteDetails = false
-            }
+            syncToCurrentState(showVotes: showVotes, redPercent: redPercent, bluePercent: bluePercent)
         }
         .onChange(of: deliberate.id) { _ in
-            if showVotes {
-                redFill = redPercent
-                blueFill = bluePercent
-                showVoteDetails = true
-            } else {
-                redFill = 0.5
-                blueFill = 0.5
-                showVoteDetails = false
-            }
+            syncToCurrentState(showVotes: showVotes, redPercent: redPercent, bluePercent: bluePercent)
         }
         .onChange(of: showVotes) { newValue in
             if newValue {
-                withAnimation(.spring(response: 1.0, dampingFraction: 0.8, blendDuration: 0.2)) {
-                    redFill = redPercent
-                    blueFill = bluePercent
-                }
-                withAnimation(.easeOut(duration: 0.35).delay(0.1)) {
-                    showVoteDetails = true
-                }
+                startVoteReveal(redPercent: redPercent, bluePercent: bluePercent)
             } else {
-                withAnimation(.easeInOut(duration: 0.45)) {
-                    redFill = 0.5
-                    blueFill = 0.5
-                }
-                showVoteDetails = false
+                settleToNeutral()
             }
         }
         .onChange(of: deliberate.votesRed ?? 0) { _ in
             guard showVotes else { return }
-            withAnimation(.spring(response: 1.0, dampingFraction: 0.8, blendDuration: 0.2)) {
+            withAnimation(VoteRevealTiming.fillAnimation) {
                 redFill = redPercent
             }
         }
         .onChange(of: deliberate.votesBlue ?? 0) { _ in
             guard showVotes else { return }
-            withAnimation(.spring(response: 1.0, dampingFraction: 0.8, blendDuration: 0.2)) {
+            withAnimation(VoteRevealTiming.fillAnimation) {
                 blueFill = bluePercent
             }
         }
+        .onDisappear {
+            revealTask?.cancel()
+            revealTask = nil
+        }
         .ignoresSafeArea()
+    }
+
+    private func syncToCurrentState(showVotes: Bool, redPercent: Double, bluePercent: Double) {
+        revealTask?.cancel()
+        revealTask = nil
+        if showVotes {
+            redFill = redPercent
+            blueFill = bluePercent
+            showVoteDetails = true
+        } else {
+            redFill = VoteRevealTiming.neutralFill
+            blueFill = VoteRevealTiming.neutralFill
+            showVoteDetails = false
+        }
+    }
+
+    private func startVoteReveal(redPercent: Double, bluePercent: Double) {
+        revealTask?.cancel()
+        revealTask = nil
+        showVoteDetails = false
+        redFill = VoteRevealTiming.neutralFill
+        blueFill = VoteRevealTiming.neutralFill
+
+        revealTask = Task { @MainActor in
+            defer { revealTask = nil }
+            withAnimation(VoteRevealTiming.fillAnimation) {
+                redFill = redPercent
+                blueFill = bluePercent
+            }
+
+            try? await Task.sleep(nanoseconds: VoteRevealTiming.revealDelayNanoseconds)
+
+            withAnimation(VoteRevealTiming.revealAnimation) {
+                showVoteDetails = true
+            }
+        }
+    }
+
+    private func settleToNeutral() {
+        revealTask?.cancel()
+        revealTask = nil
+        withAnimation(VoteRevealTiming.resetAnimation) {
+            redFill = VoteRevealTiming.neutralFill
+            blueFill = VoteRevealTiming.neutralFill
+            showVoteDetails = false
+        }
+    }
+}
+
+struct ProfilePreview: View {
+    let user: Deliberate.Creator?
+    let textColor: Color
+    let onTap: (String) -> Void
+
+    var body: some View {
+        Group {
+            if let user, let username = user.username {
+                HStack(spacing: 8) {
+                    profileImage(for: user)
+                    Text(username)
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundColor(textColor)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(textColor.opacity(0.15))
+                .clipShape(Capsule())
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onTap(username)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityLabel("View profile for \(username)")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func profileImage(for user: Deliberate.Creator) -> some View {
+        if let profilePicture = user.profilePicture,
+           let url = URL(string: profilePicture) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 24, height: 24)
+                        .clipShape(Circle())
+                default:
+                    placeholder
+                }
+            }
+        } else {
+            placeholder
+        }
+    }
+
+    private var placeholder: some View {
+        Circle()
+            .fill(textColor.opacity(0.2))
+            .frame(width: 24, height: 24)
+            .overlay(
+                Image(systemName: "person.fill")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(textColor.opacity(0.7))
+            )
     }
 }
 
@@ -634,7 +669,7 @@ final class DeliberateViewModel: ObservableObject {
     private func removeDebate(withId id: String, delayedAdvance: Bool) {
         deliberates.removeAll { $0.id == id }
 
-        let delay: UInt64 = delayedAdvance ? 2_000_000_000 : 0
+        let delay: UInt64 = delayedAdvance ? VoteRevealTiming.advanceDelayNanoseconds : 0
 
         Task { @MainActor in
             if delay > 0 {
