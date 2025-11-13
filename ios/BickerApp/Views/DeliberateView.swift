@@ -103,21 +103,26 @@ struct DeliberateCardView: View {
     let deliberate: Deliberate
     @ObservedObject var viewModel: DeliberateViewModel
     let index: Int
-    
+    @State private var redFill: Double = 0.5
+    @State private var blueFill: Double = 0.5
+    @State private var showVoteDetails = false
+
     var body: some View {
+        let hasVoted = if let myVote = deliberate.myVote {
+            !myVote.isEmpty
+        } else {
+            false
+        }
+        let totalVotes = (deliberate.votesRed ?? 0) + (deliberate.votesBlue ?? 0)
+        let redPercent = totalVotes > 0 ? Double(deliberate.votesRed ?? 0) / Double(totalVotes) : 0.5
+        let bluePercent = 1.0 - redPercent
+        let showVotes = hasVoted && totalVotes > 0
+
         GeometryReader { geometry in
             let isCompact = geometry.size.width < 600
-            // Check if user has voted - if myVote is set and not empty, they've voted
-            let hasVoted = if let myVote = deliberate.myVote {
-                !myVote.isEmpty
-            } else {
-                false
-            }
-            let totalVotes = (deliberate.votesRed ?? 0) + (deliberate.votesBlue ?? 0)
-            let redPercent = totalVotes > 0 ? Double(deliberate.votesRed ?? 0) / Double(totalVotes) : 0.5
-            let bluePercent = 1.0 - redPercent
-            let showVotes = hasVoted && totalVotes > 0
-            
+            let clampedRedFill = max(0.0, min(1.0, redFill))
+            let clampedBlueFill = max(0.0, min(1.0, blueFill))
+
             if isCompact {
                 // Mobile: Stack vertically
                 VStack(spacing: 0) {
@@ -187,8 +192,11 @@ struct DeliberateCardView: View {
                                             .font(.system(size: 16, weight: .medium, design: .rounded))
                                             .foregroundColor(.white.opacity(0.9))
                                     }
+                                    .opacity(showVoteDetails ? 1 : 0)
+                                    .scaleEffect(showVoteDetails ? 1 : 0.96)
+                                    .animation(.easeOut(duration: 0.35), value: showVoteDetails)
                                 }
-                                
+
                                 Spacer()
                             }
                             .padding(.top, 60)
@@ -196,8 +204,7 @@ struct DeliberateCardView: View {
                     }
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting || hasVoted)
-                    .frame(height: showVotes ? geometry.size.height * redPercent : geometry.size.height / 2)
-                    .animation(.spring(response: 1.2, dampingFraction: 0.75), value: redPercent)
+                    .frame(height: geometry.size.height * clampedRedFill)
                     
                     // Bottom Side: Blue - Debate
                     Button {
@@ -265,8 +272,11 @@ struct DeliberateCardView: View {
                                             .font(.system(size: 16, weight: .medium, design: .rounded))
                                             .foregroundColor(.white.opacity(0.9))
                                     }
+                                    .opacity(showVoteDetails ? 1 : 0)
+                                    .scaleEffect(showVoteDetails ? 1 : 0.96)
+                                    .animation(.easeOut(duration: 0.35), value: showVoteDetails)
                                 }
-                                
+
                                 Spacer()
                             }
                             .padding(.top, 60)
@@ -274,8 +284,7 @@ struct DeliberateCardView: View {
                     }
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting || hasVoted)
-                    .frame(height: showVotes ? geometry.size.height * bluePercent : geometry.size.height / 2)
-                    .animation(.spring(response: 1.2, dampingFraction: 0.75), value: bluePercent)
+                    .frame(height: geometry.size.height * clampedBlueFill)
                 }
             } else {
                 // Desktop: Side by side
@@ -346,8 +355,11 @@ struct DeliberateCardView: View {
                                             .font(.system(size: 20, weight: .medium, design: .rounded))
                                             .foregroundColor(.white.opacity(0.9))
                                     }
+                                    .opacity(showVoteDetails ? 1 : 0)
+                                    .scaleEffect(showVoteDetails ? 1 : 0.96)
+                                    .animation(.easeOut(duration: 0.35), value: showVoteDetails)
                                 }
-                                
+
                                 Spacer()
                             }
                             .padding(.top, 60)
@@ -355,9 +367,8 @@ struct DeliberateCardView: View {
                     }
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting || hasVoted)
-                    .frame(width: showVotes ? geometry.size.width * redPercent : geometry.size.width / 2)
-                    .animation(.spring(response: 1.2, dampingFraction: 0.75), value: redPercent)
-                    
+                    .frame(width: geometry.size.width * clampedRedFill)
+
                     // Right Side: Blue - Debate
                     Button {
                         Task {
@@ -424,8 +435,11 @@ struct DeliberateCardView: View {
                                             .font(.system(size: 20, weight: .medium, design: .rounded))
                                             .foregroundColor(.white.opacity(0.9))
                                     }
+                                    .opacity(showVoteDetails ? 1 : 0)
+                                    .scaleEffect(showVoteDetails ? 1 : 0.96)
+                                    .animation(.easeOut(duration: 0.35), value: showVoteDetails)
                                 }
-                                
+
                                 Spacer()
                             }
                             .padding(.top, 60)
@@ -433,9 +447,59 @@ struct DeliberateCardView: View {
                     }
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting || hasVoted)
-                    .frame(width: showVotes ? geometry.size.width * bluePercent : geometry.size.width / 2)
-                    .animation(.spring(response: 1.2, dampingFraction: 0.75), value: bluePercent)
+                    .frame(width: geometry.size.width * clampedBlueFill)
                 }
+            }
+        }
+        .onAppear {
+            if showVotes {
+                redFill = redPercent
+                blueFill = bluePercent
+                showVoteDetails = true
+            } else {
+                redFill = 0.5
+                blueFill = 0.5
+                showVoteDetails = false
+            }
+        }
+        .onChange(of: deliberate.id) { _ in
+            if showVotes {
+                redFill = redPercent
+                blueFill = bluePercent
+                showVoteDetails = true
+            } else {
+                redFill = 0.5
+                blueFill = 0.5
+                showVoteDetails = false
+            }
+        }
+        .onChange(of: showVotes) { newValue in
+            if newValue {
+                withAnimation(.spring(response: 1.0, dampingFraction: 0.8, blendDuration: 0.2)) {
+                    redFill = redPercent
+                    blueFill = bluePercent
+                }
+                withAnimation(.easeOut(duration: 0.35).delay(0.1)) {
+                    showVoteDetails = true
+                }
+            } else {
+                withAnimation(.easeInOut(duration: 0.45)) {
+                    redFill = 0.5
+                    blueFill = 0.5
+                }
+                showVoteDetails = false
+            }
+        }
+        .onChange(of: deliberate.votesRed ?? 0) { _ in
+            guard showVotes else { return }
+            withAnimation(.spring(response: 1.0, dampingFraction: 0.8, blendDuration: 0.2)) {
+                redFill = redPercent
+            }
+        }
+        .onChange(of: deliberate.votesBlue ?? 0) { _ in
+            guard showVotes else { return }
+            withAnimation(.spring(response: 1.0, dampingFraction: 0.8, blendDuration: 0.2)) {
+                blueFill = bluePercent
             }
         }
         .ignoresSafeArea()
