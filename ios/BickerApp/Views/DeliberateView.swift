@@ -139,6 +139,7 @@ struct DeliberateCardView: View {
     @State private var blueFill: Double = VoteRevealTiming.neutralFill
     @State private var showVoteDetails = false
     @State private var revealTask: Task<Void, Never>?
+    @State private var hasAnimatedReveal = false
 
     var body: some View {
         let hasVoted = if let myVote = deliberate.myVote {
@@ -217,6 +218,7 @@ struct DeliberateCardView: View {
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting)
                     .frame(height: geometry.size.height * clampedRedFill)
+                    .animation(VoteRevealTiming.fillAnimation, value: redFill)
                     
                     // Bottom Side: Blue - Debate
                     Button {
@@ -276,6 +278,7 @@ struct DeliberateCardView: View {
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting)
                     .frame(height: geometry.size.height * clampedBlueFill)
+                    .animation(VoteRevealTiming.fillAnimation, value: blueFill)
                 }
             } else {
                 // Desktop: Side by side
@@ -338,6 +341,7 @@ struct DeliberateCardView: View {
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting)
                     .frame(width: geometry.size.width * clampedRedFill)
+                    .animation(VoteRevealTiming.fillAnimation, value: redFill)
 
                     // Right Side: Blue - Debate
                     Button {
@@ -397,14 +401,21 @@ struct DeliberateCardView: View {
                     .buttonStyle(VibrantButtonStyle(isDisabled: viewModel.isVoting || hasVoted))
                     .disabled(viewModel.isVoting)
                     .frame(width: geometry.size.width * clampedBlueFill)
+                    .animation(VoteRevealTiming.fillAnimation, value: blueFill)
                 }
             }
         }
         .onAppear {
+            hasAnimatedReveal = false
             syncToCurrentState(showVotes: showVotes, redPercent: redPercent, bluePercent: bluePercent)
         }
         .onChange(of: deliberate.id) { _ in
+            hasAnimatedReveal = false
             syncToCurrentState(showVotes: showVotes, redPercent: redPercent, bluePercent: bluePercent)
+        }
+        .onChange(of: deliberate.myVote ?? "") { _, _ in
+            guard showVotes else { return }
+            startVoteReveal(redPercent: redPercent, bluePercent: bluePercent)
         }
         .onChange(of: showVotes) { newValue in
             if newValue {
@@ -435,6 +446,7 @@ struct DeliberateCardView: View {
     private func syncToCurrentState(showVotes: Bool, redPercent: Double, bluePercent: Double) {
         revealTask?.cancel()
         revealTask = nil
+        hasAnimatedReveal = showVotes
         if showVotes {
             redFill = redPercent
             blueFill = bluePercent
@@ -449,9 +461,23 @@ struct DeliberateCardView: View {
     private func startVoteReveal(redPercent: Double, bluePercent: Double) {
         revealTask?.cancel()
         revealTask = nil
+        if hasAnimatedReveal {
+            withAnimation(VoteRevealTiming.fillAnimation) {
+                redFill = redPercent
+                blueFill = bluePercent
+            }
+
+            withAnimation(VoteRevealTiming.revealAnimation) {
+                showVoteDetails = true
+            }
+
+            return
+        }
+
         showVoteDetails = false
         redFill = VoteRevealTiming.neutralFill
         blueFill = VoteRevealTiming.neutralFill
+        hasAnimatedReveal = true
 
         revealTask = Task { @MainActor in
             defer { revealTask = nil }
@@ -476,6 +502,7 @@ struct DeliberateCardView: View {
             blueFill = VoteRevealTiming.neutralFill
             showVoteDetails = false
         }
+        hasAnimatedReveal = false
     }
 }
 
